@@ -9,6 +9,7 @@
     "lint": "eslint ./src",
     "lint:es:fix": "eslint --ext js --ext ts './' --fix",
     "prettier": "prettier --write src/**/*.ts",
+    "prettier:fix": "prettier --write src/**/*.ts --fix",
     "lint-staged": "lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,7 +23,6 @@
   "author": ";",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^12.0.3",
     "express": "^4.17.2",
     "mysql2": "^2.3.3",
     "on-finished": "^2.3.0",

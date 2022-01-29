@@ -1,35 +1,27 @@
 import { Service } from "typedi";
-import mysql from "mysql2";
+import { createPool, PoolConnection } from "mysql2/promise";
+import type { Pool } from "mysql2/promise";
 import { logger } from ".";
 import { DB_CONFIG } from "../config";
 
 @Service()
-class MySQL {
-  private static pool: mysql.Pool;
+export class MySQL {
+  private pool: Pool | undefined;
 
-  static async connect() {
+  private connection: PoolConnection | undefined;
+
+  async connect() {
     try {
-      this.pool = mysql.createPool(DB_CONFIG);
-      //   await createConnection({
-      //     type: "mysql",
-      //     host: process.env.DB_HOST,
-      //     port: 3306,
-      //     username: process.env.DB_USERNAME,
-      //     password: process.env.DB_PASSWORD,
-      //     database: process.env.DATABASE,
-      //     entities: [`${__dirname}/models/*.js`],
-      //     synchronize: true,
-      //     logging: false,
-      //   });
+      this.pool = createPool(DB_CONFIG);
+      this.connection = await this.pool.getConnection();
+
       logger.info("DB CONNECTED");
     } catch (err) {
       logger.error(err);
     }
   }
 
-  getPool(query: string, { id }: { id: string }) {
-    return MySQL.pool.promise().query(query, [id]);
+  async getConnection() {
+    return this.connection;
   }
 }
-
-export default MySQL;

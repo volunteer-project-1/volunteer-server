@@ -22,7 +22,7 @@
       "no-nested-ternary": "off",
       "no-restricted-syntax": "off",
       "prefer-destructuring": "off",
-      "prettier/prettier": "error",
+      "prettier/prettier": ["error", {"singleQuote": false, "parser": true}],
       // "import/extensions": "off",
       "import/extensions": [
         "error",

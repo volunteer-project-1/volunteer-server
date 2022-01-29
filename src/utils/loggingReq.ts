@@ -3,7 +3,7 @@ import colors from "colors";
 import onFinished from "on-finished";
 import { logger } from ".";
 
-const loggingReq = (req: Request, res: Response, next: NextFunction) => {
+export const loggingReq = (req: Request, res: Response, next: NextFunction) => {
   logger.info(colors.magenta(`STARTED [${req.method}] ${req.originalUrl}`));
   if (req.method === "GET" && req.query) {
     logger.info(`Query Parameters : ${JSON.stringify(req.query)}`);
@@ -25,5 +25,3 @@ const loggingReq = (req: Request, res: Response, next: NextFunction) => {
   });
   next();
 };
-
-export default loggingReq;

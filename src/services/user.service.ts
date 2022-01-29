@@ -7,13 +7,13 @@ import { UserDAO } from "../daos";
 class UserService implements IUserService {
   constructor(private userDAO: UserDAO) {}
 
-  async findOne(id: string): Promise<IUser[] | null> {
+  findOne(id: number): Promise<IUser[] | undefined> {
     return this.userDAO.findOne(id);
   }
 
-  //   async create(data: IUserCreateDTO) {
-  //     return this.userDAO.create(data);
-  //   }
+  findAll(): Promise<IUser[] | undefined> {
+    return this.userDAO.findAll();
+  }
 }
 
 export default UserService;

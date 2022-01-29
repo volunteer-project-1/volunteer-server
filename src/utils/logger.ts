@@ -13,7 +13,7 @@ const myFormat = printf((info) => {
   return fullMessage;
 });
 
-const logger: winston.Logger = winston.createLogger({
+export const logger: winston.Logger = winston.createLogger({
   exitOnError: false,
   format: combine(timestamp(), myFormat),
   transports: [
@@ -43,5 +43,3 @@ const logger: winston.Logger = winston.createLogger({
 });
 
 Container.set("logger", logger);
-
-export default logger;

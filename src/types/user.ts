@@ -7,6 +7,7 @@ export interface DefaultTime {
 export interface IUser extends DefaultTime {
   email: string;
   password: string;
+  name: string;
 }
 
 export interface IUserCreateDTO {
@@ -14,24 +15,21 @@ export interface IUserCreateDTO {
   password: string;
 }
 
-export interface IUserDOC extends IUser, Document {}
-
-export interface IUserFilter {
-  _id?: string;
-  name?: string;
+export interface FindUserByIdDTO {
+  id?: string;
 }
 
 export interface IUserDAO {
-  findOne: (id: string) => Promise<IUser[] | null>;
-  //   create: (data: IUserCreateDTO) => Promise<IUser>;
+  findOne: (id: number) => Promise<IUser[] | undefined>;
+  findAll: (id: string) => Promise<IUser[] | undefined>;
 }
 
 export interface IUserService {
-  findOne: (id: string) => Promise<IUser[] | null>;
-  //   create: (data: IUserCreateDTO) => Promise<IUser | null>;
+  findOne: (id: number) => Promise<IUser[] | undefined>;
+  findAll: () => Promise<IUser[] | undefined>;
 }
 
 export interface IUserController {
-  findById: (req: Request, res: Response) => Promise<Response>;
-  //   create: (req: Request, res: Response) => Promise<Response>;
+  findById: (req: Request, res: Response<{ user: IUser }>) => Promise<Response>;
+  findAll: (req: Request, res: Response) => Promise<Response>;
 }

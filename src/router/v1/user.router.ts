@@ -10,6 +10,8 @@ const userControllerInstance: IUserController = Container.get(UserController);
 
 // router.route("/").post(asyncHandler(userControllerInstance.create));
 
+// router.route("").get(wrap(userControllerInstance.findAlasyncHandlerl));
+router.route("").get(asyncHandler(userControllerInstance.findAll));
 router.route("/:id").get(asyncHandler(userControllerInstance.findById));
 
 export default router;
