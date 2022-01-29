@@ -9,23 +9,18 @@ class UserController implements IUserController {
 
   // APIDOCS 작성 여기에.
   findById = async ({ params: { id } }: Request, res: Response) => {
-    const filter = {
-      _id: id,
-    };
-    const select = "email createdAt";
-
-    const result = await this.userService.findOne(filter, select);
+    const result = await this.userService.findOne(id);
 
     return res.json({ user: result }).status(200);
   };
 
-  create = async (req: Request, res: Response) => {
-    const data = { ...req.body };
+  //   create = async (req: Request, res: Response) => {
+  //     const data = { ...req.body };
 
-    const result = await this.userService.create(data);
+  //     const result = await this.userService.create(data);
 
-    return res.json({ user: result }).status(201);
-  };
+  //     return res.json({ user: result }).status(201);
+  //   };
 }
 
 export default UserController;

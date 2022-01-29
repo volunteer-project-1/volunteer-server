@@ -8,7 +8,7 @@ const router = express.Router();
 
 const userControllerInstance: IUserController = Container.get(UserController);
 
-router.route("/").post(asyncHandler(userControllerInstance.create));
+// router.route("/").post(asyncHandler(userControllerInstance.create));
 
 router.route("/:id").get(asyncHandler(userControllerInstance.findById));
 

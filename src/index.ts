@@ -4,13 +4,14 @@ import express, { Request, Response, NextFunction } from "express";
 import colors from "colors";
 import config from "./config";
 import routes from "./router";
-import { Mongo, logger, ExError, loggingReq } from "./utils";
+import { logger, ExError, loggingReq, MySQL } from "./utils";
 
 const app: express.Application = express();
 
 async function start() {
   app.use(express.json());
-  await Mongo.connect();
+
+  await MySQL.connect();
 
   app.use(loggingReq);
 

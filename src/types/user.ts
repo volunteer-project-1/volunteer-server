@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 
-export interface IUser {
-  email: string;
-  password: string;
+export interface DefaultTime {
   createdAt: number;
   updatedAt: number;
+}
+export interface IUser extends DefaultTime {
+  email: string;
+  password: string;
 }
 
 export interface IUserCreateDTO {
@@ -20,16 +22,16 @@ export interface IUserFilter {
 }
 
 export interface IUserDAO {
-  findOne: (filter: IUserFilter, select: string) => Promise<IUser | null>;
-  create: (data: IUserCreateDTO) => Promise<IUser>;
+  findOne: (id: string) => Promise<IUser[] | null>;
+  //   create: (data: IUserCreateDTO) => Promise<IUser>;
 }
 
 export interface IUserService {
-  findOne: (filter: IUserFilter, select: string) => Promise<IUser | null>;
-  create: (data: IUserCreateDTO) => Promise<IUser | null>;
+  findOne: (id: string) => Promise<IUser[] | null>;
+  //   create: (data: IUserCreateDTO) => Promise<IUser | null>;
 }
 
 export interface IUserController {
   findById: (req: Request, res: Response) => Promise<Response>;
-  create: (req: Request, res: Response) => Promise<Response>;
+  //   create: (req: Request, res: Response) => Promise<Response>;
 }
