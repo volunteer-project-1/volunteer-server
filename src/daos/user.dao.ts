@@ -1,7 +1,7 @@
 import { Service } from "typedi";
+import { Model, model, Schema } from "mongoose";
 import { IUserDAO, IUserCreateDTO, IUserDOC, IUserFilter } from "../types/user";
 
-import { Model, model, Schema } from "mongoose";
 import { ExError } from "../utils";
 
 const userSchema: Schema = new Schema({

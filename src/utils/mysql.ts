@@ -4,9 +4,9 @@ import { logger } from ".";
 
 @Service("MySQL")
 class MySQL {
-  constructor() {
-    // this.poolCluster = null;
-  }
+  //   constructor() {
+  //     // this.poolCluster = null;
+  //   }
 
   static async connect() {
     try {
@@ -17,7 +17,7 @@ class MySQL {
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DATABASE,
-        entities: [__dirname + "/models/*.js"],
+        entities: [`${__dirname}/models/*.js`],
         synchronize: true,
         logging: false,
       });

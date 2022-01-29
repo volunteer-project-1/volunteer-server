@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 import { Service } from "typedi";
 import { IUserService, IUserCreateDTO, IUserFilter } from "../types/user";
 import { UserDAO } from "../daos";

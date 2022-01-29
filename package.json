@@ -7,6 +7,7 @@
     "prepare": "husky install",
     "start": "tsc-watch --onSuccess \"ts-node dist/index.js\"",
     "lint": "eslint ./src",
+    "lint:es:fix": "eslint --ext js --ext ts './' --fix",
     "prettier": "prettier --write src/**/*.ts",
     "lint-staged": "lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"

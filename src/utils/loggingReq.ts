@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { logger } from ".";
 import colors from "colors";
 import onFinished from "on-finished";
+import { logger } from ".";
 
 const loggingReq = (req: Request, res: Response, next: NextFunction) => {
   logger.info(colors.magenta(`STARTED [${req.method}] ${req.originalUrl}`));

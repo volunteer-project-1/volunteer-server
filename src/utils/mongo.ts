@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 import { Service } from "typedi";
-import { logger } from ".";
 import colors from "colors";
+import { logger } from ".";
 import config from "../config";
 
 @Service("Mongo")

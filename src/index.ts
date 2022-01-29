@@ -1,8 +1,8 @@
 import "reflect-metadata";
 
 import express, { Request, Response, NextFunction } from "express";
-import config from "./config";
 import colors from "colors";
+import config from "./config";
 import routes from "./router";
 import { Mongo, logger, ExError, loggingReq } from "./utils";
 

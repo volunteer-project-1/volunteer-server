@@ -7,6 +7,11 @@ export interface IUser {
   updatedAt: number;
 }
 
+export interface IUserCreateDTO {
+  email: string;
+  password: string;
+}
+
 export interface IUserDOC extends IUser, Document {}
 
 export interface IUserFilter {
@@ -27,9 +32,4 @@ export interface IUserService {
 export interface IUserController {
   findById: (req: Request, res: Response) => Promise<Response>;
   create: (req: Request, res: Response) => Promise<Response>;
-}
-
-export interface IUserCreateDTO {
-  email: string;
-  password: string;
 }
