@@ -19,7 +19,7 @@ async function start() {
   app.use(API_PREFIX, routes);
 
   app.use("*", (_, res) => {
-    res.json({ msg: "이상한 URL" });
+    res.json({ msg: "Un Valid URL" });
   });
 
   app.use((err: ExError, _: Request, res: Response, __: NextFunction) => {

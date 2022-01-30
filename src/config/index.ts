@@ -1,4 +1,4 @@
-import type { PoolOptions } from "mysql2";
+import type { PoolOptions } from "mysql2/promise";
 
 // Set the NODE_ENV to 'development' by default
 const NODE_ENV = process.env.NODE_ENV || "development";

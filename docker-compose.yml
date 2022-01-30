@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  node1:
+    container_name: seeme_server
+    build:
+      context: ./
+      target: dev
+    restart: unless-stopped
+    command: npm run dev
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+    volumes:
+      - ./dist:/app/dist
