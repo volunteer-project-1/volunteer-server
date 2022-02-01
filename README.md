@@ -32,3 +32,12 @@ $ docker run -d -it -p 3000:3000 --env-file .env --name seeme_server seeme npm r
 ```
 $ docker-compose up --build
 ```
+
+# API
+
+## API 테스트
+
+```
+GET "/health" return `"ok"`
+POST "/health2" return `request.body`
+```

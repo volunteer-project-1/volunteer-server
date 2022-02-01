@@ -16,10 +16,19 @@ async function start() {
 
   app.use(loggingReq);
 
+  app.get("/health", (_, res) => {
+    res.send("ok");
+  });
+
+  app.post("/health2", (req, res) => {
+    const body = req.body;
+    res.json({ body });
+  });
+
   app.use(API_PREFIX, routes);
 
   app.use("*", (_, res) => {
-    res.json({ msg: "Un Valid URL" });
+    res.json({ message: "Un Valid URL" });
   });
 
   app.use((err: ExError, _: Request, res: Response, __: NextFunction) => {
