@@ -33,6 +33,15 @@ $ docker run -d -it -p 3000:3000 --env-file .env --name seeme_server seeme npm r
 $ docker-compose up --build
 ```
 
+# db-migrate
+
+```
+$ nf -e .env run npm run migrate up
+```
+
+> 위 명령어 실행 시 `migrations` 폴더 아래의 모든 파일 실행  
+> 특정 파일 실행을 원하면 파일명 입력
+
 # API
 
 ## API 테스트
