@@ -1,12 +1,17 @@
-import express from "express";
-import UserRouter from "./v1/user.router";
+import { Router } from "express";
+import { userRouter } from "./v1";
 
-const router = express.Router();
+const router = Router();
 
-const defaultRoutes = [
+type routes = {
+  path: string;
+  route: Router;
+};
+
+const defaultRoutes: routes[] = [
   {
     path: "/v1/user",
-    route: UserRouter,
+    route: userRouter,
   },
 ];
 
@@ -18,8 +23,8 @@ const defaultRoutes = [
 //   },
 // ];
 
-defaultRoutes.forEach((route) => {
-  router.use(route.path, route.route);
+defaultRoutes.forEach(({ path, route }) => {
+  router.use(path, route);
 });
 
 /* istanbul ignore next */
