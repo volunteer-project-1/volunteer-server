@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { magenta } from "colors";
 import onFinished from "on-finished";
-import { logger } from ".";
+import { logger } from "../utils";
 
 export const loggingReq = (
   { method, originalUrl, query, body }: Request,

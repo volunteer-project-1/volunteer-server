@@ -4,8 +4,9 @@ import express, { Request, Response, NextFunction } from "express";
 import colors from "colors";
 import Container from "typedi";
 import routes from "./router";
-import { ExError, logger, loggingReq, MySQL } from "./utils";
+import { ExError, logger, MySQL } from "./utils";
 import { API_PREFIX, PORT } from "./config";
+import { loggingReq } from "./middlewares";
 
 const app: express.Application = express();
 
