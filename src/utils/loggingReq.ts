@@ -1,27 +1,25 @@
-import { NextFunction, Request, Response } from "express";
-import colors from "colors";
+import type { NextFunction, Request, Response } from "express";
+import { magenta } from "colors";
 import onFinished from "on-finished";
 import { logger } from ".";
 
-export const loggingReq = (req: Request, res: Response, next: NextFunction) => {
-  logger.info(colors.magenta(`STARTED [${req.method}] ${req.originalUrl}`));
-  if (req.method === "GET" && req.query) {
-    logger.info(`Query Parameters : ${JSON.stringify(req.query)}`);
-  } else if (req.body) {
-    const printData = JSON.parse(JSON.stringify(req.body));
-    Object.keys(printData).forEach((k) => {
-      if (k.toLowerCase().indexOf("password") > -1) {
-        printData[k] = "[FILTERED]";
-      }
-    });
-    logger.info(`Parameters : ${JSON.stringify(printData)}`);
+export const loggingReq = (
+  { method, originalUrl, query, body }: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  logger.info(magenta(`STARTED [${method}] ${originalUrl}`));
+  if (method === "GET" && query) {
+    logger.info(`Query Parameters : ${JSON.stringify(query)}`);
+  } else if (body) {
+    logger.info(`Parameters : ${JSON.stringify(body)}`);
   }
 
   onFinished(res, (err) => {
     if (err) {
       logger.error(err);
     }
-    logger.info(`FINISHED [${req.method}] ${req.originalUrl}`);
+    logger.info(`FINISHED [${method}] ${originalUrl}`);
   });
   next();
 };
