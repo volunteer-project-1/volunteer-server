@@ -7,7 +7,7 @@ import { UserDAO } from "../daos";
 class UserService implements IUserService {
   constructor(private userDAO: UserDAO) {}
 
-  findOne(id: number): Promise<IUser[] | undefined> {
+  findOne(id: number): Promise<IUser | undefined> {
     return this.userDAO.findOne(id);
   }
 

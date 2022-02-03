@@ -21,17 +21,17 @@ class UserController implements IUserController {
       throw new BadReqError();
     }
     const user = await this.userService.findOne(parsedInt);
-    if (!user || user.length < 1) {
+    if (!user) {
       throw new NotFoundError();
     }
 
-    return res.json({ user: user[0] }).status(200);
+    return res.json({ user }).status(200);
   };
 
   findAll = async (_: Request, res: Response<{ users: IUser[] }>) => {
     const users = await this.userService.findAll();
 
-    if (!users || users.length < 1) {
+    if (!users) {
       throw new NotFoundError();
     }
     return res.json({ users });
