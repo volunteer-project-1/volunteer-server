@@ -50,3 +50,11 @@ $ nf -e .env run npm run migrate up
 GET "/health" return `"ok"`
 POST "/health2" return `request.body`
 ```
+
+## 로그인
+
+passport google oauth2 로그인
+
+```
+GET "/api/v1/auth/google"
+```

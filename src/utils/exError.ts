@@ -2,16 +2,15 @@
 export class ExError extends Error {
   status: number;
 
-  constructor(status: number, message: string) {
-    super();
+  constructor(status: number, message?: string) {
+    super(message);
     this.status = status;
-    this.message = message;
   }
 }
 
 export class BadReqError extends ExError {
-  constructor() {
-    super(401, "BadRequestError");
+  constructor(message?: string) {
+    super(401, message);
     const { name, prototype } = new.target;
 
     Object.setPrototypeOf(this, prototype);
@@ -20,8 +19,8 @@ export class BadReqError extends ExError {
 }
 
 export class NotFoundError extends ExError {
-  constructor() {
-    super(404, "NotFoundError");
+  constructor(message?: string) {
+    super(404, message);
     const { name, prototype } = new.target;
 
     Object.setPrototypeOf(this, prototype);

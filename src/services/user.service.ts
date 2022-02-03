@@ -14,6 +14,14 @@ class UserService implements IUserService {
   findAll(): Promise<IUser[] | undefined> {
     return this.userDAO.findAll();
   }
+
+  findByEmail(email: string) {
+    return this.userDAO.findByEmail(email);
+  }
+
+  create(email: string): Promise<IUser | undefined> {
+    return this.userDAO.create(email);
+  }
 }
 
 export default UserService;

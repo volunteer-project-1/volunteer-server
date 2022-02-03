@@ -1,4 +1,6 @@
 import type { PoolConnection } from "mysql2/promise";
+import colors from "colors";
+import { logger } from "./logger";
 
 type AlwaysArray<T> = T extends (infer R)[] ? R[] : T[];
 
@@ -14,6 +16,7 @@ export async function queryWrapper<T>(
 
     return rows;
   } catch (error) {
+    logger.error(colors.blue(JSON.stringify(error)));
     await conn.rollback();
   } finally {
     conn.release();

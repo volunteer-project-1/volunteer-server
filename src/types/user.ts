@@ -22,11 +22,13 @@ export interface FindUserByIdDTO {
 export interface IUserDAO {
   findOne: (id: number) => Promise<IUser | undefined>;
   findAll: (id: string) => Promise<IUser[] | undefined>;
+  create: (email: string) => Promise<IUser | undefined>;
 }
 
 export interface IUserService {
   findOne: (id: number) => Promise<IUser | undefined>;
   findAll: () => Promise<IUser[] | undefined>;
+  create: (email: string) => Promise<IUser | undefined>;
 }
 
 export interface IUserController {

@@ -27,7 +27,6 @@ exports.up = function (db) {
       CREATE TABLE if not exists profiles (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(20),
-        email VARCHAR(20),
         address VARCHAR(255),
         birthday DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -192,6 +191,7 @@ exports.up = function (db) {
 
       CREATE TABLE if not exists users (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        email VARCHAR(40) NOT NULL UNIQUE,
         profile_id BIGINT UNSIGNED,
         user_meta_id BIGINT UNSIGNED,
         resume_id BIGINT UNSIGNED,
