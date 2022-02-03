@@ -1,16 +1,15 @@
-import type { PoolConnection, RowDataPacket, OkPacket } from "mysql2/promise";
+import type { PoolConnection } from "mysql2/promise";
 
-type dbDefaults = RowDataPacket[] | RowDataPacket[][] | OkPacket | OkPacket[];
-type dbQuery<T> = T & dbDefaults;
+type AlwaysArray<T> = T extends (infer R)[] ? R[] : T[];
 
 // eslint-disable-next-line consistent-return
 export async function queryWrapper<T>(
   { query, values }: { query: string; values?: string[] },
   conn: PoolConnection
-): Promise<T | undefined> {
+): Promise<AlwaysArray<T> | undefined> {
   try {
     await conn.beginTransaction();
-    const [rows, _] = await conn.query<dbQuery<T>>(query, values || undefined);
+    const [rows, _]: [any, any] = await conn.query(query, values);
     await conn.commit();
 
     return rows;
