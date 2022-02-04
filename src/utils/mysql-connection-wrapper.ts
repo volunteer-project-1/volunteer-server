@@ -1,17 +1,20 @@
-import type { PoolConnection } from "mysql2/promise";
+import type { OkPacket, PoolConnection, RowDataPacket } from "mysql2/promise";
 import colors from "colors";
+import Container from "typedi";
 import { logger } from "./logger";
+import { MySQL } from ".";
 
-type AlwaysArray<T> = T extends (infer R)[] ? R[] : T[];
-
+type dbDefaults = RowDataPacket[] | RowDataPacket[][] | OkPacket | OkPacket[];
+type Query = { query: string; values?: string[] | number[] };
 // eslint-disable-next-line consistent-return
-export async function queryWrapper<T>(
-  { query, values }: { query: string; values?: string[] },
+async function queryWrapper<T extends dbDefaults>(
+  { query, values }: Query,
+  //   { query, values }: Query,
   conn: PoolConnection
-): Promise<AlwaysArray<T> | undefined> {
+): Promise<T | undefined> {
   try {
     await conn.beginTransaction();
-    const [rows, _]: [any, any] = await conn.query(query, values);
+    const [rows, _] = await conn.query<T>(query, values);
     await conn.commit();
 
     return rows;
@@ -21,4 +24,38 @@ export async function queryWrapper<T>(
   } finally {
     conn.release();
   }
+}
+
+export async function findOne<T>({
+  query,
+  values,
+}: {
+  query: string;
+  values?: string[];
+}): Promise<T | undefined> {
+  const conn = await Container.get(MySQL).getConnection();
+  const res = await queryWrapper<T & RowDataPacket[]>({ query, values }, conn!);
+  return res![0] as T;
+}
+
+export async function find<T>({
+  query,
+  values,
+}: {
+  query: string;
+  values?: string[];
+}): Promise<T | undefined> {
+  const conn = await Container.get(MySQL).getConnection();
+  return queryWrapper<T & RowDataPacket[]>({ query, values }, conn!);
+}
+
+export async function insert({
+  query,
+  values,
+}: {
+  query: string;
+  values?: string[] | number[];
+}): Promise<OkPacket | undefined> {
+  const conn = await Container.get(MySQL).getConnection();
+  return queryWrapper<OkPacket>({ query, values }, conn!);
 }

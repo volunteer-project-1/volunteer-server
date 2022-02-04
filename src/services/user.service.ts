@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-constructor */
 import { Service } from "typedi";
+import { OkPacket } from "mysql2/promise";
 import { IUserService, IUser } from "../types/user";
 import { UserDAO } from "../daos";
 
@@ -19,7 +20,7 @@ class UserService implements IUserService {
     return this.userDAO.findByEmail(email);
   }
 
-  create(email: string): Promise<IUser | undefined> {
+  create(email: string): Promise<OkPacket | undefined> {
     return this.userDAO.create(email);
   }
 }
