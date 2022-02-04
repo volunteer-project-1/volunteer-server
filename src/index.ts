@@ -8,7 +8,7 @@ import session from "express-session";
 import cors from "cors";
 import routes from "./router";
 import { ExError, logger, MySQL } from "./utils";
-import { API_PREFIX, CORS_CONFIG, PORT } from "./config";
+import { API_PREFIX, CORS_CONFIG, PORT, SESSION_SECRET } from "./config";
 import { loggingReq } from "./middlewares";
 import passportConfig from "./passports";
 
@@ -22,7 +22,7 @@ async function start() {
   app.use(express.json());
 
   passportConfig();
-  app.use(session({ secret: "secret" }));
+  app.use(session({ secret: SESSION_SECRET }));
   app.use(passport.initialize());
   app.use(passport.session());
 

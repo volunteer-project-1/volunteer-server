@@ -52,6 +52,10 @@ export interface IUserService {
 }
 
 export interface IUserController {
+  findMyProfile: (
+    req: Request,
+    res: Response<{ user: IUser }>
+  ) => Promise<Response>;
   findById: (req: Request, res: Response<{ user: IUser }>) => Promise<Response>;
   findAll: (req: Request, res: Response) => Promise<Response>;
 }

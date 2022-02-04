@@ -8,15 +8,24 @@ import { BadReqError, NotFoundError } from "../utils";
 class UserController implements IUserController {
   constructor(private readonly userService: UserService) {}
 
+  findMyProfile = async ({ user }: Request, res: Response<{ user: IUser }>) => {
+    const my = await this.userService.findOne(user!.id);
+    if (!my) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ user: my }).status(200);
+  };
+
   findById = async (
     { params: { id } }: Request<FindUserByIdDTO>,
     res: Response<{ user: IUser }>
-    // eslint-disable-next-line consistent-return
   ) => {
     if (!id) {
       throw new NotFoundError();
     }
     const parsedInt = Number(id);
+
     if (!parsedInt) {
       throw new BadReqError();
     }

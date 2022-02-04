@@ -8,6 +8,8 @@ export const PORT = process.env.PORT || 3000;
 export const CLIENT_DOMAIN =
   process.env.CLIENT_DOMAIN || "http://localhost:3000";
 
+export const SESSION_SECRET = process.env.SESSION_SECRET || "secretDevelopment";
+
 export const DB_CONFIG: PoolOptions = isProd
   ? // TODO 추후에 배포될 경우 추가
     {}

@@ -28,4 +28,14 @@ export class NotFoundError extends ExError {
   }
 }
 
+export class UnauthorizedError extends ExError {
+  constructor(message?: string) {
+    super(401, message);
+    const { name, prototype } = new.target;
+
+    Object.setPrototypeOf(this, prototype);
+    this.name = name;
+  }
+}
+
 export default ExError;

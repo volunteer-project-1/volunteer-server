@@ -43,11 +43,11 @@ class UserDAO implements IUserDAO {
 
     const user = await insert({ query: userQuery, values: [email] });
 
-    const userMeataQuery = `
+    const userMetaQuery = `
         INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (?);
         `;
 
-    await insert({ query: userMeataQuery, values: [user!.insertId] });
+    await insert({ query: userMetaQuery, values: [user!.insertId] });
 
     return user!;
   }
