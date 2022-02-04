@@ -26,6 +26,7 @@
   "author": ";",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.2",
     "express-session": "^1.17.2",
     "mysql2": "^2.3.3",
@@ -38,6 +39,7 @@
     "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/express-session": "^1.17.4",
     "@types/node": "^17.0.8",

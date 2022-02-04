@@ -5,9 +5,10 @@ import colors from "colors";
 import Container from "typedi";
 import passport from "passport";
 import session from "express-session";
+import cors from "cors";
 import routes from "./router";
 import { ExError, logger, MySQL } from "./utils";
-import { API_PREFIX, PORT } from "./config";
+import { API_PREFIX, CORS_CONFIG, PORT } from "./config";
 import { loggingReq } from "./middlewares";
 import passportConfig from "./passports";
 
@@ -16,8 +17,9 @@ const app: express.Application = express();
 async function start() {
   await Container.get(MySQL).connect();
 
-  app.use(express.json());
+  app.use(cors(CORS_CONFIG));
   app.set("trust proxy", 1);
+  app.use(express.json());
 
   passportConfig();
   app.use(session({ secret: "secret" }));
