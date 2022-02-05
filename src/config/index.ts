@@ -19,6 +19,7 @@ export const DB_CONFIG: PoolOptions = isProd
       port: 3306,
       database: process.env.DATABASE || "",
       password: process.env.DB_PASSWORD || "",
+      connectionLimit: 100,
     };
 
 export const API_PREFIX = "/api";

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { OkPacket } from "mysql2/promise";
+import { OkPacket, ResultSetHeader } from "mysql2/promise";
 
 export interface DefaultTime {
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 export interface IUser extends DefaultTime {
   id: number;
@@ -14,7 +14,7 @@ export interface IUser extends DefaultTime {
 
 const USER_TYPE = ["employee", "employer"] as const;
 
-type UserType = typeof USER_TYPE[number];
+export type UserType = typeof USER_TYPE[number];
 export interface IUserMeta extends DefaultTime {
   id: number;
   is_verified: boolean;
@@ -39,23 +39,54 @@ export interface FindUserByIdDTO {
   id?: string;
 }
 
+export interface UpdateProfileDTO {
+  name?: string;
+  address?: string;
+  birthday?: Date;
+}
+
+export interface ReturnFindMyProfileDTO
+  extends Omit<IUser, "created_at" | "updated_at"> {
+  user_meta_id: string;
+  is_verified: boolean;
+  type: UserType;
+  name: string;
+  address: string;
+  birthday: Date;
+}
+
 export interface IUserDAO {
-  findOne: (id: number) => Promise<IUser | undefined>;
-  findAll: (id: string) => Promise<IUser[] | undefined>;
+  findMyProfile: (id: number) => Promise<ReturnFindMyProfileDTO | undefined>;
+  updateMyProfile: (
+    id: number,
+    body: UpdateProfileDTO
+  ) => Promise<ResultSetHeader | undefined>;
+  findOneById: (id: number) => Promise<IUser | undefined>;
+  find: () => Promise<IUser[] | undefined>;
   create: (email: string) => Promise<OkPacket | undefined>;
 }
 
 export interface IUserService {
-  findOne: (id: number) => Promise<IUser | undefined>;
-  findAll: () => Promise<IUser[] | undefined>;
-  create: (email: string) => Promise<OkPacket | undefined>;
+  findMyProfile: (id: number) => Promise<ReturnFindMyProfileDTO | undefined>;
+  updateMyProfile: (
+    id: number,
+    body: UpdateProfileDTO
+  ) => Promise<ResultSetHeader | undefined>;
+  findUserById: (id: number) => Promise<IUser | undefined>;
+  findUsers: () => Promise<IUser[] | undefined>;
+  findUserByEmail: (email: string) => Promise<IUser | undefined>;
+  createUser: (email: string) => Promise<OkPacket | undefined>;
 }
 
 export interface IUserController {
   findMyProfile: (
     req: Request,
+    res: Response<{ user: ReturnFindMyProfileDTO }>
+  ) => Promise<Response>;
+  updateMyProfile: (req: Request, res: Response) => Promise<Response>;
+  findUserById: (
+    req: Request,
     res: Response<{ user: IUser }>
   ) => Promise<Response>;
-  findById: (req: Request, res: Response<{ user: IUser }>) => Promise<Response>;
-  findAll: (req: Request, res: Response) => Promise<Response>;
+  findUsers: (req: Request, res: Response) => Promise<Response>;
 }

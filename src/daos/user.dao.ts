@@ -1,18 +1,35 @@
-import { OkPacket } from "mysql2/promise";
 import { Service } from "typedi";
-import { IUserDAO, IUser } from "../types/user";
-import { find, findOne, insert, MySQL } from "../utils";
+import {
+  IUserDAO,
+  IUser,
+  ReturnFindMyProfileDTO,
+  UpdateProfileDTO,
+} from "../types/user";
+import { find, findOne, insert, update } from "../utils";
 
 const USER_TABLE = "users";
 const USER_METAS_TABLE = "user_metas";
+const USER_PROFILE = "profiles";
 
 @Service()
 class UserDAO implements IUserDAO {
-  constructor(private readonly mysql: MySQL) {}
+  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO | undefined> {
+    const query = `
+    Select 
+        U.id, U.email, 
+        M.id AS user_meta_id, M.is_verified, M.type, 
+        P.name, P.address, P.birthday
+    FROM ${USER_TABLE} AS U 
+    LEFT JOIN ${USER_METAS_TABLE} AS M 
+        ON U.id = M.user_id 
+    LEFT JOIN ${USER_PROFILE} AS P 
+        ON U.id = P.user_id 
+    WHERE U.id = ?`;
 
-  async findOne(id: number): Promise<IUser | undefined> {
-    const query = `Select * FROM ${USER_TABLE} WHERE id=?`;
-    const result = await findOne<IUser>({ query, values: [String(id)] });
+    const result = await findOne<ReturnFindMyProfileDTO>({
+      query,
+      values: [id],
+    });
 
     if (!result) {
       return undefined;
@@ -20,7 +37,30 @@ class UserDAO implements IUserDAO {
     return result;
   }
 
-  async findAll(): Promise<IUser[] | undefined> {
+  async updateMyProfile(id: number, body: UpdateProfileDTO) {
+    const query = `
+        UPDATE ${USER_PROFILE} 
+        SET ?
+        WHERE user_id=?
+    `;
+
+    return update({
+      query,
+      values: [body, id],
+    });
+  }
+
+  async findOneById(id: number): Promise<IUser | undefined> {
+    const query = `Select * FROM ${USER_TABLE} WHERE id=?`;
+    const result = await findOne<IUser>({ query, values: [id] });
+
+    if (!result) {
+      return undefined;
+    }
+    return result;
+  }
+
+  async find(): Promise<IUser[] | undefined> {
     const query = `Select * FROM ${USER_TABLE}`;
     return find<IUser[]>({ query });
   }
@@ -36,7 +76,7 @@ class UserDAO implements IUserDAO {
     return result;
   }
 
-  async create(email: string): Promise<OkPacket> {
+  async create(email: string) {
     const userQuery = `
         INSERT INTO ${USER_TABLE} (email) VALUES(?);
         `;
