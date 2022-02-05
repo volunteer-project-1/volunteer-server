@@ -42,7 +42,7 @@ exports.up = function (db) {
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(20),
         address VARCHAR(255),
-        birthday DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        birthday DATETIME(3),
         user_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
@@ -53,6 +53,8 @@ exports.up = function (db) {
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         title VARCHAR(100) NOT NULL,
         content VARCHAR(255),
+        created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
         user_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),

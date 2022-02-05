@@ -57,6 +57,7 @@ POST "/health2" return `request.body`
 GET "/api/v1/auth/google"  // 구글 로그인
 
 GET "/api/v1/user" // 전체 유저 찾기
-GET "/api/v1/user/profile" // 내 profile 확인
 GET "/api/v1/user/:id" // id를 갖는 유저 찾기
+GET "/api/v1/user/profile" // 내 profile 확인
+PATCH "/api/v1/user/profile" // 내 profile 수정
 ```

@@ -19,11 +19,11 @@ export default () => {
         if (!email) {
           return cb(new NotFoundError("Not Found Email"));
         }
-        const user = await userService.findByEmail(email);
+        const user = await userService.findUserByEmail(email);
 
         if (!user) {
-          await userService.create(email);
-          const createdUser = await userService.findByEmail(email);
+          await userService.createUser(email);
+          const createdUser = await userService.findUserByEmail(email);
 
           return cb(null, createdUser);
         }

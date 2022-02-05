@@ -1,26 +1,39 @@
 /* eslint-disable no-useless-constructor */
 import { Service } from "typedi";
 import { OkPacket } from "mysql2/promise";
-import { IUserService, IUser } from "../types/user";
+import {
+  IUserService,
+  IUser,
+  ReturnFindMyProfileDTO,
+  UpdateProfileDTO,
+} from "../types/user";
 import { UserDAO } from "../daos";
 
 @Service()
 class UserService implements IUserService {
   constructor(private userDAO: UserDAO) {}
 
-  findOne(id: number): Promise<IUser | undefined> {
-    return this.userDAO.findOne(id);
+  findMyProfile(id: number): Promise<ReturnFindMyProfileDTO | undefined> {
+    return this.userDAO.findMyProfile(id);
   }
 
-  findAll(): Promise<IUser[] | undefined> {
-    return this.userDAO.findAll();
+  updateMyProfile(id: number, body: UpdateProfileDTO) {
+    return this.userDAO.updateMyProfile(id, body);
   }
 
-  findByEmail(email: string) {
+  findUserById(id: number): Promise<IUser | undefined> {
+    return this.userDAO.findOneById(id);
+  }
+
+  findUsers(): Promise<IUser[] | undefined> {
+    return this.userDAO.find();
+  }
+
+  findUserByEmail(email: string) {
     return this.userDAO.findByEmail(email);
   }
 
-  create(email: string): Promise<OkPacket | undefined> {
+  createUser(email: string): Promise<OkPacket> {
     return this.userDAO.create(email);
   }
 }
