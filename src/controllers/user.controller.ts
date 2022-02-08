@@ -11,7 +11,7 @@ import { BadReqError, NotFoundError } from "../utils";
 import { UserService } from "../services";
 
 @Service()
-class UserController implements IUserController {
+export class UserController implements IUserController {
   constructor(private readonly userService: UserService) {}
 
   findMyProfile = async (
@@ -69,5 +69,3 @@ class UserController implements IUserController {
     return res.json({ users });
   };
 }
-
-export default UserController;

@@ -51,7 +51,7 @@ GET "/health" return `"ok"`
 POST "/health2" return `request.body`
 ```
 
-##
+## 실제 API
 
 ```
 GET "/api/v1/auth/google"  // 구글 로그인
@@ -60,4 +60,6 @@ GET "/api/v1/user" // 전체 유저 찾기
 GET "/api/v1/user/:id" // id를 갖는 유저 찾기
 GET "/api/v1/user/profile" // 내 profile 확인
 PATCH "/api/v1/user/profile" // 내 profile 수정
+
+POST "/api/v1/resume" // resume 추가
 ```

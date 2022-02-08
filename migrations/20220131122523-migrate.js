@@ -67,10 +67,11 @@ exports.up = function (db) {
         birthday DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         phone_number VARCHAR(20),
         email VARCHAR(20),
-        address VARCHAR(255),
+        sido VARCHAR(20),
+        sigungu VARCHAR(20),
         disability_level INT,
-        disability_type INT,
-        SEX INT,
+        disability_type VARCHAR(20),
+        sex VARCHAR(5),
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
@@ -84,24 +85,14 @@ exports.up = function (db) {
         graduation_year DATETIME(3),
         admission_year DATETIME(3),
         is_graduated BOOLEAN,
+        major VARCHAR(10),
+        credit DECIMAL(3,2),
+        total_credit DECIMAL(3,2),
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
-
-      CREATE TABLE if not exists education_details (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        major VARCHAR(20),
-        credit INT,
-        total_credit INT,
-        education_id BIGINT UNSIGNED NOT NULL,
-        
-        PRIMARY KEY (id),
-        FOREIGN KEY (education_id) REFERENCES educations(id) ON DELETE CASCADE
-      );
-
-      
 
       CREATE TABLE if not exists careers (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -140,36 +131,28 @@ exports.up = function (db) {
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
 
-      CREATE TABLE if not exists resume_videos (
+      CREATE TABLE if not exists my_videos (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        url VARCHAR(255),
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
 
-      CREATE TABLE if not exists my_videos (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        url VARCHAR(255),
-        resume_video_id BIGINT UNSIGNED NOT NULL,
-
-        PRIMARY KEY (id),
-        FOREIGN KEY (resume_video_id) REFERENCES resume_videos(id) ON DELETE CASCADE
-      );
-
       CREATE TABLE if not exists helper_videos (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         url VARCHAR(255),
-        resume_video_id BIGINT UNSIGNED NOT NULL,
+        resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
-        FOREIGN KEY (resume_video_id) REFERENCES resume_videos(id) ON DELETE CASCADE
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
 
       CREATE TABLE if not exists preferences (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         employ_type VARCHAR(20),
-        salary VARCHAR(20),
+        salary SMALLINT,
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
@@ -178,7 +161,8 @@ exports.up = function (db) {
 
       CREATE TABLE if not exists preference_locations (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        name VARCHAR(100),
+        sido VARCHAR(20),
+        sigungu VARCHAR(20),
         preference_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),

@@ -1,10 +1,6 @@
 import { Request, Response } from "express";
-import { OkPacket, ResultSetHeader } from "mysql2/promise";
+import { DefaultTime } from ".";
 
-export interface DefaultTime {
-  created_at: Date;
-  updated_at: Date;
-}
 export interface IUser extends DefaultTime {
   id: number;
   email: string;
@@ -57,25 +53,19 @@ export interface ReturnFindMyProfileDTO
 
 export interface IUserDAO {
   findMyProfile: (id: number) => Promise<ReturnFindMyProfileDTO | undefined>;
-  updateMyProfile: (
-    id: number,
-    body: UpdateProfileDTO
-  ) => Promise<ResultSetHeader | undefined>;
+  updateMyProfile: (id: number, body: UpdateProfileDTO) => Promise<void>;
   findOneById: (id: number) => Promise<IUser | undefined>;
   find: () => Promise<IUser[] | undefined>;
-  create: (email: string) => Promise<OkPacket | undefined>;
+  create: (email: string) => Promise<void>;
 }
 
 export interface IUserService {
   findMyProfile: (id: number) => Promise<ReturnFindMyProfileDTO | undefined>;
-  updateMyProfile: (
-    id: number,
-    body: UpdateProfileDTO
-  ) => Promise<ResultSetHeader | undefined>;
+  updateMyProfile: (id: number, body: UpdateProfileDTO) => Promise<void>;
   findUserById: (id: number) => Promise<IUser | undefined>;
   findUsers: () => Promise<IUser[] | undefined>;
   findUserByEmail: (email: string) => Promise<IUser | undefined>;
-  createUser: (email: string) => Promise<OkPacket | undefined>;
+  createUser: (email: string) => Promise<void>;
 }
 
 export interface IUserController {

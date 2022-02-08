@@ -1,13 +1,12 @@
 import type {
+  FieldPacket,
   OkPacket,
   PoolConnection,
   ResultSetHeader,
   RowDataPacket,
 } from "mysql2/promise";
 import colors from "colors";
-import Container from "typedi";
 import { logger } from "./logger";
-import { MySQL } from ".";
 
 type dbDefaults =
   | RowDataPacket[]
@@ -18,17 +17,27 @@ type dbDefaults =
 
 type Query = { query: string; values?: any[] };
 
+type QueryFunction<T = any> = () => Promise<[T & dbDefaults, FieldPacket[]]>;
+
+type AlwaysArray<T> = T extends (infer R)[] ? R[] : T[];
 // eslint-disable-next-line consistent-return
-async function queryWrapper<T extends dbDefaults>(
-  { query, values }: Query,
+export async function queryTransactionWrapper<T = any>(
+  queries: QueryFunction[],
   conn: PoolConnection
-): Promise<T | undefined> {
+): Promise<[AlwaysArray<T>, FieldPacket[]][] | undefined> {
   try {
     await conn.beginTransaction();
-    const [rows, _] = await conn.query<T>(query, values);
-    await conn.commit();
+    // await conn.query("START TRANSACTION;");
 
-    return rows;
+    const executedQueries = await Promise.all(
+      queries.map((query) => {
+        return query();
+      })
+    );
+
+    // await conn.query("COMMIT;");
+    await conn.commit();
+    return executedQueries;
   } catch (error) {
     logger.error(colors.blue(JSON.stringify(error)));
     await conn.rollback();
@@ -37,35 +46,26 @@ async function queryWrapper<T extends dbDefaults>(
   }
 }
 
-export async function findOne<T>({
-  query,
-  values,
-}: Query): Promise<T | undefined> {
-  const conn = await Container.get(MySQL).getConnection();
-  const res = await queryWrapper<T & RowDataPacket[]>({ query, values }, conn!);
-  return res![0] as T;
+export function findOne({ query, values }: Query, conn: PoolConnection) {
+  return () => {
+    return conn.query<RowDataPacket[]>(query, values);
+  };
 }
 
-export async function update({
-  query,
-  values,
-}: Query): Promise<ResultSetHeader | undefined> {
-  const conn = await Container.get(MySQL).getConnection();
-  return queryWrapper<ResultSetHeader>({ query, values }, conn!);
+export function find({ query, values }: Query, conn: PoolConnection) {
+  return () => {
+    return conn.query<RowDataPacket[]>(query, values);
+  };
 }
 
-export async function find<T>({
-  query,
-  values,
-}: Query): Promise<T | undefined> {
-  const conn = await Container.get(MySQL).getConnection();
-  return queryWrapper<T & RowDataPacket[]>({ query, values }, conn!);
+export function update({ query, values }: Query, conn: PoolConnection) {
+  return () => {
+    return conn.query<ResultSetHeader>(query, values);
+  };
 }
 
-export async function insert({
-  query,
-  values,
-}: Query): Promise<OkPacket | undefined> {
-  const conn = await Container.get(MySQL).getConnection();
-  return queryWrapper<OkPacket>({ query, values }, conn!);
+export function insert({ query, values }: Query, conn: PoolConnection) {
+  return () => {
+    return conn.query<OkPacket>(query, values);
+  };
 }

@@ -1,3 +1,2 @@
-import UserController from "./user.controller";
-
-export { UserController };
+export * from "./user.controller";
+export * from "./resume.controller";

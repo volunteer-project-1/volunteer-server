@@ -22,6 +22,6 @@ export class MySQL {
   }
 
   async getConnection() {
-    return this.connection;
+    return this.connection!;
   }
 }
