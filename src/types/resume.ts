@@ -129,12 +129,20 @@ export interface createResumeDTO {
   };
 }
 
+export interface findResumeDTO extends IResume {
+  type: string;
+  school_name: string;
+}
+
 export interface IResumeDAO {
-  createResume: (id: number, data: createResumeDTO) => Promise<void>;
+  createResume: (userId: number, data: createResumeDTO) => Promise<void>;
+  findResumeById: (resumeId: number) => Promise<findResumeDTO>;
+  updateResume: (userId: number, data: createResumeDTO) => Promise<void>;
 }
 
 export interface IResumeService {
   createResume: (id: number, data: createResumeDTO) => Promise<void>;
+  findResumeById: (resumeId: number) => Promise<findResumeDTO>;
 }
 
 export interface IResumeController {

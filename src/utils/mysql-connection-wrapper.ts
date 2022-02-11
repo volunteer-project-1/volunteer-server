@@ -17,7 +17,9 @@ type dbDefaults =
 
 type Query = { query: string; values?: any[] };
 
-type QueryFunction<T = any> = () => Promise<[T & dbDefaults, FieldPacket[]]>;
+export type QueryFunction<T = any> = () => Promise<
+  [T & dbDefaults, FieldPacket[]]
+>;
 
 type AlwaysArray<T> = T extends (infer R)[] ? R[] : T[];
 // eslint-disable-next-line consistent-return

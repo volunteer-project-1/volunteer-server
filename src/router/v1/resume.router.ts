@@ -12,4 +12,6 @@ resumeRouter
   .route("")
   .post(authenticateUser, asyncHandler(resumeController.createResume));
 
+resumeRouter.route("/:id").get(asyncHandler(resumeController.findResumeById));
+
 export { resumeRouter };

@@ -5,6 +5,9 @@ import { ResumeService } from "../services";
 import { createResumeDTO, IResumeController } from "../types";
 import { BadReqError } from "../utils";
 
+type ReqParams = {
+  id?: string;
+};
 @Service()
 export class ResumeController implements IResumeController {
   constructor(private readonly resumeService: ResumeService) {}
@@ -148,5 +151,20 @@ export class ResumeController implements IResumeController {
     await this.resumeService.createResume(user!.id, body);
 
     return res.sendStatus(204);
+  };
+
+  findResumeById = async (
+    { params: { id } }: Request<ReqParams>,
+    res: Response
+  ) => {
+    const parsedInt = Number(id);
+
+    if (!id || !parsedInt) {
+      throw new BadReqError();
+    }
+
+    const resume = await this.resumeService.findResumeById(parsedInt);
+
+    return res.json({ resume });
   };
 }

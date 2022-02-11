@@ -1,6 +1,13 @@
 import { Service } from "typedi";
-import { createResumeDTO, IResumeDAO } from "../types";
-import { insert, MySQL, queryTransactionWrapper } from "../utils";
+import { createResumeDTO, findResumeDTO, IResumeDAO } from "../types";
+import {
+  find,
+  insert,
+  MySQL,
+  QueryFunction,
+  queryTransactionWrapper,
+  update,
+} from "../utils";
 
 const RESUME_TABLE = "resumes";
 const RESUME_INFO_TABLE = "resume_infos";
@@ -194,5 +201,259 @@ export class ResumeDAO implements IResumeDAO {
       ],
       conn
     );
+  }
+
+  async findResumeById(resumeId: number) {
+    const conn = await this.mysql.getConnection();
+
+    const subQuery1 = `
+    SELECT resume_id, json_object('name', RI.name, 'birthday', RI.birthday, 'phone_number', RI.phone_number, 'email', RI.email, 'sido', RI.sido, 'sigungu', RI.sigungu, 'disability_level', RI.disability_level, 'disability_type', RI.disability_type, 'sex', RI.sex) AS resume_info
+    FROM ${RESUME_INFO_TABLE} AS RI
+    GROUP BY resume_id`;
+
+    const subQuery2 = `
+    SELECT resume_id, json_arrayagg(json_object('company', C.company, 'department', C.department)) AS careers
+    FROM ${CAREER_TABLE} AS C
+    GROUP BY resume_id`;
+
+    const subQuery3 = `
+    SELECT resume_id, json_arrayagg(json_object('type', E.type, 'school_name', E.school_name)) AS educations
+    FROM ${EDUCATION_TABLE} AS E
+    GROUP BY resume_id`;
+
+    const subQuery4 = `
+    SELECT resume_id, json_arrayagg(json_object('organization', A.organization, 'description', A.description)) AS activities
+    FROM ${ACTIVITY_TABLE} AS A
+    GROUP BY resume_id`;
+
+    const subQuery5 = `
+    SELECT resume_id, json_arrayagg(json_object('institute', W.institute, 'started_at', W.started_at)) AS awards
+    FROM ${AWARD_TABLE} AS W
+    GROUP BY resume_id`;
+
+    const subQuery6 = `
+    SELECT resume_id, json_object('url', MY.url) AS my_video
+    FROM ${MY_VIDEO_TABLE} AS MY
+    GROUP BY resume_id`;
+
+    const subQuery7 = `
+    SELECT resume_id, json_object('url', H.url) AS helper_video
+    FROM ${HELPER_VIDEO_TABLE} AS H
+    GROUP BY resume_id`;
+
+    const subsubQuery1 = `
+    SELECT preference_id, json_arrayagg(json_object('name', PJ.name)) AS preference_jobs
+    FROM ${PREFERNCE_JOB_TABLE} AS PJ
+    GROUP BY preference_id`;
+
+    const subsubQuery2 = `
+    SELECT preference_id, json_arrayagg(json_object('sido', PL.sido, 'sigungu', PL.sigungu)) AS preference_locations
+    FROM ${PREFERNCE_LOCATION_TABLE} AS PL
+    GROUP BY preference_id`;
+
+    const subQuery8 = `
+    SELECT id, resume_id, json_object('employ_type', P.employ_type, 'salary', P.salary, 'preference_jobs', pj.preference_jobs, 'preference_locations', pl.preference_locations) AS preference
+    FROM ${PREFERNCE_TABLE} AS P
+        JOIN (${subsubQuery1}) AS pj ON pj.preference_id = P.id
+        JOIN (${subsubQuery2}) AS pl ON pl.preference_id = P.id
+    GROUP BY resume_id`;
+
+    const query = `
+        SELECT
+            R.title,
+            R.content,
+            ri.resume_info,
+            e.educations,
+            c.careers,
+            a.activities,
+            w.awards,
+            my.my_video,
+            h.helper_video,
+            p.preference
+        FROM ${RESUME_TABLE} AS R
+        JOIN (${subQuery1}) AS ri ON ri.resume_id = R.id
+        JOIN (${subQuery2}) AS c ON c.resume_id = R.id
+        JOIN (${subQuery3}) AS e ON e.resume_id = R.id
+        JOIN (${subQuery4}) AS a ON a.resume_id = R.id
+        JOIN (${subQuery5}) AS w ON w.resume_id = R.id
+        JOIN (${subQuery6}) AS my ON my.resume_id = R.id
+        JOIN (${subQuery7}) AS h ON h.resume_id = R.id
+        JOIN (${subQuery8}) AS p ON p.resume_id = R.id
+        WHERE R.id = ?;
+    `;
+    const findResumeQueryFunction = find({ query, values: [resumeId] }, conn);
+
+    const results = await queryTransactionWrapper<findResumeDTO>(
+      [findResumeQueryFunction],
+      conn
+    );
+    if (!results) {
+      throw new Error("Resume Notfound");
+    }
+    const [[[row]]] = results;
+
+    return row;
+  }
+
+  async updateResume(
+    resumeId: number,
+    {
+      resume,
+      resumeInfo,
+      educations,
+      careers,
+      activities,
+      awards,
+      myVideo,
+      helperVideo,
+      preference: { preferenceJobs, preferenceLocations, ...preference },
+    }: createResumeDTO
+  ) {
+    const conn = await this.mysql.getConnection();
+    const queryFunctions: QueryFunction[] = [];
+
+    // const setUpdatedResumeQuery = `
+    // SET @updated_resume_id := 0;
+    // `;
+
+    // const setUpdateResumeIdQueryFunction = insert(
+    //   { query: setUpdatedResumeQuery },
+    //   conn
+    // );
+
+    // SET ?, id = (SELECT @updated_resume_id := id)
+
+    if (resume) {
+      const updateResumeQuery = `
+    UPDATE ${RESUME_TABLE}
+    SET ?
+    WHERE id = ?
+    LIMIT 1;
+    `;
+      const updateResumeQueryFunction = update(
+        { query: updateResumeQuery, values: [resume, resumeId] },
+        conn
+      );
+      queryFunctions.push(updateResumeQueryFunction);
+    }
+
+    // TODO 각자 항목 수정하기 위해 함수로 분리해야함
+
+    if (resumeInfo) {
+      const updateResumeInfoQuery = `
+        UPDATE ${RESUME_INFO_TABLE}
+        SET ?
+        WHERE resume_id = ?
+        LIMIT 1;
+    `;
+      const updateResumeInfoQueryFunction = update(
+        { query: updateResumeInfoQuery, values: [resumeInfo, resumeId] },
+        conn
+      );
+      queryFunctions.push(updateResumeInfoQueryFunction);
+    }
+
+    if (educations) {
+      educations.forEach((education) => {
+        const query = `
+              UPDATE ${RESUME_INFO_TABLE}
+              SET ?
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+
+        queryFunctions.push(
+          update({ query, values: [education, resumeId] }, conn)
+        );
+      });
+    }
+
+    if (careers) {
+      careers.forEach((career) => {
+        const query = `
+              UPDATE ${CAREER_TABLE}
+              SET ?
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+        queryFunctions.push(
+          update({ query, values: [career, resumeId] }, conn)
+        );
+      });
+    }
+    if (activities) {
+      activities.forEach((activity) => {
+        const query = `
+              UPDATE ${ACTIVITY_TABLE}
+              SET ?
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+        queryFunctions.push(
+          update({ query, values: [activity, resumeId] }, conn)
+        );
+      });
+    }
+    if (awards) {
+      awards.forEach((award) => {
+        const query = `
+              UPDATE ${AWARD_TABLE}
+              SET ?
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+        queryFunctions.push(update({ query, values: [award, resumeId] }, conn));
+      });
+    }
+
+    if (myVideo) {
+      const query = `
+              UPDATE ${MY_VIDEO_TABLE}
+              SET ?
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+      queryFunctions.push(update({ query, values: [myVideo, resumeId] }, conn));
+    }
+
+    if (helperVideo) {
+      const query = `
+              UPDATE ${HELPER_VIDEO_TABLE}
+              SET ?
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+      queryFunctions.push(
+        update({ query, values: [helperVideo, resumeId] }, conn)
+      );
+    }
+    const LAST_UPDATE_PREFERENCE_ID = "@last_update_id";
+    if (preference) {
+      const getLastUpdatedPreferenceIdQuery = `
+      SET ${LAST_UPDATE_PREFERENCE_ID} := 0;
+      `;
+
+      const getUpdatePreferenceIdQueryFunction = insert(
+        { query: getLastUpdatedPreferenceIdQuery },
+        conn
+      );
+
+      const query = `
+              UPDATE ${PREFERNCE_TABLE}
+              SET ?, id = (SELECT ${LAST_UPDATE_PREFERENCE_ID} := id)
+              WHERE resume_id = ?
+              LIMIT 1;
+              `;
+      queryFunctions.push(
+        getUpdatePreferenceIdQueryFunction,
+        update({ query, values: [preference, resumeId] }, conn)
+      );
+    }
+
+    // if (preferenceLocations) {
+    //   preferenceLocations.forEach();
+    // }
+
+    await queryTransactionWrapper(queryFunctions, conn);
   }
 }
