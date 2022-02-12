@@ -1,19 +1,16 @@
 import { Service } from "typedi";
-import { createPool, PoolConnection } from "mysql2/promise";
+import { createPool } from "mysql2/promise";
 import type { Pool } from "mysql2/promise";
-import { logger } from ".";
+import { logger } from "../utils";
 import { DB_CONFIG } from "../config";
 
 @Service()
 export class MySQL {
   private pool: Pool | undefined;
 
-  private connection: PoolConnection | undefined;
-
   async connect() {
     try {
       this.pool = createPool(DB_CONFIG);
-      this.connection = await this.pool.getConnection();
 
       logger.info("DB CONNECTED");
     } catch (err) {
@@ -21,7 +18,7 @@ export class MySQL {
     }
   }
 
-  async getConnection() {
-    return this.connection!;
+  async getPool() {
+    return this.pool!;
   }
 }

@@ -51,15 +51,62 @@ GET "/health" return `"ok"`
 POST "/health2" return `request.body`
 ```
 
-## 실제 API
+## API .v1
+
+- auth
 
 ```
 GET "/api/v1/auth/google"  // 구글 로그인
+```
+
+- user
+
+```
 
 GET "/api/v1/user" // 전체 유저 찾기
 GET "/api/v1/user/:id" // id를 갖는 유저 찾기
 GET "/api/v1/user/profile" // 내 profile 확인
 PATCH "/api/v1/user/profile" // 내 profile 수정
 
-POST "/api/v1/resume" // resume 추가
+```
+
+- resume
+
+```
+POST "/api/v1/resume" // resume 생성
+
+GET "/api/v1/resume/:id" // resume 찾기 (관련 테이블 다 같이)
+PATCH "/api/v1/resume/:id" // resume 수정
+delete "/api/v1/resume/:id" // resume 삭제 (관련 테이블 다 같이)
+
+PATCH "/api/v1/resume/:id/info" // resume_info 수정
+delete "/api/v1/resume/:id/info" // resume_info 삭제
+
+PATCH "/api/v1/resume/:id/education" // education 수정
+delete "/api/v1/resume/:id/education" // education 삭제
+
+PATCH "/api/v1/resume/:id/career" // career 수정
+delete "/api/v1/resume/:id/career" // career 삭제
+
+PATCH "/api/v1/resume/:id/activity" // activity 수정
+delete "/api/v1/resume/:id/activity" // activity 삭제
+
+PATCH "/api/v1/resume/:id/award" // award 수정
+delete "/api/v1/resume/:id/award" // award 삭제
+
+PATCH "/api/v1/resume/:id/my-video" // my-video 수정
+delete "/api/v1/resume/:id/my-video" // my-video 삭제
+
+PATCH "/api/v1/resume/:id/helper-video" // helper-video 수정
+delete "/api/v1/resume/:id/helper-video" // helper-video 삭제
+
+PATCH "/api/v1/resume/:id/preference" // preference 수정
+delete "/api/v1/resume/:id/preference" // preference 삭제
+
+PATCH "/api/v1/resume/:id/preference-job" // preference-job 수정
+delete "/api/v1/resume/:id/preference-job" // preference-job 삭제
+
+PATCH "/api/v1/resume/:id/preference-location" // preference-location 수정
+delete "/api/v1/resume/:id/preference-location" // preference-location 삭제
+
 ```

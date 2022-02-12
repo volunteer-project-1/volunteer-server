@@ -2,12 +2,27 @@
 import { Response, Request } from "express";
 import { Service } from "typedi";
 import { ResumeService } from "../services";
-import { createResumeDTO, IResumeController } from "../types";
+import {
+  createResumeDTO,
+  IResumeController,
+  updateActivityDTO,
+  updateAwardDTO,
+  updateCareerDTO,
+  updateEducationDTO,
+  updateHelperVideoDTO,
+  updateMyVideoDTO,
+  updatePreferenceDTO,
+  updatePreferenceJobDTO,
+  updatePreferenceLocationDTO,
+  updateResumeDTO,
+  updateResumeInfoDTO,
+} from "../types";
 import { BadReqError } from "../utils";
 
 type ReqParams = {
   id?: string;
 };
+
 @Service()
 export class ResumeController implements IResumeController {
   constructor(private readonly resumeService: ResumeService) {}
@@ -166,5 +181,272 @@ export class ResumeController implements IResumeController {
     const resume = await this.resumeService.findResumeById(parsedInt);
 
     return res.json({ resume });
+  };
+
+  updateResumeById = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateResumeDTO>,
+    res: Response
+  ) => {
+    const parsedInt = Number(id);
+
+    if (!id || !parsedInt) {
+      throw new BadReqError();
+    }
+    await this.resumeService.updateResume(parsedInt, body);
+
+    return res.sendStatus(204);
+  };
+
+  updateResumeInfo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateResumeInfoDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateResumeInfo(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updateEducation = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateEducationDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateEducation(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updateCareer = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateCareerDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateCareer(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updateActivity = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateActivityDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateActivity(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updateAward = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateAwardDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateAward(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updateMyVideo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateMyVideoDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateMyVideo(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updateHelperVideo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updateHelperVideoDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updateHelperVideo(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updatePreference = async (
+    { params: { id }, body }: Request<ReqParams, unknown, updatePreferenceDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updatePreference(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updatePreferenceJob = async (
+    {
+      params: { id },
+      body,
+    }: Request<ReqParams, unknown, updatePreferenceJobDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updatePreferenceJob(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  updatePreferenceLocation = async (
+    {
+      params: { id },
+      body,
+    }: Request<ReqParams, unknown, updatePreferenceLocationDTO>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.updatePreferenceLocation(parsedId, body);
+    return res.sendStatus(204);
+  };
+
+  deleteResume = async (
+    { params: { id } }: Request<ReqParams>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+    await this.resumeService.deleteResume(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteResumeInfo = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteResumeInfo(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteEducation = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteEducation(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteCareer = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteCareer(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteActivity = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteActivity(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteAward = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteAward(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteMyVideo = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteMyVideo(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deleteHelperVideo = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deleteHelperVideo(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deletePreference = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deletePreference(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deletePreferenceJob = async ({ params: { id } }: Request, res: Response) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deletePreferenceJob(parsedId);
+    return res.sendStatus(204);
+  };
+
+  deletePreferenceLocation = async (
+    { params: { id } }: Request,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await this.resumeService.deletePreferenceLocation(parsedId);
+    return res.sendStatus(204);
   };
 }

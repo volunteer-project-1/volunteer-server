@@ -20,12 +20,12 @@ export class UserController implements IUserController {
       user: ReturnFindMyProfileDTO;
     }>
   ) => {
-    const my = await this.userService.findMyProfile(user!.id);
-    if (!my) {
+    const profile = await this.userService.findMyProfile(user!.id);
+    if (!profile) {
       throw new NotFoundError();
     }
 
-    return res.json({ user: my }).status(200);
+    return res.json({ user: profile }).status(200);
   };
 
   updateMyProfile = async (

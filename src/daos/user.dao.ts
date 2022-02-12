@@ -5,14 +5,8 @@ import {
   ReturnFindMyProfileDTO,
   UpdateProfileDTO,
 } from "../types/user";
-import {
-  find,
-  findOne,
-  insert,
-  MySQL,
-  queryTransactionWrapper,
-  update,
-} from "../utils";
+import { MySQL, queryTransactionWrapper } from "../utils";
+import { findOneOrWhole, insert, update } from "../db";
 
 const USER_TABLE = "users";
 const USER_METAS_TABLE = "user_metas";
@@ -22,43 +16,34 @@ const USER_PROFILE = "profiles";
 export class UserDAO implements IUserDAO {
   constructor(private readonly mysql: MySQL) {}
 
-  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO | undefined> {
-    const conn = await this.mysql.getConnection();
+  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
+    const pool = await this.mysql.getPool();
     const query = `
-    Select 
-        U.id, U.email, 
-        M.id AS user_meta_id, M.is_verified, M.type, 
-        P.name, P.address, P.birthday
-    FROM ${USER_TABLE} AS U 
-    LEFT JOIN ${USER_METAS_TABLE} AS M 
-        ON U.id = M.user_id 
-    LEFT JOIN ${USER_PROFILE} AS P 
-        ON U.id = P.user_id 
-    WHERE U.id = ?`;
+        Select 
+            U.id, U.email, 
+            M.id AS user_meta_id, M.is_verified, M.type, 
+            P.name, P.address, P.birthday
+        FROM ${USER_TABLE} AS U 
+        LEFT JOIN ${USER_METAS_TABLE} AS M 
+            ON U.id = M.user_id 
+        LEFT JOIN ${USER_PROFILE} AS P 
+            ON U.id = P.user_id 
+        WHERE U.id = ?
+        `;
 
-    const findUserQueryFunction = findOne(
+    const [rows] = await findOneOrWhole(
       {
         query,
         values: [id],
       },
-      conn
-    );
+      pool
+    )();
 
-    const executedQueries =
-      await queryTransactionWrapper<ReturnFindMyProfileDTO>(
-        [findUserQueryFunction],
-        conn
-      );
-    if (!executedQueries) {
-      throw new Error();
-    }
-    const [[rows]] = executedQueries;
-
-    return rows[0];
+    return rows[0] as ReturnFindMyProfileDTO;
   }
 
   async updateMyProfile(id: number, body: UpdateProfileDTO) {
-    const conn = await this.mysql.getConnection();
+    const pool = await this.mysql.getPool();
 
     const query = `
         UPDATE ${USER_PROFILE} 
@@ -66,91 +51,54 @@ export class UserDAO implements IUserDAO {
         WHERE user_id=?
     `;
 
-    const updateUserQueryFunction = update(
+    await update(
       {
         query,
         values: [body, id],
       },
-      conn
-    );
-
-    await queryTransactionWrapper([updateUserQueryFunction], conn);
+      pool
+    )();
   }
 
   async findOneById(id: number): Promise<IUser | undefined> {
-    const conn = await this.mysql.getConnection();
+    const pool = await this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE} WHERE id=?`;
-    const findUserQueryFunction = findOne({ query, values: [id] }, conn);
+    const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
 
-    const executedQueries = await queryTransactionWrapper<IUser>(
-      [findUserQueryFunction],
-      conn
-    );
-
-    if (!executedQueries) {
-      throw new Error();
-    }
-    const [[rows]] = executedQueries;
-
-    return rows[0];
+    return rows[0] as IUser;
   }
 
   async find(): Promise<IUser[] | undefined> {
-    const conn = await this.mysql.getConnection();
+    const pool = await this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE}`;
-    const findUsersQueryFunction = find({ query }, conn);
+    const [rows] = await findOneOrWhole({ query }, pool)();
 
-    const executedQueries = await queryTransactionWrapper<IUser[]>(
-      [findUsersQueryFunction],
-      conn
-    );
-
-    if (!executedQueries) {
-      throw new Error();
-    }
-    const [[rows]] = executedQueries;
-
-    return rows;
+    return rows as IUser[];
   }
 
   async findByEmail(email: string): Promise<IUser | undefined> {
-    const conn = await this.mysql.getConnection();
+    const pool = await this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE} WHERE email=?`;
 
-    const findUserQueryFunction = findOne({ query, values: [email] }, conn);
+    const [rows] = await findOneOrWhole({ query, values: [email] }, pool)();
 
-    const executedQueries = await queryTransactionWrapper<IUser>(
-      [findUserQueryFunction],
-      conn
-    );
-    if (!executedQueries) {
-      throw new Error();
-    }
-    const [[rows]] = executedQueries;
-
-    return rows[0];
+    return rows[0] as IUser;
   }
 
   async create(email: string) {
-    const conn = await this.mysql.getConnection();
+    const pool = await this.mysql.getPool();
     const userQuery = `
         INSERT INTO ${USER_TABLE} (email) VALUES(?);
         `;
 
-    const createUserQueryFunction = insert(
-      { query: userQuery, values: [email] },
-      conn
-    );
+    const createUserQuery = insert({ query: userQuery, values: [email] }, pool);
 
     const userMetaQuery = `
         INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
         `;
 
-    const createUserMetaQueryFunction = insert({ query: userMetaQuery }, conn);
+    const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
 
-    await queryTransactionWrapper(
-      [createUserQueryFunction, createUserMetaQueryFunction],
-      conn
-    );
+    await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
   }
 }

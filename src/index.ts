@@ -44,6 +44,7 @@ async function start() {
   });
 
   app.use((err: ExError, _: Request, res: Response, __: NextFunction) => {
+    console.log("에러 :", err);
     if (err instanceof ExError) {
       logger.error(colors.blue(JSON.stringify(err)));
       res.status(err.status);

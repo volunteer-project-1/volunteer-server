@@ -12,7 +12,7 @@ import { UserDAO } from "../daos";
 export class UserService implements IUserService {
   constructor(private userDAO: UserDAO) {}
 
-  findMyProfile(id: number): Promise<ReturnFindMyProfileDTO | undefined> {
+  findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
     return this.userDAO.findMyProfile(id);
   }
 
