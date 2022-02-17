@@ -36,11 +36,21 @@ $ docker-compose up --build
 # db-migrate
 
 ```
-$ nf -e .env run npm run migrate up
+$ nf -e .env run npm run migrate
 ```
 
 > 위 명령어 실행 시 `migrations` 폴더 아래의 모든 파일 실행  
 > 특정 파일 실행을 원하면 파일명 입력
+
+# 테스팅
+
+mock 함수를 사용 하지않고 실제 db환경을 사용
+도커로 테스트 환경 구축
+
+```
+$ cd mysql && docker-compose up --build
+$ nf -e .env.test run npm run test
+```
 
 # API
 

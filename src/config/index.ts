@@ -2,7 +2,7 @@ import type { CorsOptions } from "cors";
 import type { PoolOptions } from "mysql2/promise";
 import type { _StrategyOptionsBase } from "passport-google-oauth20";
 
-const isProd = process.env.NODE_ENV === "production";
+export const isProd = process.env.NODE_ENV === "production";
 export const PORT = process.env.PORT || 3000;
 
 export const CLIENT_DOMAIN =

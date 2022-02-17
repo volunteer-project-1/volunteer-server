@@ -1,7 +1,7 @@
 import type {
   FieldPacket,
   OkPacket,
-  Pool,
+  PoolConnection,
   ResultSetHeader,
   RowDataPacket,
 } from "mysql2/promise";
@@ -21,16 +21,11 @@ export type QueryFunction<T = any> = () => Promise<
   [T & dbDefaults, FieldPacket[]]
 >;
 
-type AlwaysArray<T> = T extends (infer R)[] ? R[] : T[];
-
-// eslint-disable-next-line consistent-return
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // eslint-disable-next-line consistent-return
 export async function queryTransactionWrapper<T = any>(
   queries: QueryFunction[],
-  pool: Pool
-): Promise<[AlwaysArray<T>, FieldPacket[]][] | undefined> {
-  const conn = await pool.getConnection();
+  conn: PoolConnection
+): Promise<[T, FieldPacket[]][] | undefined> {
   try {
     await conn.beginTransaction();
 

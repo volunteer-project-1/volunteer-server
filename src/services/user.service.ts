@@ -12,14 +12,14 @@ import { generateHashPassword } from "../utils";
 
 @Service()
 export class UserService implements IUserService {
-  constructor(private userDAO: UserDAO) {}
+  constructor(private readonly userDAO: UserDAO) {}
 
   findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
     return this.userDAO.findMyProfile(id);
   }
 
-  updateMyProfile(id: number, body: UpdateProfileDTO) {
-    return this.userDAO.updateMyProfile(id, body);
+  updateMyProfile(id: number, data: UpdateProfileDTO) {
+    return this.userDAO.updateMyProfile(id, data);
   }
 
   findUserById(id: number): Promise<IUser | undefined> {

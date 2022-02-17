@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { FieldPacket, OkPacket, ResultSetHeader } from "mysql2/promise";
 import { DefaultTime } from ".";
 
 interface IUserSecret {
@@ -49,29 +50,35 @@ export interface UpdateProfileDTO {
 
 export interface ReturnFindMyProfileDTO
   extends Omit<IUser, "created_at" | "updated_at"> {
-  user_meta_id: string;
-  is_verified: boolean;
-  type: UserType;
-  name: string;
-  address: string;
-  birthday: Date;
+  profile: Omit<IProfile, "created_at" | "updated_at">;
+  user_meta: Omit<IUserMeta, "created_at" | "updated_at">;
 }
 
 export interface IUserDAO {
   findMyProfile: (id: number) => Promise<ReturnFindMyProfileDTO | undefined>;
-  updateMyProfile: (id: number, body: UpdateProfileDTO) => Promise<void>;
+  updateMyProfile: (
+    id: number,
+    body: UpdateProfileDTO
+  ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   findOneById: (id: number) => Promise<IUser | undefined>;
   find: () => Promise<IUser[] | undefined>;
-  create: (email: string) => Promise<void>;
+  create: (
+    email: string
+  ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
 }
 
 export interface IUserService {
   findMyProfile: (id: number) => Promise<ReturnFindMyProfileDTO | undefined>;
-  updateMyProfile: (id: number, body: UpdateProfileDTO) => Promise<void>;
+  updateMyProfile: (
+    id: number,
+    body: UpdateProfileDTO
+  ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   findUserById: (id: number) => Promise<IUser | undefined>;
   findUsers: () => Promise<IUser[] | undefined>;
   findUserByEmail: (email: string) => Promise<IUser | undefined>;
-  createUser: (email: string) => Promise<void>;
+  createUser: (
+    email: string
+  ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
 }
 
 export interface IUserController {

@@ -7,10 +7,11 @@ import passport from "passport";
 import session from "express-session";
 import cors from "cors";
 import routes from "./router";
-import { ExError, logger, MySQL } from "./utils";
+import { ExError, logger } from "./utils";
 import { API_PREFIX, CORS_CONFIG, PORT, SESSION_SECRET } from "./config";
 import { loggingReq } from "./middlewares";
 import passportConfig from "./passports";
+import { MySQL } from "./db";
 
 const app: express.Application = express();
 

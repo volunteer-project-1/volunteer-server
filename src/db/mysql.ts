@@ -18,7 +18,19 @@ export class MySQL {
     }
   }
 
-  async getPool() {
-    return this.pool!;
+  getPool() {
+    if (!this.pool) {
+      logger.info("DB RE CONNECTED");
+      this.pool = createPool(DB_CONFIG);
+    }
+    return this.pool;
+  }
+
+  getConnection() {
+    return this.getPool().getConnection();
+  }
+
+  closePool() {
+    return this.pool?.end();
   }
 }
