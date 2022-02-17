@@ -1,3 +1,2 @@
-import UserService from "./user.service";
-
-export { UserService };
+export * from "./user.service";
+export * from "./resume.service";

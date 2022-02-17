@@ -11,7 +11,7 @@ import { BadReqError, NotFoundError } from "../utils";
 import { UserService } from "../services";
 
 @Service()
-class UserController implements IUserController {
+export class UserController implements IUserController {
   constructor(private readonly userService: UserService) {}
 
   findMyProfile = async (
@@ -20,12 +20,12 @@ class UserController implements IUserController {
       user: ReturnFindMyProfileDTO;
     }>
   ) => {
-    const my = await this.userService.findMyProfile(user!.id);
-    if (!my) {
+    const profile = await this.userService.findMyProfile(user!.id);
+    if (!profile) {
       throw new NotFoundError();
     }
 
-    return res.json({ user: my }).status(200);
+    return res.json({ user: profile }).status(200);
   };
 
   updateMyProfile = async (
@@ -69,5 +69,3 @@ class UserController implements IUserController {
     return res.json({ users });
   };
 }
-
-export default UserController;

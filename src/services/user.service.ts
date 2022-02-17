@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-constructor */
 import { Service } from "typedi";
-import { OkPacket } from "mysql2/promise";
 import {
   IUserService,
   IUser,
@@ -10,10 +9,10 @@ import {
 import { UserDAO } from "../daos";
 
 @Service()
-class UserService implements IUserService {
+export class UserService implements IUserService {
   constructor(private userDAO: UserDAO) {}
 
-  findMyProfile(id: number): Promise<ReturnFindMyProfileDTO | undefined> {
+  findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
     return this.userDAO.findMyProfile(id);
   }
 
@@ -33,9 +32,7 @@ class UserService implements IUserService {
     return this.userDAO.findByEmail(email);
   }
 
-  createUser(email: string): Promise<OkPacket> {
+  createUser(email: string) {
     return this.userDAO.create(email);
   }
 }
-
-export default UserService;

@@ -4,6 +4,10 @@ export class ExError extends Error {
 
   constructor(status: number, message?: string) {
     super(message);
+    const { name, prototype } = new.target;
+
+    Object.setPrototypeOf(this, prototype);
+    this.name = name;
     this.status = status;
   }
 }

@@ -1,3 +1,2 @@
-import UserDAO from "./user.dao";
-
-export { UserDAO };
+export * from "./user.dao";
+export * from "./resume.dao";

@@ -5,92 +5,100 @@ import {
   ReturnFindMyProfileDTO,
   UpdateProfileDTO,
 } from "../types/user";
-import { find, findOne, insert, update } from "../utils";
+import { MySQL, queryTransactionWrapper } from "../utils";
+import { findOneOrWhole, insert, update } from "../db";
 
 const USER_TABLE = "users";
 const USER_METAS_TABLE = "user_metas";
 const USER_PROFILE = "profiles";
 
 @Service()
-class UserDAO implements IUserDAO {
-  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO | undefined> {
+export class UserDAO implements IUserDAO {
+  constructor(private readonly mysql: MySQL) {}
+
+  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
+    const pool = await this.mysql.getPool();
     const query = `
-    Select 
-        U.id, U.email, 
-        M.id AS user_meta_id, M.is_verified, M.type, 
-        P.name, P.address, P.birthday
-    FROM ${USER_TABLE} AS U 
-    LEFT JOIN ${USER_METAS_TABLE} AS M 
-        ON U.id = M.user_id 
-    LEFT JOIN ${USER_PROFILE} AS P 
-        ON U.id = P.user_id 
-    WHERE U.id = ?`;
+        Select 
+            U.id, U.email, 
+            M.id AS user_meta_id, M.is_verified, M.type, 
+            P.name, P.address, P.birthday
+        FROM ${USER_TABLE} AS U 
+        LEFT JOIN ${USER_METAS_TABLE} AS M 
+            ON U.id = M.user_id 
+        LEFT JOIN ${USER_PROFILE} AS P 
+            ON U.id = P.user_id 
+        WHERE U.id = ?
+        `;
 
-    const result = await findOne<ReturnFindMyProfileDTO>({
-      query,
-      values: [id],
-    });
+    const [rows] = await findOneOrWhole(
+      {
+        query,
+        values: [id],
+      },
+      pool
+    )();
 
-    if (!result) {
-      return undefined;
-    }
-    return result;
+    return rows[0] as ReturnFindMyProfileDTO;
   }
 
   async updateMyProfile(id: number, body: UpdateProfileDTO) {
+    const pool = await this.mysql.getPool();
+
     const query = `
         UPDATE ${USER_PROFILE} 
         SET ?
         WHERE user_id=?
     `;
 
-    return update({
-      query,
-      values: [body, id],
-    });
+    await update(
+      {
+        query,
+        values: [body, id],
+      },
+      pool
+    )();
   }
 
   async findOneById(id: number): Promise<IUser | undefined> {
+    const pool = await this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE} WHERE id=?`;
-    const result = await findOne<IUser>({ query, values: [id] });
+    const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
 
-    if (!result) {
-      return undefined;
-    }
-    return result;
+    return rows[0] as IUser;
   }
 
   async find(): Promise<IUser[] | undefined> {
+    const pool = await this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE}`;
-    return find<IUser[]>({ query });
+    const [rows] = await findOneOrWhole({ query }, pool)();
+
+    return rows as IUser[];
   }
 
   async findByEmail(email: string): Promise<IUser | undefined> {
+    const pool = await this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE} WHERE email=?`;
 
-    const result = await findOne<IUser>({ query, values: [email] });
+    const [rows] = await findOneOrWhole({ query, values: [email] }, pool)();
 
-    if (!result) {
-      return undefined;
-    }
-    return result;
+    return rows[0] as IUser;
   }
 
   async create(email: string) {
+    const pool = await this.mysql.getPool();
     const userQuery = `
         INSERT INTO ${USER_TABLE} (email) VALUES(?);
         `;
 
-    const user = await insert({ query: userQuery, values: [email] });
+    const createUserQuery = insert({ query: userQuery, values: [email] }, pool);
 
     const userMetaQuery = `
-        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (?);
+        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
         `;
 
-    await insert({ query: userMetaQuery, values: [user!.insertId] });
+    const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
 
-    return user!;
+    await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
   }
 }
-
-export default UserDAO;

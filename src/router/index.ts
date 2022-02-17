@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authRouter, userRouter } from "./v1";
+import { authRouter, resumeRouter, userRouter } from "./v1";
 
 const router = Router();
 
@@ -16,6 +16,10 @@ const defaultRoutes: routes[] = [
   {
     path: "/v1/auth",
     route: authRouter,
+  },
+  {
+    path: "/v1/resume",
+    route: resumeRouter,
   },
 ];
 
