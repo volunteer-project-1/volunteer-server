@@ -20,8 +20,8 @@ exports.up = function (db) {
     CREATE TABLE if not exists users (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         email VARCHAR(40) NOT NULL UNIQUE,
-        password VARCHAR(50)
-        salt VARCHAR(50)
+        password VARCHAR(300)
+        salt VARCHAR(200)
 
         created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),

@@ -1,11 +1,20 @@
 import { Router } from "express";
 import passport from "passport";
+import Container from "typedi";
+import { UserController } from "../../controllers";
+import { asyncHandler } from "../../utils";
 
 const authRouter = Router();
+
+const userController = Container.get(UserController);
 
 authRouter
   .route("/local")
   .post(passport.authenticate("local", { failureRedirect: "/login" }));
+
+authRouter
+  .route("/local/signup")
+  .post(asyncHandler(userController.localSignup));
 
 authRouter
   .route("/google")

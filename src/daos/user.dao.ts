@@ -4,8 +4,9 @@ import {
   IUser,
   ReturnFindMyProfileDTO,
   UpdateProfileDTO,
+  IUserCreateDTO,
 } from "../types/user";
-import { MySQL, queryTransactionWrapper } from "../utils";
+import { DuplicateError, MySQL, queryTransactionWrapper } from "../utils";
 import { findOneOrWhole, insert, update } from "../db";
 
 const USER_TABLE = "users";
@@ -100,5 +101,35 @@ export class UserDAO implements IUserDAO {
     const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
 
     await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
+  }
+
+  // :TODO 트랜젝션 제대로 정리
+  async createLocal(input: IUserCreateDTO) {
+    const pool = await this.mysql.getPool();
+    const userQuery = `
+        INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
+        `;
+
+    try {
+      await insert(
+        { query: userQuery, values: [input.email, input.password, input.salt] },
+        pool
+      )();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      if (err.code === "ER_DUP_ENTRY") {
+        throw new DuplicateError("Duplicate Email");
+      }
+    }
+
+    const userMetaQuery = `
+        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
+        `;
+
+    await insert({ query: userMetaQuery }, pool)();
+
+    // 임시로 true 리턴
+    return true;
+    // await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
   }
 }
