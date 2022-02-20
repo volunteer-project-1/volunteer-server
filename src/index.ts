@@ -7,7 +7,7 @@ import passport from "passport";
 import session from "express-session";
 import cors from "cors";
 import routes from "./router";
-import { ExError, logger } from "./utils";
+import { DbError, ExError, logger } from "./utils";
 import { API_PREFIX, CORS_CONFIG, PORT, SESSION_SECRET } from "./config";
 import { loggingReq } from "./middlewares";
 import passportConfig from "./passports";
@@ -44,13 +44,18 @@ async function start() {
     res.json({ message: "Un Valid URL" });
   });
 
-  app.use((err: ExError, _: Request, res: Response, __: NextFunction) => {
-    console.log("에러 :", err);
+  app.use((err: any, _: Request, res: Response, __: NextFunction) => {
     if (err instanceof ExError) {
       logger.error(colors.blue(JSON.stringify(err)));
       res.status(err.status);
       res.json({ name: err.name, message: err.message });
 
+      return;
+    }
+
+    if (err instanceof DbError) {
+      res.status(500);
+      res.json({ name: err.name, message: err.message });
       return;
     }
 

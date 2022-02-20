@@ -42,9 +42,9 @@ export class UnauthorizedError extends ExError {
   }
 }
 
-export class DuplicateError extends ExError {
+export class DbError extends Error {
   constructor(message?: string) {
-    super(409, message);
+    super(message);
     const { name, prototype } = new.target;
 
     Object.setPrototypeOf(this, prototype);
@@ -52,4 +52,12 @@ export class DuplicateError extends ExError {
   }
 }
 
-export default ExError;
+export class DuplicateError extends DbError {
+  constructor(message?: string) {
+    super(message);
+    const { name, prototype } = new.target;
+
+    Object.setPrototypeOf(this, prototype);
+    this.name = name;
+  }
+}

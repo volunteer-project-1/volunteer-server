@@ -136,11 +136,13 @@ export class UserDAO implements IUserDAO {
       conn
     );
 
-    const user = results![0][0];
-    const meta = results![2][0];
-    const profile = results![3][0];
+    const resultsOkPacket = results!.map((result) => result[0]);
 
-    return { user, meta, profile };
+    return {
+      user: resultsOkPacket[0],
+      meta: resultsOkPacket[2],
+      profile: resultsOkPacket[3],
+    };
   }
 
   // :TODO 트랜젝션 제대로 정리
