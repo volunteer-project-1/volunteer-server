@@ -1,14 +1,13 @@
 import { Service } from "typedi";
 import { Request, Response } from "express";
-import {
-  IUserController,
-  FindUserByIdDTO,
-  IUser,
-  ReturnFindMyProfileDTO,
-  UpdateProfileDTO,
-} from "../types/user";
+import { IUserController, IUser } from "../types";
 import { BadReqError, NotFoundError } from "../utils";
 import { UserService } from "../services";
+import {
+  FindUserByIdDTO,
+  ReturnFindMyProfileDTO,
+  UpdateProfileDTO,
+} from "../dtos";
 
 @Service()
 export class UserController implements IUserController {

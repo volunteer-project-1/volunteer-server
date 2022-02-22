@@ -2,9 +2,10 @@
 import { Response, Request } from "express";
 import { Service } from "typedi";
 import { ResumeService } from "../services";
+import { IResumeController } from "../types";
+import { BadReqError } from "../utils";
 import {
   createResumeDTO,
-  IResumeController,
   updateActivityDTO,
   updateAwardDTO,
   updateCareerDTO,
@@ -16,8 +17,7 @@ import {
   updatePreferenceLocationDTO,
   updateResumeDTO,
   updateResumeInfoDTO,
-} from "../types";
-import { BadReqError } from "../utils";
+} from "../dtos";
 
 type ReqParams = {
   id?: string;

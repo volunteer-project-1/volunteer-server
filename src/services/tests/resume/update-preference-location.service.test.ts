@@ -5,7 +5,7 @@ import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { ResumeService, UserService } from "../..";
 import { newResumeFactory } from "../../../factory";
-import { updatePreferenceLocationDTO } from "../../../types";
+import { updatePreferenceLocationDTO } from "../../../dtos";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();

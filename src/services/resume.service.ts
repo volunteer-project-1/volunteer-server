@@ -2,7 +2,6 @@ import { Service } from "typedi";
 import { ResumeDAO } from "../daos";
 import {
   createResumeDTO,
-  IResumeService,
   updateActivityDTO,
   updateAwardDTO,
   updateCareerDTO,
@@ -14,7 +13,8 @@ import {
   updatePreferenceLocationDTO,
   updateResumeDTO,
   updateResumeInfoDTO,
-} from "../types";
+} from "../dtos";
+import { IResumeService } from "../types";
 
 @Service()
 export class ResumeService implements IResumeService {

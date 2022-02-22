@@ -1,0 +1,11 @@
+export const RESUME_TABLE = "resumes";
+export const RESUME_INFO_TABLE = "resume_infos";
+export const EDUCATION_TABLE = "educations";
+export const CAREER_TABLE = "careers";
+export const ACTIVITY_TABLE = "activities";
+export const AWARD_TABLE = "awards";
+export const MY_VIDEO_TABLE = "my_videos";
+export const HELPER_VIDEO_TABLE = "helper_videos";
+export const PREFERNCE_TABLE = "preferences";
+export const PREFERNCE_JOB_TABLE = "preference_jobs";
+export const PREFERNCE_LOCATION_TABLE = "preference_locations";

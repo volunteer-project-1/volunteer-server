@@ -1,6 +1,22 @@
 import { Request, Response } from "express";
 import { FieldPacket, OkPacket, ResultSetHeader } from "mysql2/promise";
 import { DefaultTime } from ".";
+import { DISABLILITY_LEVEL, DISABLILITY_TYPE } from "../constants";
+import {
+  createResumeDTO,
+  findResumeDTO,
+  updateActivityDTO,
+  updateAwardDTO,
+  updateCareerDTO,
+  updateEducationDTO,
+  updateHelperVideoDTO,
+  updateMyVideoDTO,
+  updatePreferenceDTO,
+  updatePreferenceJobDTO,
+  updatePreferenceLocationDTO,
+  updateResumeDTO,
+  updateResumeInfoDTO,
+} from "../dtos";
 
 export interface IResume extends DefaultTime {
   id: number;
@@ -8,26 +24,9 @@ export interface IResume extends DefaultTime {
   content: string;
   user_id: number;
 }
-const DISABLILITY_LEVEL = [1, 2, 3, 4, 5, 6] as const;
+
 type DisabilityLevel = typeof DISABLILITY_LEVEL[number];
 
-const DISABLILITY_TYPE = [
-  "지체 장애",
-  "뇌병변 장애",
-  "시각 장애",
-  "청각 장애",
-  "언어 장애",
-  "안면 장애",
-  "신장 장애",
-  "심장 장애",
-  "간 장애",
-  "호흡기 장애",
-  "장루요루 장애",
-  "뇌전증 장애",
-  "정신 지체",
-  "정신 장애",
-  "자폐성 장애",
-] as const;
 type DisabilityType = typeof DISABLILITY_TYPE[number];
 
 type Sex = "남" | "여";
@@ -113,72 +112,6 @@ export interface IPreferenceJob {
   id: number;
   preference_id: number;
   name: string;
-}
-
-export interface createResumeDTO {
-  resume: Omit<IResume, "id" | "user_id">;
-  resumeInfo: Omit<IResumeInfo, "id" | "resume_id">;
-  educations: Omit<IEducation, "id" | "resume_id">[];
-  careers: Omit<ICareers, "id" | "resume_id">[];
-  activities: Omit<IActivity, "id" | "resume_id">[];
-  awards: Omit<IAward, "id" | "resume_id">[];
-  myVideo: Omit<IMyVideo, "id" | "resume_id">;
-  helperVideo: Omit<IHelperVideo, "id" | "resume_id">;
-  preference: Omit<IPreference, "id" | "resume_id"> & {
-    preferenceLocations: Omit<IPreferenceLocation, "id" | "preference_id">[];
-    preferenceJobs: Omit<IPreferenceJob, "id" | "preference_id">[];
-  };
-}
-
-export interface updateResumeDTO {
-  resume: Partial<Omit<IResume, "id" | "user_id">>;
-}
-
-export interface updateResumeInfoDTO {
-  resumeInfo: Partial<Omit<IResumeInfo, "id" | "resume_id">>;
-}
-export interface updateEducationDTO {
-  education: Partial<Omit<IEducation, "id" | "resume_id">>;
-}
-export interface updateCareerDTO {
-  career: Partial<Omit<ICareers, "id" | "resume_id">>;
-}
-export interface updateActivityDTO {
-  activity: Partial<Omit<IActivity, "id" | "resume_id">>;
-}
-export interface updateAwardDTO {
-  award: Partial<Omit<IAward, "id" | "resume_id">>;
-}
-export interface updateMyVideoDTO {
-  myVideo: Partial<Omit<IMyVideo, "id" | "resume_id">>;
-}
-export interface updateHelperVideoDTO {
-  helperVideo: Partial<Omit<IHelperVideo, "id" | "resume_id">>;
-}
-
-export interface updatePreferenceDTO {
-  preference: Partial<Omit<IPreference, "id" | "resume_id">>;
-}
-export interface updatePreferenceJobDTO {
-  preferenceJob: Partial<Omit<IPreferenceJob, "id" | "preference_id">>;
-}
-export interface updatePreferenceLocationDTO {
-  preferenceLocation: Partial<
-    Omit<IPreferenceLocation, "id" | "preference_id">
-  >;
-}
-
-export interface findResumeDTO extends Omit<IResume, "user_id"> {
-  educations: IEducation[];
-  careers: ICareers[];
-  activities: IActivity[];
-  awards: IAward[];
-  myVidoe: IMyVideo;
-  helperVideo: IHelperVideo;
-  preference: IPreference & {
-    preferenceJobs: IPreferenceJob[];
-    preferenceLocations: IPreferenceLocation[];
-  };
 }
 
 export interface IResumeDAO {

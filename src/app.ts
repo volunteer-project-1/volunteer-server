@@ -8,8 +8,8 @@ import session from "express-session";
 import cors from "cors";
 import routes from "./router";
 import { DbError, ExError, logger } from "./utils";
-import { API_PREFIX, CORS_CONFIG, SESSION_SECRET } from "./config";
-import { loggingReq } from "./middlewares";
+import { API_PREFIX, CORS_CONFIG, isProd, SESSION_SECRET } from "./config";
+import { loggingReq, mockAuthenticateUser } from "./middlewares";
 import passportConfig from "./passports";
 import { MySQL } from "./db";
 
@@ -25,8 +25,12 @@ export async function startApp() {
   app.use(session({ secret: SESSION_SECRET }));
   app.use(passport.initialize());
   app.use(passport.session());
-
-  app.use(loggingReq);
+  if (!isProd) {
+    app.use(mockAuthenticateUser);
+  }
+  if (isProd) {
+    app.use(loggingReq);
+  }
 
   app.get("/health", (_, res) => {
     res.send("ok");
@@ -40,6 +44,7 @@ export async function startApp() {
   app.use(API_PREFIX, routes);
 
   app.use("*", (_, res) => {
+    res.status(404);
     res.json({ message: "Un Valid URL" });
   });
 

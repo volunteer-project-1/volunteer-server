@@ -14,58 +14,64 @@ resumeRouter
 
 resumeRouter
   .route("/:id")
-  .get(asyncHandler(resumeController.findResumeById))
-  .patch(asyncHandler(resumeController.updateResumeById))
-  .delete(asyncHandler(resumeController.deleteResume));
+  .get(authenticateUser, asyncHandler(resumeController.findResumeById))
+  .patch(authenticateUser, asyncHandler(resumeController.updateResumeById))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteResume));
 
 resumeRouter
   .route("/:id/info")
-  .patch(asyncHandler(resumeController.updateResumeInfo))
-  .delete(asyncHandler(resumeController.deleteResumeInfo));
+  .patch(authenticateUser, asyncHandler(resumeController.updateResumeInfo))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteResumeInfo));
 
 resumeRouter
   .route("/:id/education")
-  .patch(asyncHandler(resumeController.updateEducation))
-  .delete(asyncHandler(resumeController.deleteEducation));
+  .patch(authenticateUser, asyncHandler(resumeController.updateEducation))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteEducation));
 
 resumeRouter
   .route("/:id/career")
-  .patch(asyncHandler(resumeController.updateCareer))
-  .delete(asyncHandler(resumeController.deleteCareer));
+  .patch(authenticateUser, asyncHandler(resumeController.updateCareer))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteCareer));
 
 resumeRouter
   .route("/:id/activity")
-  .patch(asyncHandler(resumeController.updateActivity))
-  .delete(asyncHandler(resumeController.deleteActivity));
+  .patch(authenticateUser, asyncHandler(resumeController.updateActivity))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteActivity));
 
 resumeRouter
   .route("/:id/award")
-  .patch(asyncHandler(resumeController.updateAward))
-  .delete(asyncHandler(resumeController.deleteAward));
+  .patch(authenticateUser, asyncHandler(resumeController.updateAward))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteAward));
 
 resumeRouter
   .route("/:id/my-video")
-  .patch(asyncHandler(resumeController.updateMyVideo))
-  .delete(asyncHandler(resumeController.deleteMyVideo));
+  .patch(authenticateUser, asyncHandler(resumeController.updateMyVideo))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteMyVideo));
 
 resumeRouter
   .route("/:id/helper-video")
-  .patch(asyncHandler(resumeController.updateHelperVideo))
-  .delete(asyncHandler(resumeController.deleteHelperVideo));
+  .patch(authenticateUser, asyncHandler(resumeController.updateHelperVideo))
+  .delete(authenticateUser, asyncHandler(resumeController.deleteHelperVideo));
 
 resumeRouter
   .route("/:id/preference")
-  .patch(asyncHandler(resumeController.updatePreference))
-  .delete(asyncHandler(resumeController.deletePreference));
+  .patch(authenticateUser, asyncHandler(resumeController.updatePreference))
+  .delete(authenticateUser, asyncHandler(resumeController.deletePreference));
 
 resumeRouter
   .route("/:id/preference-job")
-  .patch(asyncHandler(resumeController.updatePreferenceJob))
-  .delete(asyncHandler(resumeController.deletePreferenceJob));
+  .patch(authenticateUser, asyncHandler(resumeController.updatePreferenceJob))
+  .delete(authenticateUser, asyncHandler(resumeController.deletePreferenceJob));
 
 resumeRouter
   .route("/:id/preference-location")
-  .patch(asyncHandler(resumeController.updatePreferenceLocation))
-  .delete(asyncHandler(resumeController.deletePreferenceLocation));
+  .patch(
+    authenticateUser,
+    asyncHandler(resumeController.updatePreferenceLocation)
+  )
+  .delete(
+    authenticateUser,
+    asyncHandler(resumeController.deletePreferenceLocation)
+  );
 
 export { resumeRouter };

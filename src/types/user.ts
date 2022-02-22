@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { FieldPacket, OkPacket, ResultSetHeader } from "mysql2/promise";
 import { DefaultTime } from ".";
+import { ReturnFindMyProfileDTO, UpdateProfileDTO } from "../dtos";
 
 interface IUserSecret {
   password: string;

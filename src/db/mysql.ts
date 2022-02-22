@@ -10,6 +10,9 @@ export class MySQL {
 
   async connect() {
     try {
+      if (this.pool) {
+        return;
+      }
       this.pool = createPool(DB_CONFIG);
 
       logger.info("DB CONNECTED");

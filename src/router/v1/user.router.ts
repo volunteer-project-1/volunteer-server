@@ -12,10 +12,9 @@ userRouter.route("").get(asyncHandler(userController.findUsers));
 
 userRouter
   .route("/profile")
-  .get(authenticateUser, asyncHandler(userController.findMyProfile));
-userRouter.route("/:id").get(asyncHandler(userController.findUserById));
-userRouter
-  .route("/profile")
+  .get(authenticateUser, asyncHandler(userController.findMyProfile))
   .patch(authenticateUser, asyncHandler(userController.updateMyProfile));
+
+userRouter.route("/:id").get(asyncHandler(userController.findUserById));
 
 export { userRouter };

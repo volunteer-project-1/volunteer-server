@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-constructor */
 import { Service } from "typedi";
+<<<<<<< HEAD
 import {
   IUserService,
   IUser,
@@ -9,6 +10,11 @@ import {
 } from "../types/user";
 import { UserDAO } from "../daos";
 import { generateHashPassword } from "../utils";
+=======
+import { IUserService, IUser } from "../types/user";
+import { UserDAO } from "../daos";
+import { ReturnFindMyProfileDTO, UpdateProfileDTO } from "../dtos";
+>>>>>>> 6bb777e (Config: 폴더 구조 변경)
 
 @Service()
 export class UserService implements IUserService {

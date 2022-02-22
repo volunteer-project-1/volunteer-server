@@ -4,7 +4,7 @@ import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { UserService } from "../..";
-import { UpdateProfileDTO } from "../../../types";
+import { UpdateProfileDTO } from "../../../dtos";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();

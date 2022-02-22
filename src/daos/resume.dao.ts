@@ -1,9 +1,11 @@
 import { Service } from "typedi";
 import { OkPacket } from "mysql2/promise";
+import { queryTransactionWrapper } from "../utils";
+import { MySQL, findOneOrWhole, insert, update } from "../db";
+import { IResumeDAO } from "../types";
 import {
   createResumeDTO,
   findResumeDTO,
-  IResumeDAO,
   updateActivityDTO,
   updateAwardDTO,
   updateCareerDTO,
@@ -15,22 +17,21 @@ import {
   updatePreferenceLocationDTO,
   updateResumeDTO,
   updateResumeInfoDTO,
-} from "../types";
-import { queryTransactionWrapper } from "../utils";
-import { MySQL, findOneOrWhole, insert, update } from "../db";
-
-const RESUME_TABLE = "resumes";
-const RESUME_INFO_TABLE = "resume_infos";
-const EDUCATION_TABLE = "educations";
-const CAREER_TABLE = "careers";
-const ACTIVITY_TABLE = "activities";
-const AWARD_TABLE = "awards";
-const MY_VIDEO_TABLE = "my_videos";
-const HELPER_VIDEO_TABLE = "helper_videos";
-const PREFERNCE_TABLE = "preferences";
-const PREFERNCE_JOB_TABLE = "preference_jobs";
-const PREFERNCE_LOCATION_TABLE = "preference_locations";
-const USER_META_TABLE = "user_metas";
+} from "../dtos";
+import {
+  RESUME_TABLE,
+  RESUME_INFO_TABLE,
+  EDUCATION_TABLE,
+  CAREER_TABLE,
+  ACTIVITY_TABLE,
+  AWARD_TABLE,
+  MY_VIDEO_TABLE,
+  HELPER_VIDEO_TABLE,
+  PREFERNCE_TABLE,
+  PREFERNCE_JOB_TABLE,
+  PREFERNCE_LOCATION_TABLE,
+  USER_METAS_TABLE,
+} from "../constants";
 
 @Service()
 export class ResumeDAO implements IResumeDAO {
@@ -184,7 +185,7 @@ export class ResumeDAO implements IResumeDAO {
     const updateUserMetaQueryFunction = insert(
       {
         query: `
-        UPDATE ${USER_META_TABLE} AS m
+        UPDATE ${USER_METAS_TABLE} AS m
         SET m.is_verified = IF( m.is_verified=0, 1, m.is_verified)
         WHERE m.user_id = ?;`,
         values: [userId],

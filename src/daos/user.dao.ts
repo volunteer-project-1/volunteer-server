@@ -9,10 +9,8 @@ import {
 } from "../types/user";
 import { queryTransactionWrapper } from "../utils";
 import { findOneOrWhole, insert, MySQL, update } from "../db";
-
-const USER_TABLE = "users";
-const USER_METAS_TABLE = "user_metas";
-const USER_PROFILE_TABLE = "profiles";
+import { ReturnFindMyProfileDTO, UpdateProfileDTO } from "../dtos";
+import { USER_METAS_TABLE, USER_PROFILE_TABLE, USER_TABLE } from "../constants";
 
 @Service()
 export class UserDAO implements IUserDAO {

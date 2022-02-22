@@ -1,4 +1,4 @@
-import { createResumeDTO } from "./types";
+import { createResumeDTO } from "./dtos";
 
 export const newResumeFactory = ({
   resume,

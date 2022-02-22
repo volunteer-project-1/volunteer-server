@@ -7,6 +7,7 @@
     "prepare": "husky install",
     "build": "tsc",
     "test": "node ./node_modules/db-migrate/bin/db-migrate up && jest --detectOpenHandles --forceExit --maxWorkers=50%",
+    "test:coverage": "node ./node_modules/db-migrate/bin/db-migrate up && jest --detectOpenHandles --forceExit --maxWorkers=50% --coverage",
     "dev": "node ./dist/index.js",
     "start": "tsc-watch --onSuccess \"ts-node dist/index.js\"",
     "migrate": "node ./node_modules/db-migrate/bin/db-migrate up",
