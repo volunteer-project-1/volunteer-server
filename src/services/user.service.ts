@@ -39,11 +39,15 @@ export class UserService implements IUserService {
   }
 
   async createUserLocal(email: string, password: string) {
-    const input: IUserCreateDTO = { email, password };
-
+    console.log("input password");
+    console.log(password);
     const saltAndHash = await generateHashPassword(password);
-    input.password = saltAndHash.hash;
-    input.salt = saltAndHash.salt;
+
+    const input: IUserCreateDTO = {
+      email,
+      password: saltAndHash.hash,
+      salt: saltAndHash.salt,
+    };
 
     return this.userDAO.createLocal(input);
   }
