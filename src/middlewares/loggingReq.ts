@@ -12,6 +12,12 @@ export const loggingReq = (
   if (method === "GET" && query) {
     logger.info(`Query Parameters : ${JSON.stringify(query)}`);
   } else if (body) {
+    Object.keys(body).forEach((k) => {
+      if (k.toLocaleLowerCase().indexOf("password") > -1) {
+        // eslint-disable-next-line no-param-reassign
+        body.password = "FILTERED";
+      }
+    });
     logger.info(`Parameters : ${JSON.stringify(body)}`);
   }
 
