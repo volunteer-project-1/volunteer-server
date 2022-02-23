@@ -14,7 +14,7 @@ authRouter.route("/local").post(passport.authenticate("local"), (_, res) => {
 
 authRouter
   .route("/local/signup")
-  .post(asyncHandler(userController.localSignup));
+  .post(asyncHandler(userController.createUserByLocal));
 
 authRouter
   .route("/google")

@@ -9,12 +9,12 @@ beforeAll(async () => {
   await Container.get(MySQL).connect();
 });
 
-beforeEach(async () => {
-  const email = "ehgks0083@gmail.com";
+// beforeEach(async () => {
+//   const email = "ehgks0083@gmail.com";
 
-  const userService = Container.get(UserService);
-  await userService.createUser(email);
-});
+//   const userService = Container.get(UserService);
+//   await userService.createUser(email);
+// });
 
 afterEach(async () => {
   const conn = await Container.get(MySQL).getConnection();
@@ -41,6 +41,22 @@ describe("findMyProfile test", () => {
   const URL = "/api/v1/user";
 
   it("GET '/profile',If My profile founded, return 200", async () => {
+    // const email = "ehgks0083@gmail.com";
+
+    // const userService = Container.get(UserService);
+    // await userService.createUser(email);
+
+    const res = await request(await startApp()).get(`${URL}/profile`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it("GET '/profile',If My profile founded, return 200", async () => {
+    const email = "ehgks0083@gmail.com";
+
+    const userService = Container.get(UserService);
+    await userService.createUserBySocial(email);
+
     const res = await request(await startApp()).get(`${URL}/profile`);
 
     expect(res.status).toBe(200);

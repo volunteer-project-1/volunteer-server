@@ -13,7 +13,7 @@ beforeEach(async () => {
   const email = "ehgks0083@gmail.com";
 
   const userService = Container.get(UserService);
-  await userService.createUser(email);
+  await userService.createUserBySocial(email);
 });
 
 afterEach(async () => {
@@ -40,21 +40,21 @@ afterAll(async () => {
 describe("findUserById test", () => {
   const URL = "/api/v1/user";
 
-  it("PATCH '/:id',If Unvalid Id, return 401", async () => {
+  it("GET '/:id',If Unvalid Id, return 401", async () => {
     const id = "unvalid-id";
     const res = await request(await startApp()).get(`${URL}/${id}`);
 
     expect(res.status).toBe(401);
   });
 
-  it("PATCH '/:id',If User Not Founded return 404", async () => {
+  it("GET '/:id',If User Not Founded return 404", async () => {
     const id = 2;
     const res = await request(await startApp()).get(`${URL}/${id}`);
 
     expect(res.status).toBe(404);
   });
 
-  it("PATCH '/:id',If User Founded return 204", async () => {
+  it("GET '/:id',If User Founded return 204", async () => {
     const id = 1;
     const res = await request(await startApp()).get(`${URL}/${id}`);
 

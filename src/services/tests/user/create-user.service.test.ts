@@ -30,13 +30,13 @@ afterAll(async () => {
   await Container.get(MySQL).closePool();
 });
 
-describe("createUser Test", () => {
+describe("createUserBySocial Test", () => {
   const userService = Container.get(UserService);
   it("If success return {affectedRows: 1, serverStatus: 3}", async () => {
     const email = "ehgks0083@gmail.com";
-    const spy = jest.spyOn(userService, "createUser");
+    const spy = jest.spyOn(userService, "createUserBySocial");
 
-    const { user, meta, profile } = await userService.createUser(email);
+    const { user, meta, profile } = await userService.createUserBySocial(email);
     const TRANSACTION_STATUS = 3;
 
     expect(spy).toBeCalledTimes(1);

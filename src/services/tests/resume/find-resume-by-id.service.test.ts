@@ -37,7 +37,9 @@ describe("findResumeById Test", () => {
   it("return undefined", async () => {
     const id = 1;
 
-    const { user } = await userService.createUser("ehgks0083@gmail.com");
+    const { user } = await userService.createUserBySocial(
+      "ehgks0083@gmail.com"
+    );
     const data = newResumeFactory();
     await resumeService.createResume(user.insertId, data);
 

@@ -1,18 +1,18 @@
 import { Service } from "typedi";
 import { ResumeDAO } from "../daos";
 import {
-  createResumeDTO,
-  updateActivityDTO,
-  updateAwardDTO,
-  updateCareerDTO,
-  updateEducationDTO,
-  updateHelperVideoDTO,
-  updateMyVideoDTO,
-  updatePreferenceDTO,
-  updatePreferenceJobDTO,
-  updatePreferenceLocationDTO,
-  updateResumeDTO,
-  updateResumeInfoDTO,
+  UpdateResumeDto,
+  CreateResumeDto,
+  UpdateActivityDto,
+  UpdateAwardDto,
+  UpdateCareerDto,
+  UpdateEducationDto,
+  UpdateHelperVideoDto,
+  UpdateMyVideoDto,
+  UpdatePreferenceDto,
+  UpdatePreferenceJobDto,
+  UpdatePreferenceLocationDto,
+  UpdateResumeInfoDto,
 } from "../dtos";
 import { IResumeService } from "../types";
 
@@ -20,7 +20,7 @@ import { IResumeService } from "../types";
 export class ResumeService implements IResumeService {
   constructor(private resumeDAO: ResumeDAO) {}
 
-  createResume(id: number, data: createResumeDTO) {
+  createResume(id: number, data: CreateResumeDto) {
     return this.resumeDAO.createResume(id, data);
   }
 
@@ -28,47 +28,47 @@ export class ResumeService implements IResumeService {
     return this.resumeDAO.findResumeById(id);
   }
 
-  updateResume(id: number, data: updateResumeDTO) {
+  updateResume(id: number, data: UpdateResumeDto) {
     return this.resumeDAO.updateResume(id, data);
   }
 
-  updateResumeInfo(id: number, data: updateResumeInfoDTO) {
+  updateResumeInfo(id: number, data: UpdateResumeInfoDto) {
     return this.resumeDAO.updateResumeInfo(id, data);
   }
 
-  updateEducation(id: number, data: updateEducationDTO) {
+  updateEducation(id: number, data: UpdateEducationDto) {
     return this.resumeDAO.updateEducation(id, data);
   }
 
-  updateCareer(id: number, data: updateCareerDTO) {
+  updateCareer(id: number, data: UpdateCareerDto) {
     return this.resumeDAO.updateCareer(id, data);
   }
 
-  updateActivity(id: number, data: updateActivityDTO) {
+  updateActivity(id: number, data: UpdateActivityDto) {
     return this.resumeDAO.updateActivity(id, data);
   }
 
-  updateAward(id: number, data: updateAwardDTO) {
+  updateAward(id: number, data: UpdateAwardDto) {
     return this.resumeDAO.updateAward(id, data);
   }
 
-  updateMyVideo(id: number, data: updateMyVideoDTO) {
+  updateMyVideo(id: number, data: UpdateMyVideoDto) {
     return this.resumeDAO.updateMyVideo(id, data);
   }
 
-  updateHelperVideo(id: number, data: updateHelperVideoDTO) {
+  updateHelperVideo(id: number, data: UpdateHelperVideoDto) {
     return this.resumeDAO.updateHelperVideo(id, data);
   }
 
-  updatePreference(id: number, data: updatePreferenceDTO) {
+  updatePreference(id: number, data: UpdatePreferenceDto) {
     return this.resumeDAO.updatePreference(id, data);
   }
 
-  updatePreferenceJob(id: number, data: updatePreferenceJobDTO) {
+  updatePreferenceJob(id: number, data: UpdatePreferenceJobDto) {
     return this.resumeDAO.updatePreferenceJob(id, data);
   }
 
-  updatePreferenceLocation(id: number, data: updatePreferenceLocationDTO) {
+  updatePreferenceLocation(id: number, data: UpdatePreferenceLocationDto) {
     return this.resumeDAO.updatePreferenceLocation(id, data);
   }
 

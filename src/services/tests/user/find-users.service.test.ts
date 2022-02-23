@@ -45,8 +45,8 @@ describe("findUsers Test", () => {
   it("If Not Found return undefined", async () => {
     const email1 = "ehgks00@gmail.com";
     const email2 = "ehgks0083@gmail.com";
-    await userService.createUser(email1);
-    await userService.createUser(email2);
+    await userService.createUserBySocial(email1);
+    await userService.createUserBySocial(email2);
 
     const spy = jest.spyOn(userService, "findUsers");
 

@@ -41,23 +41,3 @@ export class UnauthorizedError extends ExError {
     this.name = name;
   }
 }
-
-export class DbError extends Error {
-  constructor(message?: string) {
-    super(message);
-    const { name, prototype } = new.target;
-
-    Object.setPrototypeOf(this, prototype);
-    this.name = name;
-  }
-}
-
-export class DuplicateError extends DbError {
-  constructor(message?: string) {
-    super(message);
-    const { name, prototype } = new.target;
-
-    Object.setPrototypeOf(this, prototype);
-    this.name = name;
-  }
-}

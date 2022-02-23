@@ -9,12 +9,12 @@ beforeAll(async () => {
   await Container.get(MySQL).connect();
 });
 
-beforeEach(async () => {
-  const email = "ehgks0083@gmail.com";
+// beforeEach(async () => {
+//   const email = "ehgks0083@gmail.com";
 
-  const userService = Container.get(UserService);
-  await userService.createUser(email);
-});
+//   const userService = Container.get(UserService);
+//   await userService.createUser(email);
+// });
 
 afterEach(async () => {
   const conn = await Container.get(MySQL).getConnection();
@@ -40,10 +40,26 @@ afterAll(async () => {
 describe("updateMyProfile test", () => {
   const URL = "/api/v1/user";
 
+  it("PATCH '/profile', If no body, return 204", async () => {
+    const email = "ehgks0083@gmail.com";
+
+    const userService = Container.get(UserService);
+    await userService.createUserBySocial(email);
+
+    const res = await request(await startApp()).patch(`${URL}/profile`);
+
+    expect(res.status).toBe(401);
+  });
+
   it("PATCH '/profile',If Update Successful, return 204", async () => {
+    const email = "ehgks0083@gmail.com";
+
+    const userService = Container.get(UserService);
+    await userService.createUserBySocial(email);
+
     const res = await request(await startApp())
       .patch(`${URL}/profile`)
-      .send({ name: "DoHan Kim" });
+      .send({ profile: { name: "DoHan Kim" } });
 
     expect(res.status).toBe(204);
   });

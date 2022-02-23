@@ -37,7 +37,7 @@ describe("deleteActivity Test", () => {
   it("If success return affectedRows", async () => {
     const {
       user: { insertId },
-    } = await userService.createUser("ehgks0083@gmail.com");
+    } = await userService.createUserBySocial("ehgks0083@gmail.com");
     const data = newResumeFactory();
     await resumeService.createResume(insertId, data);
 

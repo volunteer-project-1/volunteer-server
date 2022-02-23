@@ -22,7 +22,7 @@ export default () => {
         const user = await userService.findUserByEmail(email);
 
         if (!user) {
-          await userService.createUser(email);
+          await userService.createUserBySocial(email);
           const createdUser = await userService.findUserByEmail(email);
 
           return cb(null, createdUser);

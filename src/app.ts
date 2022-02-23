@@ -7,7 +7,7 @@ import passport from "passport";
 import session from "express-session";
 import cors from "cors";
 import routes from "./router";
-import { DbError, ExError, logger } from "./utils";
+import { ExError, logger } from "./utils";
 import { API_PREFIX, CORS_CONFIG, isProd, SESSION_SECRET } from "./config";
 import { loggingReq, mockAuthenticateUser } from "./middlewares";
 import passportConfig from "./passports";
@@ -28,18 +28,20 @@ export async function startApp() {
   if (!isProd) {
     app.use(mockAuthenticateUser);
   }
-  if (isProd) {
-    app.use(loggingReq);
-  }
+  app.use(loggingReq);
+
+  //   if (isProd) {
+  //     app.use(loggingReq);
+  //   }
 
   app.get("/health", (_, res) => {
     res.send("ok");
   });
 
-  app.post("/health2", (req, res) => {
-    const body = req.body;
-    res.json({ body });
-  });
+  //   app.post("/health2", (req, res) => {
+  //     const body = req.body;
+  //     res.json({ body });
+  //   });
 
   app.use(API_PREFIX, routes);
 
@@ -56,24 +58,17 @@ export async function startApp() {
 
       return;
     }
-
-    if (err instanceof DbError) {
+    if (err.sqlMessage || err.sqlState || err.sql) {
+      logger.error(colors.blue(JSON.stringify(err)));
       res.status(500);
-      res.json({ name: err.name, message: err.message });
+      res.json({ name: err.code, message: err.sqlMessage, sql: err.sql });
+
       return;
     }
 
     logger.error(colors.red(JSON.stringify(err)));
     res.status(500).json({ message: "SERVER_ERROR" });
   });
-
-  //   app.listen(PORT, () => {
-  //     logger.info(`
-  //         ################################################
-  //         🛡️  Server listening on port: ${PORT} 🛡️
-  //         ################################################
-  //         `);
-  //   });
 
   return app;
 }

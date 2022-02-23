@@ -5,9 +5,6 @@ import type {
   ResultSetHeader,
   RowDataPacket,
 } from "mysql2/promise";
-import colors from "colors";
-import { logger } from "./logger";
-import { DuplicateError } from ".";
 
 type dbDefaults =
   | RowDataPacket[]
@@ -38,11 +35,8 @@ export async function queryTransactionWrapper<T = any>(
     return executedQueries;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    logger.error(colors.blue(JSON.stringify(error)));
     await conn.rollback();
-    if (error.code === "ER_DUP_ENTRY" || error.errno === 1062) {
-      throw new DuplicateError(error.sqlMessage);
-    }
+    throw error;
   } finally {
     conn.release();
   }

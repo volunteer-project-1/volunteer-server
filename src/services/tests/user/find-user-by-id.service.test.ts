@@ -46,7 +46,7 @@ describe("findUserById Test", () => {
 
   it("If success return IUser", async () => {
     const email = "ehgks0083@gmail.com";
-    await userService.createUser(email);
+    await userService.createUserBySocial(email);
 
     const id = 1;
 

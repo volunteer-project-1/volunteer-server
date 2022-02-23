@@ -3,20 +3,19 @@ import { OkPacket } from "mysql2/promise";
 import {
   IUserDAO,
   IUser,
-  ReturnFindMyProfileDTO,
-  UpdateProfileDTO,
-  IUserCreateDTO,
-} from "../types/user";
+  IReturnFindMyProfile,
+  IUpdateProfile,
+} from "../types";
 import { queryTransactionWrapper } from "../utils";
 import { findOneOrWhole, insert, MySQL, update } from "../db";
-import { ReturnFindMyProfileDTO, UpdateProfileDTO } from "../dtos";
 import { USER_METAS_TABLE, USER_PROFILE_TABLE, USER_TABLE } from "../constants";
+import { CreateUserByLocalDto } from "../dtos";
 
 @Service()
 export class UserDAO implements IUserDAO {
   constructor(private readonly mysql: MySQL) {}
 
-  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
+  async findMyProfile(id: number): Promise<IReturnFindMyProfile> {
     const pool = this.mysql.getPool();
 
     const subQuery1 = `
@@ -49,10 +48,10 @@ export class UserDAO implements IUserDAO {
       pool
     )();
 
-    return rows[0] as ReturnFindMyProfileDTO;
+    return rows[0] as IReturnFindMyProfile;
   }
 
-  async updateMyProfile(id: number, body: UpdateProfileDTO) {
+  async updateMyProfile(id: number, { profile }: IUpdateProfile) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -64,7 +63,7 @@ export class UserDAO implements IUserDAO {
     return update(
       {
         query,
-        values: [body, id],
+        values: [profile, id],
       },
       pool
     )();
@@ -98,7 +97,7 @@ export class UserDAO implements IUserDAO {
     return rows[0] as IUser;
   }
 
-  async create(email: string) {
+  async createUserBySocial(email: string) {
     const conn = await this.mysql.getConnection();
 
     const LAST_INSERTED_ID = "@last_inserted_id";
@@ -143,24 +142,57 @@ export class UserDAO implements IUserDAO {
     };
   }
 
-  // :TODO 트랜젝션 제대로 정리
-  async createLocal(input: IUserCreateDTO) {
-    const pool = await this.mysql.getPool();
+  async createUserByLocal({
+    email,
+    password,
+    salt,
+  }: CreateUserByLocalDto & { salt: string }) {
+    const conn = await this.mysql.getConnection();
+
+    const LAST_INSERTED_ID = "@last_inserted_id";
+
     const userQuery = `
         INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
         `;
 
     const createUserQuery = insert(
-      { query: userQuery, values: [input.email, input.password, input.salt] },
-      pool
+      { query: userQuery, values: [email, password, salt] },
+      conn
+    );
+
+    const setLastInsertedIdQuery = insert(
+      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
+      conn
     );
 
     const userMetaQuery = `
-        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
-        `;
+          INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+          `;
 
-    const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
+    const createUserMetaQuery = insert({ query: userMetaQuery }, conn);
 
-    await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
+    const userProfileQuery = `
+              INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+              `;
+
+    const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
+
+    const results = await queryTransactionWrapper(
+      [
+        createUserQuery,
+        setLastInsertedIdQuery,
+        createUserMetaQuery,
+        createUserProfileQuery,
+      ],
+      conn
+    );
+
+    const resultsOkPacket = results!.map((result) => result[0]);
+
+    return {
+      user: resultsOkPacket[0],
+      meta: resultsOkPacket[2],
+      profile: resultsOkPacket[3],
+    };
   }
 }

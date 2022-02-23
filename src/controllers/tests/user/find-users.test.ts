@@ -40,8 +40,8 @@ describe("findUsers test", () => {
   });
 
   it("GET '/', If Users Founded, return 200", async () => {
-    await userService.createUser("ehgks0083@gmail.com");
-    await userService.createUser("ehgks00@gmail.com");
+    await userService.createUserBySocial("ehgks0083@gmail.com");
+    await userService.createUserBySocial("ehgks00@gmail.com");
 
     const res = await request(await startApp()).get(`${URL}`);
 

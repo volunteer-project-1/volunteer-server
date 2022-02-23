@@ -4,7 +4,7 @@ import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { UserService } from "../..";
-import { UpdateProfileDTO } from "../../../dtos";
+import { IUpdateProfile } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -35,11 +35,13 @@ describe("updateMyProfile Test", () => {
   const userService = Container.get(UserService);
   it("If success return {affectedRows: 1}", async () => {
     const email = "ehgks0083@gmail.com";
-    await userService.createUser(email);
+    await userService.createUserBySocial(email);
 
     const id = 1;
-    const birthday = new Date();
-    const data: UpdateProfileDTO = { name: "Lee", address: "강서구", birthday };
+    const birthday = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const data: IUpdateProfile = {
+      profile: { name: "Lee", address: "강서구", birthday },
+    };
 
     const spy = jest.spyOn(userService, "updateMyProfile");
 

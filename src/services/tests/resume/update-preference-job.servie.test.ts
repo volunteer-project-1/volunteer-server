@@ -5,7 +5,7 @@ import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { ResumeService, UserService } from "../..";
 import { newResumeFactory } from "../../../factory";
-import { updatePreferenceJobDTO } from "../../../dtos";
+import { IUpdatePreferenceJob } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -38,13 +38,13 @@ describe("updatePreferenceJob Test", () => {
   it("If success return changedRows", async () => {
     const {
       user: { insertId },
-    } = await userService.createUser("ehgks0083@gmail.com");
+    } = await userService.createUserBySocial("ehgks0083@gmail.com");
     const data = newResumeFactory();
     await resumeService.createResume(insertId, data);
 
     const spy = jest.spyOn(resumeService, "updatePreferenceJob");
 
-    const updatedData: updatePreferenceJobDTO = {
+    const updatedData: IUpdatePreferenceJob = {
       preferenceJob: { name: "수정된 직업 이름" },
     };
 

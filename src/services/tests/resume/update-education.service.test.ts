@@ -5,7 +5,7 @@ import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { ResumeService, UserService } from "../..";
 import { newResumeFactory } from "../../../factory";
-import { updateEducationDTO } from "../../../dtos";
+import { IUpdateEducation } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -38,13 +38,13 @@ describe("updateEducation Test", () => {
   it("If success return changedRows", async () => {
     const {
       user: { insertId },
-    } = await userService.createUser("ehgks0083@gmail.com");
+    } = await userService.createUserBySocial("ehgks0083@gmail.com");
     const data = newResumeFactory();
     await resumeService.createResume(insertId, data);
 
     const spy = jest.spyOn(resumeService, "updateEducation");
 
-    const updatedData: updateEducationDTO = {
+    const updatedData: IUpdateEducation = {
       education: { school_name: "수정된 학교 이름" },
     };
 

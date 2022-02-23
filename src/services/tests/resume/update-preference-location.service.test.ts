@@ -5,7 +5,7 @@ import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { ResumeService, UserService } from "../..";
 import { newResumeFactory } from "../../../factory";
-import { updatePreferenceLocationDTO } from "../../../dtos";
+import { IUpdatePreferenceLocation } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -38,13 +38,13 @@ describe("updatePreferenceLocation Test", () => {
   it("If success return changedRows", async () => {
     const {
       user: { insertId },
-    } = await userService.createUser("ehgks0083@gmail.com");
+    } = await userService.createUserBySocial("ehgks0083@gmail.com");
     const data = newResumeFactory();
     await resumeService.createResume(insertId, data);
 
     const spy = jest.spyOn(resumeService, "updatePreferenceLocation");
 
-    const updatedData: updatePreferenceLocationDTO = {
+    const updatedData: IUpdatePreferenceLocation = {
       preferenceLocation: { sido: "경기도" },
     };
 
@@ -62,13 +62,13 @@ describe("updatePreferenceLocation Test", () => {
   it("If the results are the same as the previous data, return { affectedRows: 1 ,changedRows: 0}", async () => {
     const {
       user: { insertId },
-    } = await userService.createUser("ehgks0083@gmail.com");
+    } = await userService.createUserBySocial("ehgks0083@gmail.com");
     const data = newResumeFactory();
     await resumeService.createResume(insertId, data);
 
     const spy = jest.spyOn(resumeService, "updatePreferenceLocation");
 
-    const updatedData: updatePreferenceLocationDTO = {
+    const updatedData: IUpdatePreferenceLocation = {
       preferenceLocation: { sido: "서울시" },
     };
 

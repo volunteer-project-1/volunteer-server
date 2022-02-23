@@ -3,21 +3,25 @@ import { FieldPacket, OkPacket, ResultSetHeader } from "mysql2/promise";
 import { DefaultTime } from ".";
 import { DISABLILITY_LEVEL, DISABLILITY_TYPE } from "../constants";
 import {
-  createResumeDTO,
-  findResumeDTO,
-  updateActivityDTO,
-  updateAwardDTO,
-  updateCareerDTO,
-  updateEducationDTO,
-  updateHelperVideoDTO,
-  updateMyVideoDTO,
-  updatePreferenceDTO,
-  updatePreferenceJobDTO,
-  updatePreferenceLocationDTO,
-  updateResumeDTO,
-  updateResumeInfoDTO,
+  CreateResumeDto,
+  UpdateResumeDto,
+  UpdateAwardDto,
+  UpdateCareerDto,
+  UpdateEducationDto,
+  UpdateHelperVideoDto,
+  UpdateMyVideoDto,
+  UpdatePreferenceDto,
+  UpdatePreferenceJobDto,
+  UpdatePreferenceLocationDto,
+  UpdateResumeInfoDto,
+  UpdateActivityDto,
 } from "../dtos";
 
+export type DisabilityLevel = typeof DISABLILITY_LEVEL[number];
+export type DisabilityType = typeof DISABLILITY_TYPE[number];
+export type Sex = "남" | "여";
+
+// 기본 타입
 export interface IResume extends DefaultTime {
   id: number;
   title: string;
@@ -25,17 +29,11 @@ export interface IResume extends DefaultTime {
   user_id: number;
 }
 
-type DisabilityLevel = typeof DISABLILITY_LEVEL[number];
-
-type DisabilityType = typeof DISABLILITY_TYPE[number];
-
-type Sex = "남" | "여";
-
 export interface IResumeInfo {
   id: number;
   resume_id: number;
   name: string;
-  birthday: Date;
+  birthday: string;
   phone_number: string;
   email: string;
   sido: string;
@@ -50,8 +48,8 @@ export interface IEducation {
   resume_id: number;
   type: string;
   school_name: string;
-  graduation_year: Date;
-  admission_year: Date;
+  graduation_year: string;
+  admission_year: string;
   is_graduated: boolean;
   major: string;
   credit: number;
@@ -64,7 +62,7 @@ export interface ICareers {
   department: string;
   position: string;
   task: string;
-  joined_at: Date;
+  joined_at: string;
 }
 
 export interface IActivity {
@@ -78,8 +76,8 @@ export interface IAward {
   id: number;
   resume_id: number;
   institute: string;
-  started_at: Date;
-  finished_at: Date;
+  started_at: string;
+  finished_at: string;
 }
 
 export interface IMyVideo {
@@ -114,69 +112,138 @@ export interface IPreferenceJob {
   name: string;
 }
 
+// dto 타입
+
+export interface ICreateResume {
+  resume: Omit<IResume, "id" | "user_id">;
+  resumeInfo: Omit<IResumeInfo, "id" | "resume_id">;
+  educations: Omit<IEducation, "id" | "resume_id">[];
+  careers: Omit<ICareers, "id" | "resume_id">[];
+  activities: Omit<IActivity, "id" | "resume_id">[];
+  awards: Omit<IAward, "id" | "resume_id">[];
+  myVideo: Omit<IMyVideo, "id" | "resume_id">;
+  helperVideo: Omit<IHelperVideo, "id" | "resume_id">;
+  preference: Omit<IPreference, "id" | "resume_id"> & {
+    preferenceLocations: Omit<IPreferenceLocation, "id" | "preference_id">[];
+    preferenceJobs: Omit<IPreferenceJob, "id" | "preference_id">[];
+  };
+}
+
+export interface IUpdateResume {
+  resume: Partial<Omit<IResume, "id" | "user_id">>;
+}
+export interface IUpdateResumeInfo {
+  resumeInfo: Partial<Omit<IResumeInfo, "id" | "resume_id">>;
+}
+export interface IUpdateEducation {
+  education: Partial<Omit<IEducation, "id" | "resume_id">>;
+}
+export interface IUpdateCareer {
+  career: Partial<Omit<ICareers, "id" | "resume_id">>;
+}
+export interface IUpdateActivity {
+  activity: Partial<Omit<IActivity, "id" | "resume_id">>;
+}
+export interface IUpdateAward {
+  award: Partial<Omit<IAward, "id" | "resume_id">>;
+}
+export interface IUpdateMyVideo {
+  myVideo: Partial<Omit<IMyVideo, "id" | "resume_id">>;
+}
+export interface IUpdateHelperVideo {
+  helperVideo: Partial<Omit<IHelperVideo, "id" | "resume_id">>;
+}
+
+export interface IUpdatePreference {
+  preference: Partial<Omit<IPreference, "id" | "resume_id">>;
+}
+export interface IUpdatePreferenceJob {
+  preferenceJob: Partial<Omit<IPreferenceJob, "id" | "preference_id">>;
+}
+export interface IUpdatePreferenceLocation {
+  preferenceLocation: Partial<
+    Omit<IPreferenceLocation, "id" | "preference_id">
+  >;
+}
+
+export interface IFindResume extends Omit<IResume, "user_id"> {
+  educations: IEducation[];
+  careers: ICareers[];
+  activities: IActivity[];
+  awards: IAward[];
+  myVidoe: IMyVideo;
+  helperVideo: IHelperVideo;
+  preference: IPreference & {
+    preferenceJobs: IPreferenceJob[];
+    preferenceLocations: IPreferenceLocation[];
+  };
+}
+
+// dao
+
 export interface IResumeDAO {
   createResume: (
     userId: number,
-    data: createResumeDTO
+    data: CreateResumeDto
   ) => Promise<{ resume: OkPacket }>;
-  findResumeById: (id: number) => Promise<findResumeDTO>;
+  findResumeById: (id: number) => Promise<IFindResume>;
   updateResume: (
     id: number,
-    data: createResumeDTO
+    data: UpdateResumeDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteResume: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateResumeInfo: (
     id: number,
-    data: updateResumeInfoDTO
+    data: UpdateResumeInfoDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteResumeInfo: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateEducation: (
     id: number,
-    data: updateEducationDTO
+    data: UpdateEducationDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteEducation: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateCareer: (
     id: number,
-    data: updateCareerDTO
+    data: UpdateCareerDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteCareer: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateActivity: (
     id: number,
-    data: updateActivityDTO
+    data: UpdateActivityDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteActivity: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateAward: (
     id: number,
-    data: updateAwardDTO
+    data: UpdateAwardDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteAward: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateMyVideo: (
     id: number,
-    data: updateMyVideoDTO
+    data: UpdateMyVideoDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteMyVideo: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateHelperVideo: (
     id: number,
-    data: updateHelperVideoDTO
+    data: UpdateHelperVideoDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteHelperVideo: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updatePreference: (
     id: number,
-    data: updatePreferenceDTO
+    data: UpdatePreferenceDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deletePreference: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updatePreferenceJob: (
     id: number,
-    data: updatePreferenceJobDTO
+    data: UpdatePreferenceJobDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deletePreferenceJob: (
     id: number
@@ -184,7 +251,7 @@ export interface IResumeDAO {
 
   updatePreferenceLocation: (
     id: number,
-    data: updatePreferenceLocationDTO
+    data: UpdatePreferenceLocationDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deletePreferenceLocation: (
     id: number
@@ -194,66 +261,66 @@ export interface IResumeDAO {
 export interface IResumeService {
   createResume: (
     id: number,
-    data: createResumeDTO
+    data: CreateResumeDto
   ) => Promise<{ resume: OkPacket }>;
-  findResumeById: (resumeId: number) => Promise<findResumeDTO>;
+  findResumeById: (resumeId: number) => Promise<IFindResume>;
   updateResume: (
     resumeId: number,
-    data: updateResumeDTO
+    data: UpdateResumeDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteResume: (resumeId: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateResumeInfo: (
     id: number,
-    data: updateResumeInfoDTO
+    data: UpdateResumeInfoDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteResumeInfo: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateEducation: (
     id: number,
-    data: updateEducationDTO
+    data: UpdateEducationDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteEducation: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateCareer: (
     id: number,
-    data: updateCareerDTO
+    data: UpdateCareerDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteCareer: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateActivity: (
     id: number,
-    data: updateActivityDTO
+    data: UpdateActivityDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteActivity: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateAward: (
     id: number,
-    data: updateAwardDTO
+    data: UpdateAwardDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteAward: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateMyVideo: (
     id: number,
-    data: updateMyVideoDTO
+    data: UpdateMyVideoDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteMyVideo: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updateHelperVideo: (
     id: number,
-    data: updateHelperVideoDTO
+    data: UpdateHelperVideoDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deleteHelperVideo: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updatePreference: (
     id: number,
-    data: updatePreferenceDTO
+    data: UpdatePreferenceDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deletePreference: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 
   updatePreferenceJob: (
     id: number,
-    data: updatePreferenceJobDTO
+    data: UpdatePreferenceJobDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deletePreferenceJob: (
     id: number
@@ -261,7 +328,7 @@ export interface IResumeService {
 
   updatePreferenceLocation: (
     id: number,
-    data: updatePreferenceLocationDTO
+    data: UpdatePreferenceLocationDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   deletePreferenceLocation: (
     id: number

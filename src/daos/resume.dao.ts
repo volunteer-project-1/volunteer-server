@@ -2,21 +2,23 @@ import { Service } from "typedi";
 import { OkPacket } from "mysql2/promise";
 import { queryTransactionWrapper } from "../utils";
 import { MySQL, findOneOrWhole, insert, update } from "../db";
-import { IResumeDAO } from "../types";
 import {
-  createResumeDTO,
-  findResumeDTO,
-  updateActivityDTO,
-  updateAwardDTO,
-  updateCareerDTO,
-  updateEducationDTO,
-  updateHelperVideoDTO,
-  updateMyVideoDTO,
-  updatePreferenceDTO,
-  updatePreferenceJobDTO,
-  updatePreferenceLocationDTO,
-  updateResumeDTO,
-  updateResumeInfoDTO,
+  ICreateResume,
+  IFindResume,
+  IResumeDAO,
+  IUpdateResume,
+} from "../types";
+import {
+  UpdateActivityDto,
+  UpdateAwardDto,
+  UpdateCareerDto,
+  UpdateEducationDto,
+  UpdateHelperVideoDto,
+  UpdateMyVideoDto,
+  UpdatePreferenceDto,
+  UpdatePreferenceJobDto,
+  UpdatePreferenceLocationDto,
+  UpdateResumeInfoDto,
 } from "../dtos";
 import {
   RESUME_TABLE,
@@ -49,7 +51,7 @@ export class ResumeDAO implements IResumeDAO {
       myVideo,
       helperVideo,
       preference: { preferenceJobs, preferenceLocations, ...preference },
-    }: createResumeDTO
+    }: ICreateResume
   ) {
     const conn = await this.mysql.getConnection();
 
@@ -218,7 +220,7 @@ export class ResumeDAO implements IResumeDAO {
     };
   }
 
-  async findResumeById(resumeId: number): Promise<findResumeDTO> {
+  async findResumeById(resumeId: number): Promise<IFindResume> {
     const pool = this.mysql.getPool();
 
     const subQuery1 = `
@@ -299,10 +301,10 @@ export class ResumeDAO implements IResumeDAO {
     `;
     const [rows] = await findOneOrWhole({ query, values: [resumeId] }, pool)();
 
-    return rows[0] as findResumeDTO;
+    return rows[0] as IFindResume;
   }
 
-  updateResume(id: number, { resume }: updateResumeDTO) {
+  updateResume(id: number, { resume }: IUpdateResume) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -313,7 +315,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [resume, id] }, pool)();
   }
 
-  updateResumeInfo(id: number, { resumeInfo }: updateResumeInfoDTO) {
+  updateResumeInfo(id: number, { resumeInfo }: UpdateResumeInfoDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -325,7 +327,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [resumeInfo, id] }, pool)();
   }
 
-  updateEducation(id: number, { education }: updateEducationDTO) {
+  updateEducation(id: number, { education }: UpdateEducationDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -336,7 +338,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [education, id] }, pool)();
   }
 
-  updateCareer(id: number, { career }: updateCareerDTO) {
+  updateCareer(id: number, { career }: UpdateCareerDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -347,7 +349,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [career, id] }, pool)();
   }
 
-  updateActivity(id: number, { activity }: updateActivityDTO) {
+  updateActivity(id: number, { activity }: UpdateActivityDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -358,7 +360,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [activity, id] }, pool)();
   }
 
-  updateAward(id: number, { award }: updateAwardDTO) {
+  updateAward(id: number, { award }: UpdateAwardDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -369,7 +371,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [award, id] }, pool)();
   }
 
-  updateMyVideo(id: number, { myVideo }: updateMyVideoDTO) {
+  updateMyVideo(id: number, { myVideo }: UpdateMyVideoDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -380,7 +382,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [myVideo, id] }, pool)();
   }
 
-  updateHelperVideo(id: number, { helperVideo }: updateHelperVideoDTO) {
+  updateHelperVideo(id: number, { helperVideo }: UpdateHelperVideoDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -391,7 +393,7 @@ export class ResumeDAO implements IResumeDAO {
     return update({ query, values: [helperVideo, id] }, pool)();
   }
 
-  updatePreference(id: number, { preference }: updatePreferenceDTO) {
+  updatePreference(id: number, { preference }: UpdatePreferenceDto) {
     const pool = this.mysql.getPool();
 
     const query = `
@@ -404,7 +406,7 @@ export class ResumeDAO implements IResumeDAO {
 
   updatePreferenceLocation(
     id: number,
-    { preferenceLocation }: updatePreferenceLocationDTO
+    { preferenceLocation }: UpdatePreferenceLocationDto
   ) {
     const pool = this.mysql.getPool();
 
@@ -422,7 +424,7 @@ export class ResumeDAO implements IResumeDAO {
     )();
   }
 
-  updatePreferenceJob(id: number, { preferenceJob }: updatePreferenceJobDTO) {
+  updatePreferenceJob(id: number, { preferenceJob }: UpdatePreferenceJobDto) {
     const pool = this.mysql.getPool();
 
     const query = `

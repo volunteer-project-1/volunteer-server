@@ -36,7 +36,7 @@ describe("createResume Test", () => {
   const resumeService = Container.get(ResumeService);
   it("If success return {affectedRows: 1, serverStatus: 3}", async () => {
     const email = "ehgks0083@gmail.com";
-    const { user } = await userService.createUser(email);
+    const { user } = await userService.createUserBySocial(email);
 
     const data = newResumeFactory();
 
@@ -47,7 +47,7 @@ describe("createResume Test", () => {
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(user.insertId, data);
 
-    expect(resume.insertId).toBe(user.insertId);
+    expect(resume.insertId).toBe(1);
     expect(resume.affectedRows).toBe(1);
   });
 });
