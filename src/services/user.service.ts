@@ -39,8 +39,6 @@ export class UserService implements IUserService {
   }
 
   async createUserLocal(email: string, password: string) {
-    console.log("input password");
-    console.log(password);
     const saltAndHash = await generateHashPassword(password);
 
     const input: IUserCreateDTO = {
