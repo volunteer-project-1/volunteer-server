@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: seeme_test_db
+    image: mysql:8
+    restart: unless-stopped
+    cap_add:
+      - SYS_NICE
+    ports:
+      - 3307:3306
+    environment:
+      - TZ=Asia/Seoul
+    env_file:
+      - ../.env.test
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    # volumes:
+    #   - ./dist:/app/dist

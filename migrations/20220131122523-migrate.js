@@ -53,7 +53,7 @@ exports.up = function (db) {
 
       CREATE TABLE if not exists resumes (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        title VARCHAR(100) NOT NULL,
+        title VARCHAR(100) NOT NULL UNIQUE,
         content VARCHAR(255),
         created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
@@ -66,7 +66,7 @@ exports.up = function (db) {
       CREATE TABLE if not exists resume_infos (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(20),
-        birthday DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        birthday timestamp(3) NOT NULL,
         phone_number VARCHAR(20),
         email VARCHAR(20),
         sido VARCHAR(20),

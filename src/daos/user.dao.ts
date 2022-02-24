@@ -1,36 +1,44 @@
 import { Service } from "typedi";
+import { OkPacket } from "mysql2/promise";
 import {
   IUserDAO,
   IUser,
-  ReturnFindMyProfileDTO,
-  UpdateProfileDTO,
-  IUserCreateDTO,
-} from "../types/user";
-import { MySQL, queryTransactionWrapper } from "../utils";
-import { findOneOrWhole, insert, update } from "../db";
-
-const USER_TABLE = "users";
-const USER_METAS_TABLE = "user_metas";
-const USER_PROFILE = "profiles";
+  IReturnFindMyProfile,
+  IUpdateProfile,
+} from "../types";
+import { queryTransactionWrapper } from "../utils";
+import { findOneOrWhole, insert, MySQL, update } from "../db";
+import { USER_METAS_TABLE, USER_PROFILE_TABLE, USER_TABLE } from "../constants";
+import { CreateUserByLocalDto } from "../dtos";
 
 @Service()
 export class UserDAO implements IUserDAO {
   constructor(private readonly mysql: MySQL) {}
 
-  async findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
-    const pool = await this.mysql.getPool();
+  async findMyProfile(id: number): Promise<IReturnFindMyProfile> {
+    const pool = this.mysql.getPool();
+
+    const subQuery1 = `
+        SELECT user_id, json_object('id', M.id, 'is_verified', M.is_verified, 'type', M.type) AS user_meta
+        FROM ${USER_METAS_TABLE} AS M
+        GROUP BY id, user_id
+    `;
+    const subQuery2 = `
+        SELECT user_id, json_object('id', P.id, 'name', P.name, 'address', P.address, 'birthday', P.birthday) AS profile
+        FROM ${USER_PROFILE_TABLE} AS P
+        GROUP BY id, user_id
+    `;
+
     const query = `
-        Select 
-            U.id, U.email, 
-            M.id AS user_meta_id, M.is_verified, M.type, 
-            P.name, P.address, P.birthday
-        FROM ${USER_TABLE} AS U 
-        LEFT JOIN ${USER_METAS_TABLE} AS M 
-            ON U.id = M.user_id 
-        LEFT JOIN ${USER_PROFILE} AS P 
-            ON U.id = P.user_id 
-        WHERE U.id = ?
-        `;
+        SELECT 
+            U.id, U.email,
+            m.user_meta,
+            p.profile
+        FROM ${USER_TABLE} AS U
+        JOIN (${subQuery1}) AS m ON m.user_id = U.id
+        JOIN (${subQuery2}) AS p ON p.user_id = U.id
+        WHERE U.id = ?;
+    `;
 
     const [rows] = await findOneOrWhole(
       {
@@ -40,29 +48,29 @@ export class UserDAO implements IUserDAO {
       pool
     )();
 
-    return rows[0] as ReturnFindMyProfileDTO;
+    return rows[0] as IReturnFindMyProfile;
   }
 
-  async updateMyProfile(id: number, body: UpdateProfileDTO) {
-    const pool = await this.mysql.getPool();
+  async updateMyProfile(id: number, { profile }: IUpdateProfile) {
+    const pool = this.mysql.getPool();
 
     const query = `
-        UPDATE ${USER_PROFILE} 
+        UPDATE ${USER_PROFILE_TABLE} 
         SET ?
         WHERE user_id=?
     `;
 
-    await update(
+    return update(
       {
         query,
-        values: [body, id],
+        values: [profile, id],
       },
       pool
     )();
   }
 
   async findOneById(id: number): Promise<IUser | undefined> {
-    const pool = await this.mysql.getPool();
+    const pool = this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE} WHERE id=?`;
     const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
 
@@ -70,15 +78,18 @@ export class UserDAO implements IUserDAO {
   }
 
   async find(): Promise<IUser[] | undefined> {
-    const pool = await this.mysql.getPool();
+    const pool = this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE}`;
     const [rows] = await findOneOrWhole({ query }, pool)();
+    if (rows.length === 0) {
+      return undefined;
+    }
 
     return rows as IUser[];
   }
 
   async findByEmail(email: string): Promise<IUser | undefined> {
-    const pool = await this.mysql.getPool();
+    const pool = this.mysql.getPool();
     const query = `Select * FROM ${USER_TABLE} WHERE email=?`;
 
     const [rows] = await findOneOrWhole({ query, values: [email] }, pool)();
@@ -86,41 +97,102 @@ export class UserDAO implements IUserDAO {
     return rows[0] as IUser;
   }
 
-  async create(email: string) {
-    const pool = await this.mysql.getPool();
+  async createUserBySocial(email: string) {
+    const conn = await this.mysql.getConnection();
+
+    const LAST_INSERTED_ID = "@last_inserted_id";
     const userQuery = `
         INSERT INTO ${USER_TABLE} (email) VALUES(?);
         `;
 
-    const createUserQuery = insert({ query: userQuery, values: [email] }, pool);
+    const createUserQuery = insert({ query: userQuery, values: [email] }, conn);
+    const setLastInsertedIdQuery = insert(
+      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
+      conn
+    );
 
     const userMetaQuery = `
-        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
+        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
         `;
 
-    const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
+    const createUserMetaQuery = insert({ query: userMetaQuery }, conn);
 
-    await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
+    const userProfileQuery = `
+            INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+            `;
+
+    const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
+
+    const results = await queryTransactionWrapper<OkPacket>(
+      [
+        createUserQuery,
+        setLastInsertedIdQuery,
+        createUserMetaQuery,
+        createUserProfileQuery,
+      ],
+      conn
+    );
+
+    const resultsOkPacket = results!.map((result) => result[0]);
+
+    return {
+      user: resultsOkPacket[0],
+      meta: resultsOkPacket[2],
+      profile: resultsOkPacket[3],
+    };
   }
 
-  // :TODO 트랜젝션 제대로 정리
-  async createLocal(input: IUserCreateDTO) {
-    const pool = await this.mysql.getPool();
+  async createUserByLocal({
+    email,
+    password,
+    salt,
+  }: CreateUserByLocalDto & { salt: string }) {
+    const conn = await this.mysql.getConnection();
+
+    const LAST_INSERTED_ID = "@last_inserted_id";
+
     const userQuery = `
         INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
         `;
 
     const createUserQuery = insert(
-      { query: userQuery, values: [input.email, input.password, input.salt] },
-      pool
+      { query: userQuery, values: [email, password, salt] },
+      conn
+    );
+
+    const setLastInsertedIdQuery = insert(
+      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
+      conn
     );
 
     const userMetaQuery = `
-        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
-        `;
+          INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+          `;
 
-    const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
+    const createUserMetaQuery = insert({ query: userMetaQuery }, conn);
 
-    await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
+    const userProfileQuery = `
+              INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+              `;
+
+    const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
+
+    const results = await queryTransactionWrapper(
+      [
+        createUserQuery,
+        setLastInsertedIdQuery,
+        createUserMetaQuery,
+        createUserProfileQuery,
+      ],
+      conn
+    );
+
+    const resultsOkPacket = results!.map((result) => result[0]);
+
+    return {
+      user: resultsOkPacket[0],
+      meta: resultsOkPacket[2],
+      profile: resultsOkPacket[3],
+    };
   }
 }

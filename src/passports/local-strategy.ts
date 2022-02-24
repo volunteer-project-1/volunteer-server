@@ -15,7 +15,7 @@ export default () => {
       async (email, password, cb) => {
         const foundUser = await userService.findUserByEmail(email);
 
-        if (!foundUser) {
+        if (!foundUser || !foundUser.password || !foundUser.salt) {
           return cb(new NotFoundError("Not Found Email"));
         }
 

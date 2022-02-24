@@ -2,22 +2,22 @@
 import { Response, Request } from "express";
 import { Service } from "typedi";
 import { ResumeService } from "../services";
+import { IResumeController } from "../types";
+import { BadReqError, NotFoundError, validateDto } from "../utils";
 import {
-  createResumeDTO,
-  IResumeController,
-  updateActivityDTO,
-  updateAwardDTO,
-  updateCareerDTO,
-  updateEducationDTO,
-  updateHelperVideoDTO,
-  updateMyVideoDTO,
-  updatePreferenceDTO,
-  updatePreferenceJobDTO,
-  updatePreferenceLocationDTO,
-  updateResumeDTO,
-  updateResumeInfoDTO,
-} from "../types";
-import { BadReqError } from "../utils";
+  CreateResumeDto,
+  UpdateResumeDto,
+  UpdateResumeInfoDto,
+  UpdateEducationDto,
+  UpdateCareerDto,
+  UpdateActivityDto,
+  UpdateAwardDto,
+  UpdateMyVideoDto,
+  UpdateHelperVideoDto,
+  UpdatePreferenceDto,
+  UpdatePreferenceJobDto,
+  UpdatePreferenceLocationDto,
+} from "../dtos";
 
 type ReqParams = {
   id?: string;
@@ -28,140 +28,10 @@ export class ResumeController implements IResumeController {
   constructor(private readonly resumeService: ResumeService) {}
 
   createResume = async (
-    { body, user }: Request<unknown, unknown, createResumeDTO>,
+    { body, user }: Request<unknown, unknown, CreateResumeDto>,
     res: Response
   ) => {
-    // TODO validation pipe 구축
-    if (!body) {
-      throw new BadReqError();
-    }
-
-    const {
-      resume: { title, content },
-      resumeInfo: {
-        name,
-        birthday,
-        phone_number,
-        email,
-        sido,
-        sigungu,
-        disability_level,
-        disability_type,
-        sex,
-      },
-      educations,
-      careers,
-      activities,
-      awards,
-      myVideo,
-      helperVideo,
-      preference: { preferenceJobs, preferenceLocations, ...preference },
-    } = body;
-    if (!title || !content) {
-      throw new BadReqError("Resume");
-    }
-
-    if (
-      !name ||
-      !birthday ||
-      !phone_number ||
-      !email ||
-      !sido ||
-      !sigungu ||
-      !disability_level ||
-      !disability_type ||
-      !sex
-    ) {
-      throw new BadReqError("resumeInfo");
-    }
-    if (!title || !content) {
-      throw new BadReqError("Resume");
-    }
-
-    educations.forEach(
-      ({
-        type,
-        school_name,
-        graduation_year,
-        admission_year,
-        is_graduated,
-        major,
-        credit,
-        total_credit,
-      }) => {
-        if (
-          !type ||
-          !school_name ||
-          !graduation_year ||
-          !admission_year ||
-          !is_graduated ||
-          !major ||
-          !credit ||
-          !total_credit
-        ) {
-          throw new BadReqError("Education");
-        }
-      }
-    );
-    if (!careers) {
-      throw new BadReqError("ICarrer");
-    }
-    careers.forEach(({ company, department, position, task, joined_at }) => {
-      if (!company || !department || !position || !task || !joined_at) {
-        throw new BadReqError("ICarrer");
-      }
-    });
-
-    if (!activities) {
-      throw new BadReqError("IActivity");
-    }
-
-    activities.forEach(({ organization, description }) => {
-      if (!organization || !description) {
-        throw new BadReqError("IActivity");
-      }
-    });
-
-    if (!awards) {
-      throw new BadReqError("IAward");
-    }
-
-    awards.forEach(({ institute, started_at, finished_at }) => {
-      if (!institute || !started_at || !finished_at) {
-        throw new BadReqError("IAward");
-      }
-    });
-    if (!myVideo.url) {
-      throw new BadReqError("IMyVideo");
-    }
-    if (!helperVideo.url) {
-      throw new BadReqError("IHelperVideo");
-    }
-
-    if (!preference.employ_type || !preference.salary) {
-      throw new BadReqError("IPreference");
-    }
-
-    if (!preferenceJobs) {
-      throw new BadReqError("IPreferenceJob");
-    }
-
-    // eslint-disable-next-line no-shadow
-    preferenceJobs.forEach(({ name }) => {
-      if (!name) {
-        throw new BadReqError("IPreferenceJob");
-      }
-    });
-
-    if (!preferenceLocations) {
-      throw new BadReqError("IPreferenceLocation");
-    }
-    // eslint-disable-next-line no-shadow
-    preferenceLocations.forEach(({ sido, sigungu }) => {
-      if (!sido || !sigungu) {
-        throw new BadReqError("IPreferenceLocation");
-      }
-    });
+    await validateDto(new CreateResumeDto(body));
 
     await this.resumeService.createResume(user!.id, body);
 
@@ -179,91 +49,107 @@ export class ResumeController implements IResumeController {
     }
 
     const resume = await this.resumeService.findResumeById(parsedInt);
+    if (!resume) {
+      throw new NotFoundError();
+    }
 
     return res.json({ resume });
   };
 
   updateResumeById = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateResumeDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateResumeDto>,
     res: Response
   ) => {
     const parsedInt = Number(id);
-
     if (!id || !parsedInt) {
       throw new BadReqError();
     }
-    await this.resumeService.updateResume(parsedInt, body);
+
+    await validateDto(new UpdateResumeDto(body));
+
+    const [result] = await this.resumeService.updateResume(parsedInt, body);
+    if (result.affectedRows === 0) {
+      throw new NotFoundError();
+    }
 
     return res.sendStatus(204);
   };
 
   updateResumeInfo = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateResumeInfoDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateResumeInfoDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdateResumeInfoDto(body));
 
     await this.resumeService.updateResumeInfo(parsedId, body);
     return res.sendStatus(204);
   };
 
   updateEducation = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateEducationDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateEducationDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdateEducationDto(body));
 
     await this.resumeService.updateEducation(parsedId, body);
     return res.sendStatus(204);
   };
 
   updateCareer = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateCareerDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateCareerDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdateCareerDto(body));
 
     await this.resumeService.updateCareer(parsedId, body);
     return res.sendStatus(204);
   };
 
   updateActivity = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateActivityDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateActivityDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
-
+    await validateDto(new UpdateActivityDto(body));
     await this.resumeService.updateActivity(parsedId, body);
     return res.sendStatus(204);
   };
 
   updateAward = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateAwardDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateAwardDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdateAwardDto(body));
 
     await this.resumeService.updateAward(parsedId, body);
     return res.sendStatus(204);
   };
 
   updateMyVideo = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateMyVideoDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateMyVideoDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
@@ -271,13 +157,15 @@ export class ResumeController implements IResumeController {
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdateMyVideoDto(body));
 
     await this.resumeService.updateMyVideo(parsedId, body);
     return res.sendStatus(204);
   };
 
   updateHelperVideo = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updateHelperVideoDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdateHelperVideoDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
@@ -285,19 +173,23 @@ export class ResumeController implements IResumeController {
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdateHelperVideoDto(body));
 
     await this.resumeService.updateHelperVideo(parsedId, body);
     return res.sendStatus(204);
   };
 
   updatePreference = async (
-    { params: { id }, body }: Request<ReqParams, unknown, updatePreferenceDTO>,
+    { params: { id }, body }: Request<ReqParams, unknown, UpdatePreferenceDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdatePreferenceDto(body));
 
     await this.resumeService.updatePreference(parsedId, body);
     return res.sendStatus(204);
@@ -307,13 +199,15 @@ export class ResumeController implements IResumeController {
     {
       params: { id },
       body,
-    }: Request<ReqParams, unknown, updatePreferenceJobDTO>,
+    }: Request<ReqParams, unknown, UpdatePreferenceJobDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdatePreferenceJobDto(body));
 
     await this.resumeService.updatePreferenceJob(parsedId, body);
     return res.sendStatus(204);
@@ -323,13 +217,15 @@ export class ResumeController implements IResumeController {
     {
       params: { id },
       body,
-    }: Request<ReqParams, unknown, updatePreferenceLocationDTO>,
+    }: Request<ReqParams, unknown, UpdatePreferenceLocationDto>,
     res: Response
   ) => {
     const parsedId = Number(id);
     if (!parsedId) {
       throw new BadReqError();
     }
+
+    await validateDto(new UpdatePreferenceLocationDto(body));
 
     await this.resumeService.updatePreferenceLocation(parsedId, body);
     return res.sendStatus(204);
@@ -343,7 +239,11 @@ export class ResumeController implements IResumeController {
     if (!parsedId) {
       throw new BadReqError();
     }
-    await this.resumeService.deleteResume(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteResume(parsedId);
+
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -353,7 +253,12 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteResumeInfo(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteResumeInfo(
+      parsedId
+    );
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -363,7 +268,13 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteEducation(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteEducation(
+      parsedId
+    );
+
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -373,7 +284,10 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteCareer(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteCareer(parsedId);
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -383,7 +297,12 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteActivity(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteActivity(
+      parsedId
+    );
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -393,7 +312,10 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteAward(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteAward(parsedId);
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -403,7 +325,10 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteMyVideo(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteMyVideo(parsedId);
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -413,7 +338,12 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deleteHelperVideo(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deleteHelperVideo(
+      parsedId
+    );
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -423,7 +353,12 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deletePreference(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deletePreference(
+      parsedId
+    );
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -433,7 +368,12 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deletePreferenceJob(parsedId);
+    const [{ affectedRows }] = await this.resumeService.deletePreferenceJob(
+      parsedId
+    );
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 
@@ -446,7 +386,12 @@ export class ResumeController implements IResumeController {
       throw new BadReqError();
     }
 
-    await this.resumeService.deletePreferenceLocation(parsedId);
+    const [{ affectedRows }] =
+      await this.resumeService.deletePreferenceLocation(parsedId);
+
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
     return res.sendStatus(204);
   };
 }

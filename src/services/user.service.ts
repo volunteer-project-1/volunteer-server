@@ -3,23 +3,23 @@ import { Service } from "typedi";
 import {
   IUserService,
   IUser,
-  ReturnFindMyProfileDTO,
-  UpdateProfileDTO,
-  IUserCreateDTO,
+  IReturnFindMyProfile,
+  IUpdateProfile,
 } from "../types/user";
 import { UserDAO } from "../daos";
-import { generateHashPassword } from "../utils";
+import { generateHashPassword } from "../utils/hashing-password";
+import { CreateUserByLocalDto } from "../dtos";
 
 @Service()
 export class UserService implements IUserService {
-  constructor(private userDAO: UserDAO) {}
+  constructor(private readonly userDAO: UserDAO) {}
 
-  findMyProfile(id: number): Promise<ReturnFindMyProfileDTO> {
+  findMyProfile(id: number): Promise<IReturnFindMyProfile> {
     return this.userDAO.findMyProfile(id);
   }
 
-  updateMyProfile(id: number, body: UpdateProfileDTO) {
-    return this.userDAO.updateMyProfile(id, body);
+  updateMyProfile(id: number, data: IUpdateProfile) {
+    return this.userDAO.updateMyProfile(id, data);
   }
 
   findUserById(id: number): Promise<IUser | undefined> {
@@ -34,19 +34,19 @@ export class UserService implements IUserService {
     return this.userDAO.findByEmail(email);
   }
 
-  createUser(email: string) {
-    return this.userDAO.create(email);
+  createUserBySocial(email: string) {
+    return this.userDAO.createUserBySocial(email);
   }
 
-  async createUserLocal(email: string, password: string) {
-    const saltAndHash = await generateHashPassword(password);
+  async createUserByLocal({ email, password }: CreateUserByLocalDto) {
+    const { hash: hasedPassword, salt } = await generateHashPassword(password);
 
-    const input: IUserCreateDTO = {
+    const input: CreateUserByLocalDto & { salt: string } = {
       email,
-      password: saltAndHash.hash,
-      salt: saltAndHash.salt,
+      password: hasedPassword,
+      salt,
     };
 
-    return this.userDAO.createLocal(input);
+    return this.userDAO.createUserByLocal(input);
   }
 }

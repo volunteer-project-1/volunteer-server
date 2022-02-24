@@ -1,23 +1,21 @@
 import { Service } from "typedi";
 import { Request, Response } from "express";
-import {
-  IUserController,
-  FindUserByIdDTO,
-  IUser,
-  ReturnFindMyProfileDTO,
-  UpdateProfileDTO,
-} from "../types/user";
-import { BadReqError, NotFoundError } from "../utils";
+import { IUserController, IUser, IReturnFindMyProfile } from "../types";
+import { BadReqError, NotFoundError, validateDto } from "../utils";
 import { UserService } from "../services";
+import { UpdateProfileDto } from "../dtos/user/update-my-profile.dto";
+import { CreateUserByLocalDto } from "../dtos/user/create-user-by-local.dto";
 
 @Service()
 export class UserController implements IUserController {
   constructor(private readonly userService: UserService) {}
 
-  localSignup = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-
-    await this.userService.createUserLocal(email, password);
+  createUserByLocal = async (
+    { body }: Request<unknown, unknown, CreateUserByLocalDto>,
+    res: Response
+  ) => {
+    await validateDto(new CreateUserByLocalDto(body));
+    await this.userService.createUserByLocal(body);
 
     return res.sendStatus(201);
   };
@@ -25,7 +23,7 @@ export class UserController implements IUserController {
   findMyProfile = async (
     { user }: Request,
     res: Response<{
-      user: ReturnFindMyProfileDTO;
+      user: IReturnFindMyProfile;
     }>
   ) => {
     const profile = await this.userService.findMyProfile(user!.id);
@@ -37,19 +35,17 @@ export class UserController implements IUserController {
   };
 
   updateMyProfile = async (
-    { user, body }: Request<unknown, unknown, UpdateProfileDTO>,
+    { user, body }: Request<unknown, unknown, UpdateProfileDto>,
     res: Response
   ) => {
-    if (!body) {
-      throw new BadReqError();
-    }
+    await validateDto(new UpdateProfileDto(body));
     await this.userService.updateMyProfile(user!.id, body);
 
     return res.sendStatus(204);
   };
 
   findUserById = async (
-    { params: { id } }: Request<FindUserByIdDTO>,
+    { params: { id } }: Request,
     res: Response<{ user: IUser }>
   ) => {
     if (!id) {

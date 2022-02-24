@@ -41,15 +41,3 @@ export class UnauthorizedError extends ExError {
     this.name = name;
   }
 }
-
-export class DuplicateError extends ExError {
-  constructor(message?: string) {
-    super(409, message);
-    const { name, prototype } = new.target;
-
-    Object.setPrototypeOf(this, prototype);
-    this.name = name;
-  }
-}
-
-export default ExError;

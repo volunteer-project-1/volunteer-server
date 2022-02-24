@@ -7,9 +7,9 @@ const { combine, timestamp, printf } = format;
 
 const logDir = "logs";
 
-const myFormat = printf((info) => {
-  const { message } = info;
-  const fullMessage = `[#${process.pid}] ${info.timestamp} [${info.level}] ${message}`;
+// eslint-disable-next-line no-shadow
+const myFormat = printf(({ message, timestamp, level }) => {
+  const fullMessage = `[#${process.pid}] ${timestamp} [${level}] ${message}`;
   return fullMessage;
 });
 

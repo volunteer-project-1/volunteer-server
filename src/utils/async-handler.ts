@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-// RequestHandler
 
 /* eslint-disable */
 export const asyncHandler =

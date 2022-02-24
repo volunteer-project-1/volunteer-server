@@ -2,7 +2,7 @@ import type { CorsOptions } from "cors";
 import type { PoolOptions } from "mysql2/promise";
 import type { _StrategyOptionsBase } from "passport-google-oauth20";
 
-const isProd = process.env.NODE_ENV === "production";
+export const isProd = process.env.NODE_ENV === "production";
 export const PORT = process.env.PORT || 3000;
 
 export const CLIENT_DOMAIN =
@@ -19,6 +19,7 @@ export const DB_CONFIG: PoolOptions = isProd
       port: Number(process.env.DB_PORT) || 3306,
       database: process.env.MYSQL_DATABASE || "test",
       password: process.env.DB_PASSWORD || "root",
+      //   dateStrings: ["DATE"],
       connectionLimit: 100,
     };
 
