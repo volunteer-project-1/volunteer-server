@@ -5,8 +5,10 @@ import {
   IUser,
   ReturnFindMyProfileDTO,
   UpdateProfileDTO,
+  IUserCreateDTO,
 } from "../types/user";
 import { UserDAO } from "../daos";
+import { generateHashPassword } from "../utils";
 
 @Service()
 export class UserService implements IUserService {
@@ -34,5 +36,17 @@ export class UserService implements IUserService {
 
   createUser(email: string) {
     return this.userDAO.create(email);
+  }
+
+  async createUserLocal(email: string, password: string) {
+    const saltAndHash = await generateHashPassword(password);
+
+    const input: IUserCreateDTO = {
+      email,
+      password: saltAndHash.hash,
+      salt: saltAndHash.salt,
+    };
+
+    return this.userDAO.createLocal(input);
   }
 }

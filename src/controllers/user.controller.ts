@@ -14,6 +14,14 @@ import { UserService } from "../services";
 export class UserController implements IUserController {
   constructor(private readonly userService: UserService) {}
 
+  localSignup = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    await this.userService.createUserLocal(email, password);
+
+    return res.sendStatus(201);
+  };
+
   findMyProfile = async (
     { user }: Request,
     res: Response<{

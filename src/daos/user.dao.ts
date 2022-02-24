@@ -4,6 +4,7 @@ import {
   IUser,
   ReturnFindMyProfileDTO,
   UpdateProfileDTO,
+  IUserCreateDTO,
 } from "../types/user";
 import { MySQL, queryTransactionWrapper } from "../utils";
 import { findOneOrWhole, insert, update } from "../db";
@@ -92,6 +93,27 @@ export class UserDAO implements IUserDAO {
         `;
 
     const createUserQuery = insert({ query: userQuery, values: [email] }, pool);
+
+    const userMetaQuery = `
+        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());
+        `;
+
+    const createUserMetaQuery = insert({ query: userMetaQuery }, pool);
+
+    await queryTransactionWrapper([createUserQuery, createUserMetaQuery], pool);
+  }
+
+  // :TODO 트랜젝션 제대로 정리
+  async createLocal(input: IUserCreateDTO) {
+    const pool = await this.mysql.getPool();
+    const userQuery = `
+        INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
+        `;
+
+    const createUserQuery = insert(
+      { query: userQuery, values: [input.email, input.password, input.salt] },
+      pool
+    );
 
     const userMetaQuery = `
         INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (Last_insert_id());

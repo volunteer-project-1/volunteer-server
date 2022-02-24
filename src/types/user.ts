@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import { DefaultTime } from ".";
 
-export interface IUser extends DefaultTime {
+interface IUserSecret {
+  password: string;
+  salt: string;
+}
+
+export interface IUser extends DefaultTime, IUserSecret {
   id: number;
   email: string;
   //   password: string;
@@ -29,6 +34,7 @@ export interface IProfile extends DefaultTime {
 export interface IUserCreateDTO {
   email: string;
   password: string;
+  salt?: string;
 }
 
 export interface FindUserByIdDTO {
@@ -69,6 +75,7 @@ export interface IUserService {
 }
 
 export interface IUserController {
+  localSignup: (req: Request, res: Response) => Promise<Response>;
   findMyProfile: (
     req: Request,
     res: Response<{ user: ReturnFindMyProfileDTO }>

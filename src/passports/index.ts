@@ -1,6 +1,7 @@
 import passport from "passport";
 import { IUser } from "../types/user";
 import google from "./google-strategy";
+import local from "./local-strategy";
 
 export default () => {
   passport.serializeUser((user: IUser, done) => {
@@ -16,5 +17,6 @@ export default () => {
     }
   });
 
+  local();
   google();
 };
