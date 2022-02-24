@@ -14,11 +14,11 @@ export const DB_CONFIG: PoolOptions = isProd
   ? // TODO 추후에 배포될 경우 추가
     {}
   : {
-      host: process.env.DB_HOST || "",
-      user: "admin",
-      port: 3306,
-      database: process.env.DATABASE || "",
-      password: process.env.DB_PASSWORD || "",
+      host: process.env.DB_HOST || "localhost",
+      user: process.env.DB_USERNAME || "root",
+      port: Number(process.env.DB_PORT) || 3306,
+      database: process.env.MYSQL_DATABASE || "test",
+      password: process.env.DB_PASSWORD || "root",
       connectionLimit: 100,
     };
 

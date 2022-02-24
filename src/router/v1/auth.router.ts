@@ -8,11 +8,9 @@ const authRouter = Router();
 
 const userController = Container.get(UserController);
 
-authRouter
-  .route("/local")
-  .post(passport.authenticate("local"), function (_, res) {
-    return res.status(200).json();
-  });
+authRouter.route("/local").post(passport.authenticate("local"), (_, res) => {
+  return res.status(200).send("Logged in.");
+});
 
 authRouter
   .route("/local/signup")

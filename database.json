@@ -1,6 +1,9 @@
 {
     "dev": {
       "driver": "mysql",
+      "port": {
+        "ENV": "DB_PORT"
+      },
       "host": {
         "ENV": "DB_HOST"
       },
@@ -11,7 +14,7 @@
         "ENV": "DB_PASSWORD"
       },
       "database": {
-        "ENV": "DATABASE"
+        "ENV": "MYSQL_DATABASE"
       },
       "multipleStatements": true
     }
