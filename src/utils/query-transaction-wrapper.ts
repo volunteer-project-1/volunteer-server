@@ -13,28 +13,28 @@ type dbDefaults =
   | OkPacket[]
   | ResultSetHeader;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type QueryFunction<T = any> = () => Promise<
-  [T & dbDefaults, FieldPacket[]]
->;
+type QueryFunction = () => Promise<[dbDefaults, FieldPacket[]]>;
 
-// eslint-disable-next-line consistent-return
-export async function queryTransactionWrapper<T = any>(
-  queries: QueryFunction[],
+function executeQueries<T extends QueryFunction[]>(queries: [...T]) {
+  return queries.reduce(async (promise, query) => {
+    const acc = await promise;
+    const [row] = await query();
+    return [...acc, row];
+  }, Promise.resolve([] as dbDefaults[]));
+}
+
+export async function queryTransactionWrapper<T extends QueryFunction[]>(
+  queries: [...T],
   conn: PoolConnection
-): Promise<[T, FieldPacket[]][] | undefined> {
+) {
   try {
     await conn.beginTransaction();
 
-    const executedQueries = [];
-    for (const query of queries) {
-      executedQueries.push(await query());
-    }
+    const executedQueries = await executeQueries(queries);
 
     await conn.commit();
     return executedQueries;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
+  } catch (error) {
     await conn.rollback();
     throw error;
   } finally {

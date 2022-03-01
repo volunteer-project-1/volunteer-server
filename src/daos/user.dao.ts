@@ -123,7 +123,7 @@ export class UserDAO implements IUserDAO {
 
     const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
 
-    const results = await queryTransactionWrapper<OkPacket>(
+    const results = await queryTransactionWrapper(
       [
         createUserQuery,
         setLastInsertedIdQuery,
@@ -133,12 +133,10 @@ export class UserDAO implements IUserDAO {
       conn
     );
 
-    const resultsOkPacket = results!.map((result) => result[0]);
-
     return {
-      user: resultsOkPacket[0],
-      meta: resultsOkPacket[2],
-      profile: resultsOkPacket[3],
+      user: results[0] as OkPacket,
+      meta: results[2] as OkPacket,
+      profile: results[3] as OkPacket,
     };
   }
 
@@ -176,7 +174,6 @@ export class UserDAO implements IUserDAO {
               `;
 
     const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
-
     const results = await queryTransactionWrapper(
       [
         createUserQuery,
@@ -187,12 +184,10 @@ export class UserDAO implements IUserDAO {
       conn
     );
 
-    const resultsOkPacket = results!.map((result) => result[0]);
-
     return {
-      user: resultsOkPacket[0],
-      meta: resultsOkPacket[2],
-      profile: resultsOkPacket[3],
+      user: results[0] as OkPacket,
+      meta: results[2] as OkPacket,
+      profile: results[3] as OkPacket,
     };
   }
 }

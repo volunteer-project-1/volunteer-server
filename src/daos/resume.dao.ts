@@ -195,7 +195,7 @@ export class ResumeDAO implements IResumeDAO {
       conn
     );
 
-    const results = await queryTransactionWrapper<OkPacket>(
+    const results = await queryTransactionWrapper(
       [
         resumeQueryFunction,
         setLastResumeIdQueryFunction,
@@ -216,7 +216,7 @@ export class ResumeDAO implements IResumeDAO {
     );
 
     return {
-      resume: results![0][0],
+      resume: results[0] as OkPacket,
     };
   }
 
