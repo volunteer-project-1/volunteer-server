@@ -1,9 +1,11 @@
 import { validate } from "class-validator";
 import { BadReqError } from ".";
 
-export const validateDto = async (dto: object) => {
-  const error = await validate(dto);
-  if (error.length > 0) {
-    throw new BadReqError(JSON.stringify(error));
+export const validateDto = async (...dtos: object[]) => {
+  for (const dto of dtos) {
+    const error = await validate(dto);
+    if (error.length > 0) {
+      throw new BadReqError(JSON.stringify(error));
+    }
   }
 };

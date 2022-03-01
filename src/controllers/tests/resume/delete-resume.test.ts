@@ -47,30 +47,24 @@ describe("deleteResume test", () => {
   const URL = "/api/v1/resume";
 
   it("DELETE '/', If Un Valid URL, return 401", async () => {
-    const resumeInfoId = "un-valid-id";
-    const res = await request(await startApp()).delete(
-      `${URL}/${resumeInfoId}`
-    );
+    const resumeId = "un-valid-id";
+    const res = await request(await startApp()).delete(`${URL}/${resumeId}`);
 
     expect(res.status).toBe(401);
   });
 
   it("DELETE '/', If ResumeInfo Not Founded, return 404", async () => {
-    const resumeInfoId = 2;
+    const resumeId = 2;
 
-    const res = await request(await startApp()).delete(
-      `${URL}/${resumeInfoId}`
-    );
+    const res = await request(await startApp()).delete(`${URL}/${resumeId}`);
 
     expect(res.status).toBe(404);
   });
 
   it("DELETE '/', If Founded, return 204", async () => {
-    const resumeInfoId = 1;
+    const resumeId = 1;
 
-    const res = await request(await startApp()).delete(
-      `${URL}/${resumeInfoId}`
-    );
+    const res = await request(await startApp()).delete(`${URL}/${resumeId}`);
 
     expect(res.status).toBe(204);
   });

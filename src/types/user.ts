@@ -95,9 +95,6 @@ export interface IUserController {
     res: Response<{ user: IReturnFindMyProfile }>
   ) => Promise<Response>;
   updateMyProfile: (req: Request, res: Response) => Promise<Response>;
-  findUserById: (
-    req: Request,
-    res: Response<{ user: IUser }>
-  ) => Promise<Response>;
+  findUserById: (req: Request, res: Response) => Promise<Response>;
   findUsers: (req: Request, res: Response) => Promise<Response>;
 }
