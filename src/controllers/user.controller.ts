@@ -1,11 +1,12 @@
 import { Service } from "typedi";
 import { Request, Response } from "express";
 import { IUserController, IUser, IReturnFindMyProfile } from "../types";
-import { BadReqError, NotFoundError, validateDto } from "../utils";
+import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
 import { UserService } from "../services";
 import { UpdateProfileDto } from "../dtos/user/update-my-profile.dto";
 import { CreateUserByLocalDto } from "../dtos/user/create-user-by-local.dto";
 
+type ReqParams = { id?: string };
 @Service()
 export class UserController implements IUserController {
   constructor(private readonly userService: UserService) {}
@@ -14,7 +15,7 @@ export class UserController implements IUserController {
     { body }: Request<unknown, unknown, CreateUserByLocalDto>,
     res: Response
   ) => {
-    await validateDto(new CreateUserByLocalDto(body));
+    await validateDtos(new CreateUserByLocalDto(body));
     await this.userService.createUserByLocal(body);
 
     return res.sendStatus(201);
@@ -27,9 +28,8 @@ export class UserController implements IUserController {
     }>
   ) => {
     const profile = await this.userService.findMyProfile(user!.id);
-    if (!profile) {
-      throw new NotFoundError();
-    }
+
+    assertNonNullish(profile);
 
     return res.json({ user: profile }).status(200);
   };
@@ -38,28 +38,21 @@ export class UserController implements IUserController {
     { user, body }: Request<unknown, unknown, UpdateProfileDto>,
     res: Response
   ) => {
-    await validateDto(new UpdateProfileDto(body));
+    await validateDtos(new UpdateProfileDto(body));
     await this.userService.updateMyProfile(user!.id, body);
 
     return res.sendStatus(204);
   };
 
   findUserById = async (
-    { params: { id } }: Request,
+    { params: { id } }: Request<ReqParams>,
     res: Response<{ user: IUser }>
   ) => {
-    if (!id) {
-      throw new NotFoundError();
-    }
-    const parsedInt = Number(id);
+    assertNonNullish(id);
 
-    if (!parsedInt) {
-      throw new BadReqError();
-    }
-    const user = await this.userService.findUserById(parsedInt);
-    if (!user) {
-      throw new NotFoundError();
-    }
+    const user = await this.userService.findUserById(parseToNumberOrThrow(id));
+
+    assertNonNullish(user);
 
     return res.json({ user }).status(200);
   };
@@ -67,9 +60,8 @@ export class UserController implements IUserController {
   findUsers = async (_: Request, res: Response<{ users: IUser[] }>) => {
     const users = await this.userService.findUsers();
 
-    if (!users) {
-      throw new NotFoundError();
-    }
+    assertNonNullish(users);
+
     return res.json({ users });
   };
 }

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UnauthorizedError } from "../utils";
 
-export const authenticateUser = (
+export const isAuthenticate = (
   req: Request,
   _: Response,
   next: NextFunction
@@ -14,7 +14,7 @@ export const authenticateUser = (
   }
 };
 
-export const unAuthenticateUser = (
+export const isUnAuthenticate = (
   req: Request,
   _: Response,
   next: NextFunction
