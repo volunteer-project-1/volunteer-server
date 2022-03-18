@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { UnauthorizedError } from "../utils";
+import { UnauthorizedError } from "../lib";
 
 export const isAuthenticate = (
   req: Request,

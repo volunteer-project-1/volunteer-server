@@ -1,4 +1,4 @@
-import { BadReqError } from ".";
+import { BadReqError } from "../lib";
 
 export function parseToNumberOrThrow(
   value: string | number,

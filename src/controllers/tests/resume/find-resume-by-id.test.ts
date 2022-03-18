@@ -46,14 +46,14 @@ afterAll(async () => {
 describe("findResumeById test", () => {
   const URL = "/api/v1/resume";
 
-  it("GET '/', If Resume Not Founded, return 401", async () => {
+  it("GET '/', If Resume Not Founded, return 400", async () => {
     const resumeId = "un-valid-id";
     const res = await request(await startApp()).get(`${URL}/${resumeId}`);
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
-  it("GET '/', If Resume Not Founded, return 401", async () => {
+  it("GET '/', If Resume Not Founded, return 404", async () => {
     const resumeId = 2;
     const res = await request(await startApp()).get(`${URL}/${resumeId}`);
 

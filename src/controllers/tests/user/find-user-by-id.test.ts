@@ -40,11 +40,11 @@ afterAll(async () => {
 describe("findUserById test", () => {
   const URL = "/api/v1/user";
 
-  it("GET '/:id',If Unvalid Id, return 401", async () => {
+  it("GET '/:id',If Unvalid Id, return 400", async () => {
     const id = "unvalid-id";
     const res = await request(await startApp()).get(`${URL}/${id}`);
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
   it("GET '/:id',If User Not Founded return 404", async () => {

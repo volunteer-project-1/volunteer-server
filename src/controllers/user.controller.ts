@@ -57,8 +57,19 @@ export class UserController implements IUserController {
     return res.json({ user }).status(200);
   };
 
-  findUsers = async (_: Request, res: Response<{ users: IUser[] }>) => {
-    const users = await this.userService.findUsers();
+  findUsers = async (
+    {
+      query: { id, limit },
+    }: Request<unknown, unknown, unknown, { id?: string; limit?: string }>,
+    res: Response<{ users: IUser[] }>
+  ) => {
+    assertNonNullish(id);
+    assertNonNullish(limit);
+
+    const users = await this.userService.findUsers({
+      id: parseToNumberOrThrow(id),
+      limit: parseToNumberOrThrow(limit),
+    });
 
     assertNonNullish(users);
 

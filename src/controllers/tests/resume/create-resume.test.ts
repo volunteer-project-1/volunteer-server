@@ -10,12 +10,12 @@ beforeAll(async () => {
   await Container.get(MySQL).connect();
 });
 
-// beforeEach(async () => {
-//   const email = "ehgks0083@gmail.com";
+beforeEach(async () => {
+  const email = "ehgks0083@gmail.com";
 
-//   const userService = Container.get(UserService);
-//   await userService.createUser(email);
-// });
+  const userService = Container.get(UserService);
+  await userService.createUserBySocial(email);
+});
 
 afterEach(async () => {
   const conn = await Container.get(MySQL).getConnection();
@@ -41,38 +41,15 @@ afterAll(async () => {
 describe("createResume test", () => {
   const URL = "/api/v1/resume";
 
-  //   it("GET '/', If Un Valid Body, return 401", async () => {
-  //     const email = "ehgks0083@gmail.com";
-
-  //     const userService = Container.get(UserService);
-  //     await userService.createUser(email);
-
-  //     const res = await request(await startApp())
-  //       .post(URL)
-  //       .send({ resume: { title: "이력서 제목" } });
-
-  //     expect(res.status).toBe(401);
-  //   });
-
-  it("GET '/',If Created, return 204", async () => {
-    const email = "ehgks0083@gmail.com";
-
-    const userService = Container.get(UserService);
-    await userService.createUserBySocial(email);
-
+  it("GET '/',If Validate Fail, return 400", async () => {
     const res = await request(await startApp())
       .post(URL)
       .send({ resume: { title: "제목", content: "내용" }, resumeInfo: {} });
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
   it("GET '/',If Created, return 204", async () => {
-    const email = "ehgks0083@gmail.com";
-
-    const userService = Container.get(UserService);
-    await userService.createUserBySocial(email);
-
     const res = await request(await startApp())
       .post(URL)
       .send(newResumeFactory());

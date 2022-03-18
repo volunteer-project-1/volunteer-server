@@ -2,7 +2,8 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import Container from "typedi";
 import { UserService } from "../services";
-import { NotFoundError, UnauthorizedError, verifyPassword } from "../utils";
+import { NotFoundError, UnauthorizedError } from "../lib";
+import { verifyPassword } from "../utils";
 
 export default () => {
   const userService = Container.get(UserService);

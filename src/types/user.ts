@@ -35,6 +35,7 @@ export interface IProfile extends DefaultTime {
 export interface ICreateUserByLocal {
   email: string;
   password: string;
+  passwordConfirm: string;
 }
 
 export interface IFindUserById {
@@ -62,7 +63,13 @@ export interface IUserDAO {
     body: IUpdateProfile
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   findOneById: (id: number) => Promise<IUser | undefined>;
-  find: () => Promise<IUser[] | undefined>;
+  find: ({
+    start,
+    limit,
+  }: {
+    start: number;
+    limit: number;
+  }) => Promise<IUser[] | undefined>;
   createUserBySocial: (
     email: string
   ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
@@ -78,7 +85,13 @@ export interface IUserService {
     body: IUpdateProfile
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
   findUserById: (id: number) => Promise<IUser | undefined>;
-  findUsers: () => Promise<IUser[] | undefined>;
+  findUsers: ({
+    id,
+    limit,
+  }: {
+    id: number;
+    limit: number;
+  }) => Promise<IUser[] | undefined>;
   findUserByEmail: (email: string) => Promise<IUser | undefined>;
   createUserBySocial: (
     email: string

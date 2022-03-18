@@ -226,37 +226,54 @@ export class ResumeDAO implements IResumeDAO {
     const subQuery1 = `
     SELECT resume_id, json_object('id', RI.id, 'name', RI.name, 'birthday', RI.birthday, 'phone_number', RI.phone_number, 'email', RI.email, 'sido', RI.sido, 'sigungu', RI.sigungu, 'disability_level', RI.disability_level, 'disability_type', RI.disability_type, 'sex', RI.sex) AS resume_info
     FROM ${RESUME_INFO_TABLE} AS RI
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    LIMIT 1
+    `;
 
     const subQuery2 = `
     SELECT resume_id, json_arrayagg(json_object('id', C.id, 'company', C.company, 'department', C.department)) AS careers
     FROM ${CAREER_TABLE} AS C
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
 
     const subQuery3 = `
     SELECT resume_id, json_arrayagg(json_object('id', E.id, 'type', E.type, 'school_name', E.school_name)) AS educations
     FROM ${EDUCATION_TABLE} AS E
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
 
     const subQuery4 = `
     SELECT resume_id, json_arrayagg(json_object('id', A.id, 'organization', A.organization, 'description', A.description)) AS activities
     FROM ${ACTIVITY_TABLE} AS A
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
 
     const subQuery5 = `
     SELECT resume_id, json_arrayagg(json_object('id', W.id, 'institute', W.institute, 'started_at', W.started_at)) AS awards
     FROM ${AWARD_TABLE} AS W
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
 
     const subQuery6 = `
     SELECT resume_id, json_object('id', MY.id, 'url', MY.url) AS my_video
     FROM ${MY_VIDEO_TABLE} AS MY
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    LIMIT 1
+    `;
 
     const subQuery7 = `
     SELECT resume_id, json_object('id', H.id, 'url', H.url) AS helper_video
     FROM ${HELPER_VIDEO_TABLE} AS H
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    LIMIT 1
+    `;
 
     const subsubQuery1 = `
     SELECT preference_id, json_arrayagg(json_object('name', PJ.name)) AS preference_jobs
@@ -273,7 +290,9 @@ export class ResumeDAO implements IResumeDAO {
     FROM ${PREFERNCE_TABLE} AS P
         JOIN (${subsubQuery1}) AS pj ON pj.preference_id = P.id
         JOIN (${subsubQuery2}) AS pl ON pl.preference_id = P.id
-    GROUP BY id, resume_id`;
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
 
     const query = `
         SELECT
@@ -299,7 +318,23 @@ export class ResumeDAO implements IResumeDAO {
         JOIN (${subQuery8}) AS p ON p.resume_id = R.id
         WHERE R.id = ?;
     `;
-    const [rows] = await findOneOrWhole({ query, values: [resumeId] }, pool)();
+    const [rows] = await findOneOrWhole(
+      {
+        query,
+        values: [
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
+        ],
+      },
+      pool
+    )();
 
     return rows[0] as IFindResume;
   }

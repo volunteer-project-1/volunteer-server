@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import Container from "typedi";
 import { GOOGLE_CONFIG } from "../config";
 import { UserService } from "../services";
-import { NotFoundError } from "../utils";
+import { NotFoundError } from "../lib";
 
 export default () => {
   const userService = Container.get(UserService);

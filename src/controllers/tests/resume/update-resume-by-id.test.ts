@@ -46,14 +46,14 @@ afterAll(async () => {
 describe("updateResumeById test", () => {
   const URL = "/api/v1/resume";
 
-  it("PATCH '/', If Resume Not Founded, return 401", async () => {
+  it("PATCH '/', If Resume Not Founded, return 400", async () => {
     const resumeId = "un-valid-id";
     const res = await request(await startApp()).patch(`${URL}/${resumeId}`);
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
-  it("PATCH '/', If Body Not Founded, return 401", async () => {
+  it("PATCH '/', If Body Not Founded, return 400", async () => {
     const email = "ehgks0083@gmail.com";
 
     const userService = Container.get(UserService);
@@ -68,7 +68,7 @@ describe("updateResumeById test", () => {
 
     const res = await request(await startApp()).patch(`${URL}/${resumeId}`);
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
   it("PATCH '/', If Founded, return 204", async () => {

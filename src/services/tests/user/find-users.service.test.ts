@@ -34,11 +34,12 @@ describe("findUsers Test", () => {
   const userService = Container.get(UserService);
   it("If Not Found return undefined", async () => {
     const spy = jest.spyOn(userService, "findUsers");
+    const query = { id: 0, limit: 5 };
 
-    const results = await userService.findUsers();
+    const results = await userService.findUsers(query);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith();
+    expect(spy).toBeCalledWith(query);
     expect(results).toBe(undefined);
   });
 
@@ -50,10 +51,12 @@ describe("findUsers Test", () => {
 
     const spy = jest.spyOn(userService, "findUsers");
 
-    const results = await userService.findUsers();
+    const query = { id: 0, limit: 5 };
+
+    const results = await userService.findUsers(query);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith();
+    expect(spy).toBeCalledWith(query);
     expect(results).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ email: email2 }),
