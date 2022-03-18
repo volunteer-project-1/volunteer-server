@@ -3,12 +3,8 @@ import { Response, Request } from "express";
 import { Service } from "typedi";
 import { ResumeService } from "../services";
 import { IResumeController } from "../types";
-import {
-  assertNonNullish,
-  NotFoundError,
-  parseToNumberOrThrow,
-  validateDtos,
-} from "../utils";
+import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
+import { MulterS3, NotFoundError } from "../lib";
 import {
   CreateResumeDto,
   UpdateResumeDto,
@@ -23,6 +19,7 @@ import {
   UpdatePreferenceJobDto,
   UpdatePreferenceLocationDto,
 } from "../dtos";
+// import { S3_BUCKET } from "../config";
 
 type ReqParams = {
   id?: string;
@@ -30,7 +27,17 @@ type ReqParams = {
 
 @Service()
 export class ResumeController implements IResumeController {
-  constructor(private readonly resumeService: ResumeService) {}
+  constructor(
+    private readonly resumeService: ResumeService,
+    private readonly multerS3: MulterS3
+  ) {}
+
+  uploadVideo = async ({ file }: Request<unknown, unknown>, res: Response) => {
+    assertNonNullish(file?.key);
+    const url = this.multerS3.getSignedUrl(file.key);
+
+    return res.json({ file, url });
+  };
 
   createResume = async (
     { body, user }: Request<unknown, unknown, CreateResumeDto>,

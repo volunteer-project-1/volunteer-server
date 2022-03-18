@@ -1,12 +1,20 @@
 import { Router } from "express";
 import Container from "typedi";
 import { ResumeController } from "../../controllers";
-import { isAuthenticate } from "../../middlewares";
+import { isAuthenticate, upload } from "../../middlewares";
 import { asyncHandler } from "../../utils";
 
 const resumeRouter = Router();
 
 const resumeController = Container.get(ResumeController);
+
+resumeRouter
+  .route("/upload")
+  .post(
+    isAuthenticate,
+    upload.single("url"),
+    asyncHandler(resumeController.uploadVideo)
+  );
 
 resumeRouter
   .route("")

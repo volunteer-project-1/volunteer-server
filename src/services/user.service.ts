@@ -9,6 +9,7 @@ import {
 import { UserDAO } from "../daos";
 import { generateHashPassword } from "../utils/hashing-password";
 import { CreateUserByLocalDto } from "../dtos";
+import { BadReqError } from "../lib";
 
 @Service()
 export class UserService implements IUserService {
@@ -26,8 +27,13 @@ export class UserService implements IUserService {
     return this.userDAO.findOneById(id);
   }
 
-  findUsers(): Promise<IUser[] | undefined> {
-    return this.userDAO.find();
+  findUsers(data: { id: number; limit: number }): Promise<IUser[] | undefined> {
+    const { id, limit } = data;
+    if (id < 0 || limit <= 0) {
+      throw new BadReqError();
+    }
+
+    return this.userDAO.find({ start: id, limit });
   }
 
   findUserByEmail(email: string) {
@@ -41,11 +47,11 @@ export class UserService implements IUserService {
   async createUserByLocal({ email, password }: CreateUserByLocalDto) {
     const { hash: hasedPassword, salt } = await generateHashPassword(password);
 
-    const input: CreateUserByLocalDto & { salt: string } = {
+    const input = {
       email,
       password: hasedPassword,
       salt,
-    };
+    } as CreateUserByLocalDto & { salt: string };
 
     return this.userDAO.createUserByLocal(input);
   }

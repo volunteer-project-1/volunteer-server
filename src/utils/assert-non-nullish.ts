@@ -1,4 +1,4 @@
-import { NotFoundError } from ".";
+import { NotFoundError } from "../lib";
 
 export function assertNonNullish<TValue>(
   value: TValue,

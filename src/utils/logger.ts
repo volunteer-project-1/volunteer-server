@@ -5,7 +5,7 @@ import process from "process";
 
 const { combine, timestamp, printf } = format;
 
-const logDir = "logs";
+const LOG_DIR = "logs" as const;
 
 // eslint-disable-next-line no-shadow
 const myFormat = printf(({ message, timestamp, level }) => {
@@ -24,7 +24,7 @@ export const logger: winston.Logger = winston.createLogger({
     new winstonDaily({
       level: "info",
       datePattern: "YYYY-MM-DD",
-      dirname: `${logDir}/info`,
+      dirname: `${LOG_DIR}/info`,
       filename: `%DATE%.log`,
       maxFiles: 20,
       zippedArchive: true,
@@ -34,7 +34,7 @@ export const logger: winston.Logger = winston.createLogger({
     new winstonDaily({
       level: "error",
       datePattern: "YYYY-MM-DD",
-      dirname: `${logDir}/error`,
+      dirname: `${LOG_DIR}/error`,
       filename: `%DATE%.error.log`,
       maxFiles: 20,
       zippedArchive: true,

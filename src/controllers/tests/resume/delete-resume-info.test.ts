@@ -46,13 +46,13 @@ afterAll(async () => {
 describe("deleteResumeInfo test", () => {
   const URL = "/api/v1/resume";
 
-  it("DELETE '/', If Un Valid URL, return 401", async () => {
+  it("DELETE '/', If Un Valid URL, return 400", async () => {
     const resumeInfoId = "un-valid-id";
     const res = await request(await startApp()).delete(
       `${URL}/${resumeInfoId}/info`
     );
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
   it("DELETE '/', If ResumeInfo Not Founded, return 404", async () => {

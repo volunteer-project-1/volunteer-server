@@ -43,7 +43,9 @@ describe("findUsers test", () => {
     await userService.createUserBySocial("ehgks0083@gmail.com");
     await userService.createUserBySocial("ehgks00@gmail.com");
 
-    const res = await request(await startApp()).get(`${URL}`);
+    const res = await request(await startApp())
+      .get(`${URL}`)
+      .query({ id: 1, limit: 5 });
 
     expect(res.status).toBe(200);
   });

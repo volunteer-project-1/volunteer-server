@@ -9,12 +9,12 @@ beforeAll(async () => {
   await Container.get(MySQL).connect();
 });
 
-// beforeEach(async () => {
-//   const email = "ehgks0083@gmail.com";
+beforeEach(async () => {
+  const email = "ehgks0083@gmail.com";
 
-//   const userService = Container.get(UserService);
-//   await userService.createUser(email);
-// });
+  const userService = Container.get(UserService);
+  await userService.createUserBySocial(email);
+});
 
 afterEach(async () => {
   const conn = await Container.get(MySQL).getConnection();
@@ -30,6 +30,7 @@ afterEach(async () => {
   }
   await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
   conn?.release();
+  //   await Container.get(Redis).closeRedis();
   jest.clearAllMocks();
 });
 
@@ -40,22 +41,22 @@ afterAll(async () => {
 describe("updateMyProfile test", () => {
   const URL = "/api/v1/user";
 
-  it("PATCH '/profile', If no body, return 204", async () => {
-    const email = "ehgks0083@gmail.com";
+  it("PATCH '/profile', If no body, return 400", async () => {
+    // const email = "ehgks0083@gmail.com";
 
-    const userService = Container.get(UserService);
-    await userService.createUserBySocial(email);
+    // const userService = Container.get(UserService);
+    // await userService.createUserBySocial(email);
 
     const res = await request(await startApp()).patch(`${URL}/profile`);
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
   it("PATCH '/profile',If Update Successful, return 204", async () => {
-    const email = "ehgks0083@gmail.com";
+    // const email = "ehgks0083@gmail.com";
 
-    const userService = Container.get(UserService);
-    await userService.createUserBySocial(email);
+    // const userService = Container.get(UserService);
+    // await userService.createUserBySocial(email);
 
     const res = await request(await startApp())
       .patch(`${URL}/profile`)

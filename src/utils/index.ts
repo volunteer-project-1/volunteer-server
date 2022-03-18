@@ -1,5 +1,4 @@
 export * from "./logger";
-export * from "./exError";
 export * from "./async-handler";
 export * from "./query-transaction-wrapper";
 export * from "./validate-dtos";

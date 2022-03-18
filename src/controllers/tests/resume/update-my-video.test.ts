@@ -47,23 +47,23 @@ describe("updateMyVideo test", () => {
   const URL = "/api/v1/resume";
   const concatURL = "my-video";
 
-  it("PATCH '/', If Resume Not Founded, return 401", async () => {
+  it("PATCH '/', If Resume Not Founded, return 400", async () => {
     const resumeInfoId = "un-valid-id";
     const res = await request(await startApp()).patch(
       `${URL}/${resumeInfoId}/${concatURL}`
     );
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
-  it("PATCH '/', If Body Not Founded, return 401", async () => {
+  it("PATCH '/', If Body Not Founded, return 400", async () => {
     const resumeInfoId = 1;
 
     const res = await request(await startApp()).patch(
       `${URL}/${resumeInfoId}/${concatURL}`
     );
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(400);
   });
 
   it("PATCH '/', If Founded, return 204", async () => {

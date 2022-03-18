@@ -336,6 +336,7 @@ export interface IResumeService {
 }
 
 export interface IResumeController {
+  uploadVideo: (req: Request, res: Response) => Promise<Response>;
   createResume: (req: Request, res: Response) => Promise<Response>;
   findResumeById: (req: Request, res: Response) => Promise<Response>;
   updateResumeById: (req: Request, res: Response) => Promise<Response>;

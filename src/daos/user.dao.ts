@@ -21,12 +21,16 @@ export class UserDAO implements IUserDAO {
     const subQuery1 = `
         SELECT user_id, json_object('id', M.id, 'is_verified', M.is_verified, 'type', M.type) AS user_meta
         FROM ${USER_METAS_TABLE} AS M
-        GROUP BY id, user_id
+        WHERE user_id = ?
+        GROUP BY user_id
+        LIMIT 1
     `;
     const subQuery2 = `
         SELECT user_id, json_object('id', P.id, 'name', P.name, 'address', P.address, 'birthday', P.birthday) AS profile
         FROM ${USER_PROFILE_TABLE} AS P
-        GROUP BY id, user_id
+        WHERE user_id = ?
+        GROUP BY user_id
+        LIMIT 1
     `;
 
     const query = `
@@ -37,13 +41,14 @@ export class UserDAO implements IUserDAO {
         FROM ${USER_TABLE} AS U
         JOIN (${subQuery1}) AS m ON m.user_id = U.id
         JOIN (${subQuery2}) AS p ON p.user_id = U.id
-        WHERE U.id = ?;
+        WHERE U.id = ?
+        LIMIT 1;
     `;
 
     const [rows] = await findOneOrWhole(
       {
         query,
-        values: [id],
+        values: [id, id, id],
       },
       pool
     )();
@@ -71,16 +76,31 @@ export class UserDAO implements IUserDAO {
 
   async findOneById(id: number): Promise<IUser | undefined> {
     const pool = this.mysql.getPool();
-    const query = `Select * FROM ${USER_TABLE} WHERE id=?`;
+    const query = `Select * FROM ${USER_TABLE} WHERE id=? LIMIT 1`;
     const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
 
     return rows[0] as IUser;
   }
 
-  async find(): Promise<IUser[] | undefined> {
+  async find({
+    start,
+    limit,
+  }: {
+    start: number;
+    limit: number;
+  }): Promise<IUser[] | undefined> {
     const pool = this.mysql.getPool();
-    const query = `Select * FROM ${USER_TABLE}`;
-    const [rows] = await findOneOrWhole({ query }, pool)();
+    // TODO 페이지네이션 나중에 추가
+    const query = `
+        Select id, email, created_at, updated_at 
+        FROM ${USER_TABLE} 
+        WHERE id >= ? ORDER BY id LIMIT ?`;
+
+    // const query = `Select * FROM ${USER_TABLE}`;
+    const [rows] = await findOneOrWhole(
+      { query, values: [start, limit] },
+      pool
+    )();
     if (rows.length === 0) {
       return undefined;
     }
@@ -90,7 +110,7 @@ export class UserDAO implements IUserDAO {
 
   async findByEmail(email: string): Promise<IUser | undefined> {
     const pool = this.mysql.getPool();
-    const query = `Select * FROM ${USER_TABLE} WHERE email=?`;
+    const query = `Select * FROM ${USER_TABLE} WHERE email=? LIMIT 1`;
 
     const [rows] = await findOneOrWhole({ query, values: [email] }, pool)();
 
