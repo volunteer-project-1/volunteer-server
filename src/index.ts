@@ -23,7 +23,7 @@ startApp().then((app) => {
   http.createServer(app).listen(PORT, () => {
     logger.info(`
                 ################################################
-                🛡️ HTTP  Server listening on port: ${PORT} 🛡️
+                🛡️ HTTP  Server listening on port: ${PORT} / ${process.env.NODE_ENV} 🛡️
                 ################################################
                 `);
   });

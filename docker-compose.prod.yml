@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  node1:
+    container_name: seeme_server
+    build:
+      context: ./
+      target: prod
+    restart: unless-stopped
+    command: npm run start:js
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+    volumes:
+      - ./awsconfig.storj.json:/app/awsconfig.storj.json
+      - ./dist:/app/dist
+  # nginx:
+  #   container_name: seeme_nginx
+  #   image: nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./src/localhost-key.pem:/etc/ssl/localhost-key.pem
+  #     - ./src/localhost.pem:/etc/ssl/localhost.pem
+  #     - ./nginx.conf:/etc/nginx/nginx.conf

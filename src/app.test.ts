@@ -6,7 +6,7 @@ describe("index test", () => {
     const res = await request(await startApp()).get("/health");
 
     expect(res.status).toBe(200);
-    expect(res.text).toBe("ok");
+    expect(res.text).toBe("ok2");
   });
 
   it("GET /Un-valid-url return 404", async () => {
