@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          DB_HOST: 127.0.0.1
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: root
+          DB_PORT: 3306
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: "https://npm.pkg.github.com"
+          cache: npm
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Set up MySQL
+        run: |
+          mysql --version
+          sudo systemctl start mysql.service
+
+          # sudo echo -e "[mysqld]\nsql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\nskip-grant-tables\n" | sudo tee /etc/mysql/my.cnf
+          # sudo echo -e "[mysqld]\nsql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION\nskip-grant-tables\n" | sudo tee /etc/mysql/conf.d/mysql.cnf
+
+          # sudo chown -R mysql:mysql /var/lib/mysql
+
+          # sudo /lib/systemd/systemd-sysv-install enable mysql
+          # sudo systemctl enable mysql.service
+
+          # sudo systemctl restart mysql.service
+          # sudo systemctl status mysql.service
+
+          mysql -e 'SET GLOBAL sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION";' -uroot -proot
+          mysql -e 'select @@sql_mode;' -uroot -proot
+          mysql -e 'CREATE DATABASE test;' -uroot -proot
+          mysql -e 'SHOW DATABASES;' -uroot -proot
+
+      - name: Test
+        run: npm run test:ci
+        env:
+          NODE_ENV: test
+          DB_HOST: 127.0.0.1
+          MYSQL_DATABASE: test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          DB_PORT: 3306
+          GOOGLE_CLIENT_ID: $
+          GOOGLE_CLIENT_SECRET: $
+          GOOGLE_CALLBACK_URL: $
+
+      - name: Test env
+        run: |
+          echo "USER_NAME=$(whoami)" >> $GITHUB_ENV
+      - name: Notify CI success
+        if: success()
+        run: |
+          echo "success, ${{env.USER_NAME}}"
+      - name: if fail # 만약 실패했을 때의 설정
+        uses: actions/github-script@v3 # 커스텀 스크립트를 사용하게 해주는 액션
+        with: # 커스텀 스크립트 작성란
+          github-token: $ # 깃허브 토큰으로 PR을 close시킴
+          script: |
+            const ref = "$"
+            const pull_number = Number(ref.split("/")[2])
+            await github.pulls.createReview({
+              ...context.repo,
+              pull_number,
+              body:"테스트코드를 다시 확인해주세요. ",
+              event: "REQUEST_CHANGES"
+            })
+            await github.pulls.update({
+              ...context.repo,
+              pull_number,
+              state: "closed"
+            })
+        if: failure()
