@@ -11,6 +11,7 @@
     "test:coverage": "node ./node_modules/db-migrate/bin/db-migrate up && jest --detectOpenHandles --forceExit --maxWorkers=50% --coverage",
     "dev": "node ./dist/index.js",
     "start": "tsc-watch --onSuccess \"ts-node dist/index.js\"",
+    "start:js": "node dist/index.js",
     "migrate": "node ./node_modules/db-migrate/bin/db-migrate up",
     "lint": "eslint ./src",
     "lint:es:fix": "eslint --ext js --ext ts './' --fix",

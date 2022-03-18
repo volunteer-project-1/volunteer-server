@@ -45,7 +45,7 @@ export async function startApp() {
   app.use(loggingReq);
 
   app.get("/health", (_, res) => {
-    res.send("ok");
+    res.send("ok2");
   });
 
   app.use(API_PREFIX, routes);
