@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsString,
   IsBoolean,
+  IsUrl,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { DisabilityLevel, DisabilityType, Sex } from "../../types";
@@ -128,11 +129,13 @@ export class AwardDto {
 
 export class MyVideoDto {
   @IsString()
+  @IsUrl()
   url!: string;
 }
 
 export class HelperVideoDto {
   @IsString()
+  @IsUrl()
   url!: string;
 }
 
