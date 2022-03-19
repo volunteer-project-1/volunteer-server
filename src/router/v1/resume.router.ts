@@ -18,6 +18,7 @@ resumeRouter
 
 resumeRouter
   .route("")
+  .get(isAuthenticate, asyncHandler(resumeController.findMyResumes))
   .post(isAuthenticate, asyncHandler(resumeController.createResume));
 
 resumeRouter

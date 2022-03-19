@@ -50,6 +50,16 @@ export class ResumeController implements IResumeController {
     return res.sendStatus(204);
   };
 
+  findMyResumes = async ({ user }: Request, res: Response) => {
+    const resumes = await this.resumeService.findMyResumes(user!.id);
+
+    if (resumes.length < 1) {
+      return res.status(204).json({ message: "이력서 없음" });
+    }
+
+    return res.json({ resumes });
+  };
+
   findResumeById = async (
     { params: { id } }: Request<ReqParams>,
     res: Response
