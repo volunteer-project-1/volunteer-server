@@ -5,6 +5,7 @@ import { MySQL, findOneOrWhole, insert, update } from "../db";
 import {
   ICreateResume,
   IFindResume,
+  IFindWholeResume,
   IResumeDAO,
   IUpdateResume,
 } from "../types";
@@ -220,7 +221,17 @@ export class ResumeDAO implements IResumeDAO {
     };
   }
 
-  async findResumeById(resumeId: number): Promise<IFindResume> {
+  async findMyResumes(id: number): Promise<IFindResume[]> {
+    const pool = this.mysql.getPool();
+
+    const query = `SELECT * FROM ${RESUME_TABLE} WHERE user_id = ? LIMIT 10`;
+
+    const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
+
+    return rows as IFindResume[];
+  }
+
+  async findResumeById(resumeId: number): Promise<IFindWholeResume> {
     const pool = this.mysql.getPool();
 
     const subQuery1 = `
@@ -336,7 +347,7 @@ export class ResumeDAO implements IResumeDAO {
       pool
     )();
 
-    return rows[0] as IFindResume;
+    return rows[0] as IFindWholeResume;
   }
 
   updateResume(id: number, { resume }: IUpdateResume) {

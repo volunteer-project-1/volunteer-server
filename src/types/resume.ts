@@ -166,7 +166,9 @@ export interface IUpdatePreferenceLocation {
   >;
 }
 
-export interface IFindResume extends Omit<IResume, "user_id"> {
+export type IFindResume = Omit<IResume, "user_id">;
+
+export interface IFindWholeResume extends Omit<IResume, "user_id"> {
   educations: IEducation[];
   careers: ICareers[];
   activities: IActivity[];
@@ -186,7 +188,8 @@ export interface IResumeDAO {
     userId: number,
     data: CreateResumeDto
   ) => Promise<{ resume: OkPacket }>;
-  findResumeById: (id: number) => Promise<IFindResume>;
+  findMyResumes: (id: number) => Promise<IFindResume[]>;
+  findResumeById: (id: number) => Promise<IFindWholeResume>;
   updateResume: (
     id: number,
     data: UpdateResumeDto
@@ -263,7 +266,8 @@ export interface IResumeService {
     id: number,
     data: CreateResumeDto
   ) => Promise<{ resume: OkPacket }>;
-  findResumeById: (resumeId: number) => Promise<IFindResume>;
+  findMyResumes: (id: number) => Promise<IFindResume[]>;
+  findResumeById: (resumeId: number) => Promise<IFindWholeResume>;
   updateResume: (
     resumeId: number,
     data: UpdateResumeDto
@@ -338,6 +342,8 @@ export interface IResumeService {
 export interface IResumeController {
   uploadVideo: (req: Request, res: Response) => Promise<Response>;
   createResume: (req: Request, res: Response) => Promise<Response>;
+  findMyResumes: (req: Request, res: Response) => Promise<Response>;
+
   findResumeById: (req: Request, res: Response) => Promise<Response>;
   updateResumeById: (req: Request, res: Response) => Promise<Response>;
   deleteResume: (req: Request, res: Response) => Promise<Response>;
