@@ -67,14 +67,18 @@ POST "/health2" return `request.body`
 
 ```
 GET "/api/v1/auth/google"  // 구글 로그인
+
+POST "/api/v1/auth/local" // 로컬 회원가입
+POST "/api/v1/auth/local/signup" // 로컬 로그인
 ```
 
 - user
 
 ```
 
-GET "/api/v1/user" // 전체 유저 찾기
+GET "/api/v1/user?id=1&limit=5" // 전체 유저 찾기(페이지네이션 id 1부터 5개)
 GET "/api/v1/user/:id" // id를 갖는 유저 찾기
+
 GET "/api/v1/user/profile" // 내 profile 확인
 PATCH "/api/v1/user/profile" // 내 profile 수정
 
@@ -84,6 +88,7 @@ PATCH "/api/v1/user/profile" // 내 profile 수정
 
 ```
 POST "/api/v1/resume" // resume 생성
+GET "/api/v1/resume" // 내 resume 전체 찾기
 
 GET "/api/v1/resume/:id" // resume 찾기 (관련 테이블 다 같이)
 PATCH "/api/v1/resume/:id" // resume 수정

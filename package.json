@@ -12,6 +12,7 @@
     "dev": "node ./dist/index.js",
     "start": "tsc-watch --onSuccess \"ts-node dist/index.js\"",
     "start:js": "NODE_ENV=production node dist/index.js",
+    "pm2": "pm2 start ecosystem.config.cjs --env production",
     "migrate": "node ./node_modules/db-migrate/bin/db-migrate up",
     "lint": "eslint ./src",
     "lint:es:fix": "eslint --ext js --ext ts './' --fix",

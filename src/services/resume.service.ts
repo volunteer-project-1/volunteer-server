@@ -24,6 +24,10 @@ export class ResumeService implements IResumeService {
     return this.resumeDAO.createResume(id, data);
   }
 
+  findMyResumes(id: number) {
+    return this.resumeDAO.findMyResumes(id);
+  }
+
   findResumeById(id: number) {
     return this.resumeDAO.findResumeById(id);
   }
