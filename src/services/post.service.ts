@@ -9,4 +9,8 @@ export class PostService implements IPostService {
   createPost(userId: number, data: any) {
     return this.postDAO.createPost(userId, data);
   }
+
+  find(data: {start: number, limit: number}) {
+    return this.postDAO.find(data);
+  }
 }

@@ -17,4 +17,12 @@ export class PostController implements IPostController {
 
     return res.sendStatus(201);
   };
+
+  find = async (req: Request, res: Response) => {
+    const { start, limit } = req.query;
+    
+    const posts = await this.postService.find({start: Number(start), limit: Number(limit)});
+
+    return res.json({ posts: posts}).status(200);
+  }
 }

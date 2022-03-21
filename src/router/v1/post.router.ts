@@ -8,6 +8,8 @@ const postRouter = Router();
 
 const postController = Container.get(PostController);
 
-postRouter.route("/").post(authenticateUser, asyncHandler(postController.createPost));
+postRouter.route("/")
+    .get(asyncHandler(postController.find))
+    .post(authenticateUser, asyncHandler(postController.createPost));
 
 export { postRouter };

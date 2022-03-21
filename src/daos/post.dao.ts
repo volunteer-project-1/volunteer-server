@@ -1,10 +1,9 @@
 import { Service } from "typedi";
 import { OkPacket } from "mysql2/promise";
-import { IPostDAO } from "../types";
-import { insert, MySQL } from "../db";
+import { IPost, IPostDAO } from "../types";
+import { findOneOrWhole, insert, MySQL } from "../db";
 import { queryTransactionWrapper } from "../utils";
 import { POSTS } from "../constants";
-import { Console } from "console";
 
 @Service()
 export class PostDAO implements IPostDAO {
@@ -31,5 +30,28 @@ export class PostDAO implements IPostDAO {
     );
 
     return { post: results![0][0] };
+  }
+
+  async find({ start, limit }: { 
+    start: number;
+    limit: number;
+  }): Promise<IPost[] |undefined> {
+    const pool = this.mysql.getPool();
+    // TODO 페이지네이션 나중에 추가
+    const query = `
+        Select id, user_id, type, title, content, view_count, created_at, updated_at 
+        FROM ${POSTS} 
+        WHERE id >= ? ORDER BY id LIMIT ?`;
+
+    // const query = `Select * FROM ${USER_TABLE}`;
+    const [rows] = await findOneOrWhole(
+      { query, values: [start, limit] },
+      pool
+    )();
+    if (rows.length === 0) {
+      return undefined;
+    }
+
+    return rows as IPost[];
   }
 }

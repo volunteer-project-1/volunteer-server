@@ -22,12 +22,21 @@ export interface ICreatePost {
 
 export interface IPostDAO {
   createPost: (userId: number, data: any) => Promise<{ post: OkPacket }>;
+  find: ({ start, limit }: {
+    start: number;
+    limit: number;
+  }) => Promise<IPost[] | undefined>
 }
 
 export interface IPostService {
   createPost: (userId: number, data: any) => Promise<{ post: OkPacket }>;
+  find: (data: {
+    start: number;
+    limit: number;
+  }) =>  Promise<IPost[] | undefined>
 }
 
 export interface IPostController {
   createPost: (req: Request, res: Response) => Promise<Response>;
+  find: (req: Request, res: Response) => Promise<Response>;
 }
