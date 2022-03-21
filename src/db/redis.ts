@@ -27,7 +27,10 @@ export class Redis {
   }
 
   private getRedisClient() {
-    return this.redisClient!;
+    if (!this.redisClient) {
+      throw new Error("레디스 클라 없음?");
+    }
+    return this.redisClient;
   }
 
   private async getRedisConnection() {
@@ -38,17 +41,27 @@ export class Redis {
     return this.getRedisClient()
       .connect()
       .then(() => logger.info("REDIS CONNECTED"))
-      .catch((err) =>
-        logger.error("REDIS CONNECTED FAILED", JSON.stringify(err))
-      );
+      .catch(async (err) => {
+        logger.error("REDIS CONNECTED FAILED", JSON.stringify(err));
+        logger.info("Retry Redis Connection");
+        await this.getRedisConnection();
+      });
   }
 
   getRedisStore() {
     return new this.redisStore!({ client: this.getRedisClient() });
   }
 
+  async getPing() {
+    return this.getRedisClient().ping();
+  }
+
   async closeRedis() {
-    await this.getRedisClient().disconnect();
+    return this.getRedisClient()
+      .disconnect()
+      .then(() => {
+        logger.info("Redis is Disconnected");
+      });
     // await this.getRedisClient().quit();
   }
 }

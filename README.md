@@ -57,7 +57,9 @@ $ nf -e .env.test run npm run test
 ## API 테스트
 
 ```
-GET "/health" return `"ok"`
+GET "/health" return { status: "ok" }
+
+<!-- Deprecated -->
 POST "/health2" return `request.body`
 ```
 

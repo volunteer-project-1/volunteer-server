@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prepare": "husky install",
-    "build": "rm -rf ./dist && tsc",
+    "build": "rm -rf ./dist && tsc", 
     "test": "node ./node_modules/db-migrate/bin/db-migrate up && jest --detectOpenHandles --forceExit --maxWorkers=50%",
     "test:ci": "NODE_ENV=test node ./node_modules/db-migrate/bin/db-migrate up && jest --detectOpenHandles --forceExit --runInBand",
     "test:coverage": "node ./node_modules/db-migrate/bin/db-migrate up && jest --detectOpenHandles --forceExit --maxWorkers=50% --coverage",
@@ -30,6 +30,7 @@
   "author": ";",
   "license": "ISC",
   "dependencies": {
+    "@godaddy/terminus": "^4.10.2",
     "aws-sdk": "^2.1087.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
