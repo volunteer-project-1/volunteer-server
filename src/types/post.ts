@@ -38,6 +38,7 @@ export interface IPostDAO {
     id: number,
     data: UpdatePostDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
+  deletePost: (id: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 }
 
 export interface IPostService {
@@ -51,6 +52,7 @@ export interface IPostService {
     resumeId: number,
     data: UpdatePostDto
   ) => Promise<[ResultSetHeader, FieldPacket[]]>;
+  deletePost: (postId: number) => Promise<[ResultSetHeader, FieldPacket[]]>;
 }
 
 export interface IPostController {
@@ -58,4 +60,5 @@ export interface IPostController {
   createPost: (req: Request, res: Response) => Promise<Response>;
   find: (req: Request, res: Response) => Promise<Response>;
   updatePostById: (req: Request, res: Response) => Promise<Response>;
+  deletePost: (req: Request, res: Response) => Promise<Response>;
 }

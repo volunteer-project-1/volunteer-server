@@ -22,4 +22,8 @@ export class PostService implements IPostService {
   updatePost(id: number, data: UpdatePostDto) {
     return this.postDAO.updatePost(id, data);
   }
+
+  deletePost(id: number) {
+    return this.postDAO.deletePost(id);
+  }
 }

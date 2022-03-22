@@ -66,4 +66,20 @@ export class PostController implements IPostController {
 
     return res.sendStatus(204);
   };
+
+  deletePost = async (
+    { params: { id } }: Request<ReqParams>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+    const [{ affectedRows }] = await this.postService.deletePost(parsedId);
+
+    if (!affectedRows) {
+      throw new NotFoundError();
+    }
+    return res.sendStatus(204);
+  };
 }

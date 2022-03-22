@@ -78,4 +78,14 @@ export class PostDAO implements IPostDAO {
 
     return rows[0] as IFindPost;
   }
+
+  deletePost(id: number) {
+    const pool = this.mysql.getPool();
+    const query = `
+        DELETE FROM ${POSTS}
+        WHERE id = ?
+    `;
+
+    return update({ query, values: [id] }, pool)();
+  }
 }

@@ -14,6 +14,7 @@ postRouter.route("/")
 
 postRouter.route("/:id")
     .get(asyncHandler(postController.findPostById))
-    .patch(authenticateUser, asyncHandler(postController.updatePostById));
+    .patch(authenticateUser, asyncHandler(postController.updatePostById))
+    .delete(authenticateUser, asyncHandler(postController.deletePost));
 
 export { postRouter };

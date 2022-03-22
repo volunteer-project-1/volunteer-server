@@ -130,4 +130,4 @@ GET "/api/v1/post" // 게시글 목록 가져오기
 POST "/api/v1/post" // 게시글 생성
 GET "/api/v1/post/:id" // 게시글 id로 검색
 PATCH "/api/v1/post/:id" // 게시글 수정
-```
+``` 
