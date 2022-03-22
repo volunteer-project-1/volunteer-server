@@ -13,6 +13,24 @@ type ReqParams = {
 export class PostController implements IPostController {
   constructor(private readonly postService: PostService) {}
 
+  findPostById = async (
+    { params: { id } }: Request<ReqParams>,
+    res: Response
+  ) => {
+    const parsedInt = Number(id);
+
+    if (!id || !parsedInt) {
+      throw new BadReqError();
+    }
+
+    const post = await this.postService.findPostById(parsedInt);
+    if (!post) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ post });
+  };
+
   // :TODO 몇몇 유저만 입력가능하도록 미들웨어 추가
   createPost = async ({ body, user }: Request, res: Response) => {
     await validateDto(new CreatePostDto(body));

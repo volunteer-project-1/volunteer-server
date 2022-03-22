@@ -1,6 +1,6 @@
 import { Service } from "typedi";
 import { OkPacket } from "mysql2/promise";
-import { IPost, IPostDAO, IUpdatePost } from "../types";
+import { IFindPost, IPost, IPostDAO, IUpdatePost } from "../types";
 import { findOneOrWhole, insert, MySQL, update } from "../db";
 import { queryTransactionWrapper } from "../utils";
 import { POSTS } from "../constants";
@@ -64,5 +64,18 @@ export class PostDAO implements IPostDAO {
         WHERE id = ?
     `;
     return update({ query, values: [post, id] }, pool)();
+  }
+
+  async findPostById(postId: number): Promise<IFindPost> {
+    const pool = this.mysql.getPool();
+
+    const query = `
+      Select id, type, title, content, view_count, created_at, updated_at 
+      FROM ${POSTS} 
+      WHERE id = ?;
+    `;
+    const [rows] = await findOneOrWhole({ query, values: [postId] }, pool)();
+
+    return rows[0] as IFindPost;
   }
 }

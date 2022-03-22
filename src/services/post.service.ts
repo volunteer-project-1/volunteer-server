@@ -7,6 +7,10 @@ import { IPostService } from "../types";
 export class PostService implements IPostService {
   constructor(private postDAO: PostDAO) {}
 
+  findPostById(id: number) {
+    return this.postDAO.findPostById(id);
+  }
+
   createPost(userId: number, data: any) {
     return this.postDAO.createPost(userId, data);
   }

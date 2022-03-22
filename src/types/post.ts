@@ -14,6 +14,8 @@ export interface IPost extends DefaultTime {
   view_count: number;
 }
 
+export interface IFindPost extends Omit<IPost, "user_id"> {}
+
 export interface ICreatePost {
   user_id: number;
   type: string;
@@ -26,6 +28,7 @@ export interface IUpdatePost {
 }
 
 export interface IPostDAO {
+  findPostById: (id: number) => Promise<IFindPost>;
   createPost: (userId: number, data: any) => Promise<{ post: OkPacket }>;
   find: ({ start, limit }: {
     start: number;
@@ -38,6 +41,7 @@ export interface IPostDAO {
 }
 
 export interface IPostService {
+  findPostById: (postId: number) => Promise<IFindPost>;
   createPost: (userId: number, data: any) => Promise<{ post: OkPacket }>;
   find: (data: {
     start: number;
@@ -50,6 +54,7 @@ export interface IPostService {
 }
 
 export interface IPostController {
+  findPostById: (req: Request, res: Response) => Promise<Response>;
   createPost: (req: Request, res: Response) => Promise<Response>;
   find: (req: Request, res: Response) => Promise<Response>;
   updatePostById: (req: Request, res: Response) => Promise<Response>;
