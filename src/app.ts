@@ -22,9 +22,12 @@ import { HTTP_STATUS_CODE } from "./constants";
 export async function startApp() {
   const app = express();
 
-  await Container.get(Redis).initialize(session);
-  const RedisStore = Container.get(Redis).getRedisStore();
-  await Container.get(MySQL).connect();
+  const redis = Container.get(Redis);
+  await redis.initialize(session);
+  const RedisStore = redis.getRedisStore();
+
+  const mysql = Container.get(MySQL);
+  await mysql.connect();
 
   app.use(helmet());
 
@@ -44,9 +47,11 @@ export async function startApp() {
   app.use(passport.session());
   app.use(loggingReq);
 
-  app.get("/health", (_, res) => {
-    res.send("ok2");
-  });
+  //   app.get("/health", async (_, res) => {
+  //     const t1 = await mysql.getHealthCheck();
+  //     const t2 = await redis.getHealthCheck();
+  //     res.json({ status: "ok", t1, t2 });
+  //   });
 
   app.use(API_PREFIX, routes);
 

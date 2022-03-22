@@ -15,7 +15,7 @@ export class MySQL {
       }
       this.pool = createPool(DB_CONFIG);
 
-      logger.info("DB CONNECTED");
+      logger.info("MySQL CONNECTED");
     } catch (err) {
       logger.error(err);
     }
@@ -23,7 +23,7 @@ export class MySQL {
 
   getPool() {
     if (!this.pool) {
-      logger.info("DB RE CONNECTED");
+      logger.info("MySQL CONNECTED");
       this.pool = createPool(DB_CONFIG);
     }
     return this.pool;
@@ -33,7 +33,15 @@ export class MySQL {
     return this.getPool().getConnection();
   }
 
-  closePool() {
-    return this.pool?.end();
+  async getPing() {
+    return this.getConnection().then((c) => c.ping());
+  }
+
+  async closePool() {
+    return this.getPool()
+      .end()
+      .then(() => {
+        logger.info("MySQL Pool is DisConnected");
+      });
   }
 }
