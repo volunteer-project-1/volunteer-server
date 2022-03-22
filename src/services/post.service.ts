@@ -1,5 +1,6 @@
 import { Service } from "typedi";
 import { PostDAO } from "../daos";
+import { UpdatePostDto } from "../dtos";
 import { IPostService } from "../types";
 
 @Service()
@@ -12,5 +13,9 @@ export class PostService implements IPostService {
 
   find(data: {start: number, limit: number}) {
     return this.postDAO.find(data);
+  }
+
+  updatePost(id: number, data: UpdatePostDto) {
+    return this.postDAO.updatePost(id, data);
   }
 }

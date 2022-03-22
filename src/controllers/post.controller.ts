@@ -2,8 +2,12 @@ import { Service } from "typedi";
 import { Request, Response } from "express";
 import { IPostController } from "../types";
 import { PostService } from "../services";
-import { validateDto } from "../utils";
-import { CreatePostDto } from "../dtos";
+import { BadReqError, NotFoundError, validateDto } from "../utils";
+import { CreatePostDto, UpdatePostDto } from "../dtos";
+
+type ReqParams = {
+  id?: string;
+};
 
 @Service()
 export class PostController implements IPostController {
@@ -24,5 +28,24 @@ export class PostController implements IPostController {
     const posts = await this.postService.find({start: Number(start), limit: Number(limit)});
 
     return res.json({ posts: posts}).status(200);
-  }
+  };
+
+  updatePostById = async (
+    { params: { id }, body }: Request<ReqParams, unknown, UpdatePostDto>,
+    res: Response
+  ) => {
+    const parsedInt = Number(id);
+    if (!id || !parsedInt) {
+      throw new BadReqError();
+    }
+
+    await validateDto(new UpdatePostDto(body));
+
+    const [result] = await this.postService.updatePost(parsedInt, body);
+    if (result.affectedRows === 0) {
+      throw new NotFoundError();
+    }
+
+    return res.sendStatus(204);
+  };
 }

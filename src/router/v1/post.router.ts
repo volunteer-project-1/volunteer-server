@@ -12,4 +12,7 @@ postRouter.route("/")
     .get(asyncHandler(postController.find))
     .post(authenticateUser, asyncHandler(postController.createPost));
 
+postRouter.route("/:id")
+    .patch(authenticateUser, asyncHandler(postController.updatePostById));
+
 export { postRouter };

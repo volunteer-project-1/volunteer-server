@@ -1,7 +1,7 @@
 import { Service } from "typedi";
 import { OkPacket } from "mysql2/promise";
-import { IPost, IPostDAO } from "../types";
-import { findOneOrWhole, insert, MySQL } from "../db";
+import { IPost, IPostDAO, IUpdatePost } from "../types";
+import { findOneOrWhole, insert, MySQL, update } from "../db";
 import { queryTransactionWrapper } from "../utils";
 import { POSTS } from "../constants";
 
@@ -53,5 +53,16 @@ export class PostDAO implements IPostDAO {
     }
 
     return rows as IPost[];
+  }
+
+  updatePost(id: number, { post }: IUpdatePost) {
+    const pool = this.mysql.getPool();
+
+    const query = `
+        UPDATE ${POSTS}
+        SET ?
+        WHERE id = ?
+    `;
+    return update({ query, values: [post, id] }, pool)();
   }
 }

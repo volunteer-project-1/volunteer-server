@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { OkPacket } from "mysql2/promise";
+import { FieldPacket, OkPacket, ResultSetHeader } from "mysql2/promise";
 import { DefaultTime } from ".";
+import { UpdatePostDto } from "../dtos";
 
 // 기본 타입
 export interface IPost extends DefaultTime {
@@ -20,12 +21,20 @@ export interface ICreatePost {
   content: string;
 }
 
+export interface IUpdatePost {
+  post: Partial<Omit<IPost, "id" | "user_id">>;
+}
+
 export interface IPostDAO {
   createPost: (userId: number, data: any) => Promise<{ post: OkPacket }>;
   find: ({ start, limit }: {
     start: number;
     limit: number;
-  }) => Promise<IPost[] | undefined>
+  }) => Promise<IPost[] | undefined>;
+  updatePost: (
+    id: number,
+    data: UpdatePostDto
+  ) => Promise<[ResultSetHeader, FieldPacket[]]>;
 }
 
 export interface IPostService {
@@ -33,10 +42,15 @@ export interface IPostService {
   find: (data: {
     start: number;
     limit: number;
-  }) =>  Promise<IPost[] | undefined>
+  }) =>  Promise<IPost[] | undefined>;
+  updatePost: (
+    resumeId: number,
+    data: UpdatePostDto
+  ) => Promise<[ResultSetHeader, FieldPacket[]]>;
 }
 
 export interface IPostController {
   createPost: (req: Request, res: Response) => Promise<Response>;
   find: (req: Request, res: Response) => Promise<Response>;
+  updatePostById: (req: Request, res: Response) => Promise<Response>;
 }

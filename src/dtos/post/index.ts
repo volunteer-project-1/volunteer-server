@@ -2,6 +2,7 @@
 import { IsNumber, IsString } from "class-validator";
 
 export * from "./create-post.dto";
+export * from "./update-post.dto";
 
 export class PostDto {
   @IsNumber()
