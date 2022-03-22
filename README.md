@@ -67,6 +67,8 @@ POST "/health2" return `request.body`
 
 ```
 GET "/api/v1/auth/google"  // 구글 로그인
+POST "/api/v1/auth/local"  // 로컬 로그인
+POST "/api/v1/auth/signup" // 로컬 회원가입
 ```
 
 - user
@@ -119,4 +121,13 @@ delete "/api/v1/resume/:id/preference-job" // preference-job 삭제
 PATCH "/api/v1/resume/:id/preference-location" // preference-location 수정
 delete "/api/v1/resume/:id/preference-location" // preference-location 삭제
 
+```
+
+- post (게시판)
+
+```
+GET "/api/v1/post" // 게시글 목록 가져오기
+POST "/api/v1/post" // 게시글 생성
+GET "/api/v1/post/:id" // 게시글 id로 검색
+PATCH "/api/v1/post/:id" // 게시글 수정
 ```
