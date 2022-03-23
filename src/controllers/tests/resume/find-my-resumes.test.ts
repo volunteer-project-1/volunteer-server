@@ -64,12 +64,16 @@ describe("findResumeById test", () => {
     } = await userService.createUserBySocial(email);
     await resumeService.createResume(
       insertId,
-      newResumeFactory({ resume: { title: "1번 이력서", content: "1번" } })
+      newResumeFactory({
+        resume: { title: "1번 이력서", content: "1번", is_public: true },
+      })
     );
 
     await resumeService.createResume(
       insertId,
-      newResumeFactory({ resume: { title: "2번 이력서", content: "2번" } })
+      newResumeFactory({
+        resume: { title: "2번 이력서", content: "2번", is_public: true },
+      })
     );
 
     const res = await request(await startApp()).get(`${URL}`);

@@ -26,7 +26,7 @@ export const newResumeFactory = ({
   preference,
 }: Partial<ICreateResume> = {}): ICreateResume => {
   return {
-    resume: resume || { title: "제목", content: "내용" },
+    resume: resume || { title: "제목", content: "내용", is_public: true },
     resumeInfo: resumeInfo || {
       name: "김도한",
       birthday: convertDateToTimestamp(),
