@@ -91,6 +91,7 @@ PATCH "/api/v1/user/profile" // 내 profile 수정
 ```
 POST "/api/v1/resume" // resume 생성
 GET "/api/v1/resume" // 내 resume 전체 찾기
+GET "/api/v1/resume/public?start=1&limit=5" // public resume 찾기(예. 페이지네이션 start 1 부터 5개 검색)
 
 GET "/api/v1/resume/:id" // resume 찾기 (관련 테이블 다 같이)
 PATCH "/api/v1/resume/:id" // resume 수정
