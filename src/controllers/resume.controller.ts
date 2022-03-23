@@ -50,6 +50,30 @@ export class ResumeController implements IResumeController {
     return res.sendStatus(204);
   };
 
+  findPublicResumes = async (
+    {
+      query: { start, limit },
+    }: Request<unknown, unknown, unknown, { start: string; limit: string }>,
+    res: Response
+  ) => {
+    assertNonNullish(start);
+    assertNonNullish(limit);
+
+    const parsedQuery = {
+      start: parseToNumberOrThrow(start),
+      limit: parseToNumberOrThrow(limit),
+    };
+    const resumes = await this.resumeService.findPublicResumes(parsedQuery);
+
+    if (!resumes) {
+      return res
+        .status(204)
+        .json({ message: "공개된 이력서가 존재하지 않습니다." });
+    }
+
+    return res.json({ resumes });
+  };
+
   findMyResumes = async ({ user }: Request, res: Response) => {
     const resumes = await this.resumeService.findMyResumes(user!.id);
 
