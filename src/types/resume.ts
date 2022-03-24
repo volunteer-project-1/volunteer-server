@@ -26,6 +26,7 @@ export interface IResume extends DefaultTime {
   id: number;
   title: string;
   content: string;
+  is_public: boolean;
   user_id: number;
 }
 
@@ -188,6 +189,13 @@ export interface IResumeDAO {
     userId: number,
     data: CreateResumeDto
   ) => Promise<{ resume: OkPacket }>;
+  findPublicResumes: ({
+    start,
+    limit,
+  }: {
+    start: number;
+    limit: number;
+  }) => Promise<IFindResume[] | undefined>;
   findMyResumes: (id: number) => Promise<IFindResume[]>;
   findResumeById: (id: number) => Promise<IFindWholeResume>;
   updateResume: (
@@ -266,6 +274,13 @@ export interface IResumeService {
     id: number,
     data: CreateResumeDto
   ) => Promise<{ resume: OkPacket }>;
+  findPublicResumes: ({
+    start,
+    limit,
+  }: {
+    start: number;
+    limit: number;
+  }) => Promise<IFindResume[] | undefined>;
   findMyResumes: (id: number) => Promise<IFindResume[]>;
   findResumeById: (resumeId: number) => Promise<IFindWholeResume>;
   updateResume: (
@@ -342,6 +357,10 @@ export interface IResumeService {
 export interface IResumeController {
   uploadVideo: (req: Request, res: Response) => Promise<Response>;
   createResume: (req: Request, res: Response) => Promise<Response>;
+  findPublicResumes: (
+    req: Request<unknown, unknown, unknown, { start: string; limit: string }>,
+    res: Response
+  ) => Promise<Response>;
   findMyResumes: (req: Request, res: Response) => Promise<Response>;
 
   findResumeById: (req: Request, res: Response) => Promise<Response>;

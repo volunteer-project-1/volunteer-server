@@ -22,6 +22,10 @@ resumeRouter
   .post(isAuthenticate, asyncHandler(resumeController.createResume));
 
 resumeRouter
+  .route("/public")
+  .get(asyncHandler(resumeController.findPublicResumes));
+
+resumeRouter
   .route("/:id")
   .get(isAuthenticate, asyncHandler(resumeController.findResumeById))
   .patch(isAuthenticate, asyncHandler(resumeController.updateResumeById))

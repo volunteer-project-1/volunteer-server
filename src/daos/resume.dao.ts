@@ -221,6 +221,31 @@ export class ResumeDAO implements IResumeDAO {
     };
   }
 
+  async findPublicResumes({
+    start,
+    limit,
+  }: {
+    start: number;
+    limit: number;
+  }): Promise<IFindResume[] | undefined> {
+    const pool = this.mysql.getPool();
+    const query = `
+        SELECT * 
+        FROM ${RESUME_TABLE} 
+        WHERE id >= ? AND is_public = true ORDER BY id LIMIT ?`;
+
+    const [rows] = await findOneOrWhole(
+      { query, values: [start, limit] },
+      pool
+    )();
+
+    if (rows.length === 0) {
+      return undefined;
+    }
+
+    return rows as IFindResume[];
+  }
+
   async findMyResumes(id: number): Promise<IFindResume[]> {
     const pool = this.mysql.getPool();
 

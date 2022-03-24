@@ -32,6 +32,9 @@ export class ResumeDto {
 
   @IsString()
   content!: string;
+
+  @IsBoolean({ always: false })
+  is_public!: boolean;
 }
 
 export class ResumeInfoDto {
