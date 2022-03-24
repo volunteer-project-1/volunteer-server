@@ -1,5 +1,5 @@
-jest.mock("./src/middlewares/auth.ts", () => {
-  const orig = jest.requireActual("./src/middlewares/auth.ts");
+jest.mock("../src/middlewares/auth.ts", () => {
+  const orig = jest.requireActual("../src/middlewares/auth.ts");
 
   return {
     __esmodule: true,

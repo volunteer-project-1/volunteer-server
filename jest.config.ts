@@ -16,12 +16,12 @@ const config: Config.InitialOptions = {
   },
   testTimeout: 30000,
   setupFilesAfterEnv: [
-    "./jest.setup.redis-mock.ts",
-    "./jest.setup.passport.ts",
-    "./jest.setup.aws-sdk.ts",
-    "./jest.setup.multer.ts",
-    "./jest.setup.authenticate.ts",
+    "./jest/jest.setup.logger.ts",
+    "./jest/jest.setup.redis-mock.ts",
+    "./jest/jest.setup.passport.ts",
+    "./jest/jest.setup.aws-sdk.ts",
+    "./jest/jest.setup.multer.ts",
+    "./jest/jest.setup.authenticate.ts",
   ],
 };
-
 export default config;
