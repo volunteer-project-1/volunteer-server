@@ -1,5 +1,5 @@
-jest.mock("./src/middlewares/multer", () => {
-  const orig = jest.requireActual("./src/middlewares/multer");
+jest.mock("../src/middlewares/multer", () => {
+  const orig = jest.requireActual("../src/middlewares/multer");
 
   return {
     ...orig,

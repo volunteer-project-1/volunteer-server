@@ -1,5 +1,5 @@
-jest.mock("./src/utils/logger.ts", () => {
-  const orig = jest.requireActual("./src/utils/logger.ts");
+jest.mock("../src/utils/logger.ts", () => {
+  const orig = jest.requireActual("../src/utils/logger.ts");
 
   return {
     __esmodule: true,
