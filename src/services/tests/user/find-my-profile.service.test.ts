@@ -63,7 +63,7 @@ describe("findMyProfile Test", () => {
       })
     );
     expect(result.user_meta).toEqual(
-      expect.objectContaining({ is_verified: 0, type: "employee" })
+      expect.objectContaining({ is_verified: 0, type: "seeker" })
     );
   });
 });
