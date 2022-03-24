@@ -33,7 +33,7 @@ exports.up = function (db) {
       CREATE TABLE if not exists user_metas (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         is_verified BOOLEAN DEFAULT false,
-        type VARCHAR(10) DEFAULT 'employee',
+        type VARCHAR(10) DEFAULT 'seeker',
         user_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
