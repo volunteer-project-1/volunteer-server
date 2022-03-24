@@ -16,6 +16,7 @@ const config: Config.InitialOptions = {
   },
   testTimeout: 30000,
   setupFilesAfterEnv: [
+    "./jest.setup.logger.ts",
     "./jest.setup.redis-mock.ts",
     "./jest.setup.passport.ts",
     "./jest.setup.aws-sdk.ts",
