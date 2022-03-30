@@ -12,8 +12,14 @@ export const CLIENT_DOMAIN =
 export const SESSION_SECRET = process.env.SESSION_SECRET || "secretDevelopment";
 
 export const DB_CONFIG: PoolOptions = isProd
-  ? // TODO 추후에 배포될 경우 추가
-    {}
+  ? {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USERNAME,
+      port: Number(process.env.DB_PORT),
+      database: process.env.MYSQL_DATABASE,
+      password: process.env.DB_PASSWORD,
+      connectionLimit: 100,
+    }
   : {
       host: process.env.DB_HOST || "localhost",
       user: process.env.DB_USERNAME || "root",

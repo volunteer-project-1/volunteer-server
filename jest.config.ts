@@ -2,6 +2,7 @@
 import type { Config } from "@jest/types";
 
 const config: Config.InitialOptions = {
+  clearMocks: true,
   preset: "ts-jest",
   testEnvironment: "node",
   moduleFileExtensions: ["js", "ts", "json"],
@@ -17,6 +18,9 @@ const config: Config.InitialOptions = {
   testTimeout: 30000,
   setupFilesAfterEnv: [
     "./jest/jest.setup.logger.ts",
+    "./jest/jest.setup.set-off-keep-alive.ts",
+    "./jest/jest.setup.terminus.ts",
+    "./jest/jest.setup.health-check.ts",
     "./jest/jest.setup.redis-mock.ts",
     "./jest/jest.setup.passport.ts",
     "./jest/jest.setup.aws-sdk.ts",
