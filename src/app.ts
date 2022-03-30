@@ -6,6 +6,7 @@ import passport from "passport";
 import session from "express-session";
 import cors from "cors";
 import helmet from "helmet";
+
 import routes from "./router";
 import { API_PREFIX, CORS_CONFIG, SESSION_OPTION } from "./config";
 import {
@@ -14,6 +15,7 @@ import {
   logMulterErrorMiddleware,
   logDbErrorMiddleware,
   logInternalServerErrorMiddleware,
+  setOffKeepAlive,
 } from "./middlewares";
 import passportConfig from "./passports";
 import { MySQL, Redis } from "./db";
@@ -28,6 +30,8 @@ export async function startApp() {
 
   const mysql = Container.get(MySQL);
   await mysql.connect();
+
+  setOffKeepAlive(app);
 
   app.use(helmet());
 
@@ -46,12 +50,6 @@ export async function startApp() {
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(loggingReq);
-
-  //   app.get("/health", async (_, res) => {
-  //     const t1 = await mysql.getHealthCheck();
-  //     const t2 = await redis.getHealthCheck();
-  //     res.json({ status: "ok", t1, t2 });
-  //   });
 
   app.use(API_PREFIX, routes);
 
