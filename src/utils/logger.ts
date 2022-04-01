@@ -1,23 +1,28 @@
-import winston, { format } from "winston";
+import { format, transports, Logger, createLogger } from "winston";
 import winstonDaily from "winston-daily-rotate-file";
 import { Container } from "typedi";
 import process from "process";
+import { isProd } from "../config";
 
-const { combine, timestamp, printf } = format;
+const { combine, timestamp, printf, colorize } = format;
 
 const LOG_DIR = "logs" as const;
 
 // eslint-disable-next-line no-shadow
 const myFormat = printf(({ message, timestamp, level }) => {
-  const fullMessage = `[#${process.pid}] ${timestamp} [${level}] ${message}`;
-  return fullMessage;
+  return `[#${process.pid}] ${timestamp} [${level}] ${message}`;
 });
 
-export const logger: winston.Logger = winston.createLogger({
+const logger: Logger = createLogger({
   exitOnError: false,
-  format: combine(timestamp(), myFormat),
+  format: combine(
+    timestamp({
+      format: "YYYY-MM-DD HH:mm:ss",
+    }),
+    myFormat
+  ),
   transports: [
-    new winston.transports.Console({
+    new transports.Console({
       format: combine(),
     }),
     // eslint-disable-next-line new-cap
@@ -41,5 +46,15 @@ export const logger: winston.Logger = winston.createLogger({
     }),
   ],
 });
+
+if (!isProd) {
+  logger.add(
+    new transports.Console({
+      format: combine(colorize({ all: true }), myFormat),
+    })
+  );
+}
+
+export { logger };
 
 Container.set("logger", logger);
