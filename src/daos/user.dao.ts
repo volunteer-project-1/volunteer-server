@@ -76,7 +76,7 @@ export class UserDAO implements IUserDAO {
 
   async findOneById(id: number): Promise<IUser | undefined> {
     const pool = this.mysql.getPool();
-    const query = `Select * FROM ${USER_TABLE} WHERE id=? LIMIT 1`;
+    const query = `Select id, email, created_at, updated_at FROM ${USER_TABLE} WHERE id=? LIMIT 1`;
     const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
 
     return rows[0] as IUser;
