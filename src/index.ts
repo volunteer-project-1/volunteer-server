@@ -27,7 +27,9 @@ startApp().then((app) => {
   createTerminus(server, terminusOption);
 
   server.listen(PORT, () => {
-    (<any>process).send("ready");
+    if (process.send) {
+      (<any>process).send("ready");
+    }
     logger.info(`
             ################################################
             🛡️ HTTP  Server listening on port: ${PORT} / ${process.env.NODE_ENV} 🛡️

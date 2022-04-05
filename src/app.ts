@@ -6,7 +6,7 @@ import passport from "passport";
 import session from "express-session";
 import cors from "cors";
 import helmet from "helmet";
-
+import colors from "colors";
 import routes from "./router";
 import { API_PREFIX, CORS_CONFIG, SESSION_OPTION } from "./config";
 import {
@@ -20,6 +20,7 @@ import {
 import passportConfig from "./passports";
 import { MySQL, Redis } from "./db";
 import { HTTP_STATUS_CODE } from "./constants";
+import { logger } from "./utils";
 
 export async function startApp() {
   const app = express();
@@ -54,8 +55,10 @@ export async function startApp() {
   app.use(API_PREFIX, routes);
 
   app.use("*", (_, res) => {
+    const message = "Un Valid URL";
+    logger.info(colors.red(JSON.stringify(message)));
     res.status(HTTP_STATUS_CODE.NOT_FOUND);
-    res.json({ message: "Un Valid URL" });
+    res.json({ message });
   });
 
   app.use(logMulterErrorMiddleware);

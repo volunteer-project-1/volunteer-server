@@ -1,6 +1,7 @@
 /node_modules
 /dist
 /logs
+/log-data
 .env.test
 .env
 
