@@ -5,18 +5,10 @@ import { startApp } from "../../../app";
 import { MySQL } from "../../../db";
 import { IComapny } from "../../../types";
 import { CompanyService } from "../../../services";
-// import { UserService } from "../../../services";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
 });
-
-// beforeEach(async () => {
-//   const email = "ehgks0083@gmail.com";
-
-//   const userService = Container.get(UserService);
-//   await userService.createUserBySocial(email);
-// });
 
 afterEach(async () => {
   const conn = await Container.get(MySQL).getConnection();
@@ -44,13 +36,13 @@ describe("findCompanyList test", () => {
 
   const companyService = Container.get(CompanyService);
 
-  it("GET '/',If Query not exists return 400", async () => {
+  it("GET '/', If Query not exists return 400", async () => {
     const res = await request(await startApp()).get(`${URL}`);
 
     expect(res.status).toBe(404);
   });
 
-  it("GET '/',If Query not a number return 400", async () => {
+  it("GET '/', If Query not a number return 400", async () => {
     const QUERY = { start: "un-valid-query", limit: 4 };
     const res = await request(await startApp())
       .get(`${URL}`)
@@ -61,7 +53,6 @@ describe("findCompanyList test", () => {
 
   it("GET '/', If company not exist return 204", async () => {
     const QUERY = { start: 1, limit: 4 };
-    // jest.spyOn(companyService, "findCompanyList").mockResolvedValue(undefined);
 
     const res = await request(await startApp())
       .get(`${URL}`)

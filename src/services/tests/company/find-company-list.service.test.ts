@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
-import { CompanyService, UserService } from "../..";
+import { CompanyService } from "../..";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
