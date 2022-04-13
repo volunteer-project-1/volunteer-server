@@ -238,7 +238,7 @@ export interface IResumeDAO {
     start: number;
     limit: number;
   }) => Promise<IFindResume[] | undefined>;
-  findMyResumes: (id: number) => Promise<IFindResume[]>;
+  findMyResumes: (id: number) => Promise<IFindResume[] | undefined>;
   findResumeById: (id: number) => Promise<IFindWholeResume>;
   updateResume: (
     id: number,
@@ -323,7 +323,7 @@ export interface IResumeService {
     start: number;
     limit: number;
   }) => Promise<IFindResume[] | undefined>;
-  findMyResumes: (id: number) => Promise<IFindResume[]>;
+  findMyResumes: (id: number) => Promise<IFindResume[] | undefined>;
   findResumeById: (resumeId: number) => Promise<IFindWholeResume>;
   updateResume: (
     resumeId: number,

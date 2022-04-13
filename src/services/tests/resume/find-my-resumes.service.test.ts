@@ -48,7 +48,7 @@ describe("findMyResumes Test", () => {
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(user.insertId);
 
-    expect(results.length).toBeLessThan(11);
+    expect(results!.length).toBeLessThan(11);
 
     // expect(results.title).toBe(data.resume.title);
     // expect(results.content).toBe(data.resume.content);

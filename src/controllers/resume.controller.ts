@@ -65,9 +65,7 @@ export class ResumeController implements IResumeController {
     const resumes = await this.resumeService.findPublicResumes(parsedQuery);
 
     if (!resumes) {
-      return res
-        .status(204)
-        .json({ message: "공개된 이력서가 존재하지 않습니다." });
+      return res.status(204).send();
     }
 
     return res.json({ resumes });
@@ -76,8 +74,8 @@ export class ResumeController implements IResumeController {
   findMyResumes = async ({ user }: Request, res: Response) => {
     const resumes = await this.resumeService.findMyResumes(user!.id);
 
-    if (resumes.length < 1) {
-      return res.status(204).json({ message: "이력서 없음" });
+    if (!resumes) {
+      return res.status(204).send();
     }
 
     return res.json({ resumes });
