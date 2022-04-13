@@ -4,7 +4,7 @@ import { findOneOrWhole, MySQL } from "../db";
 import { IComapny, IComapnyDAO } from "../types";
 
 @Service()
-export class ComapnyDAO implements IComapnyDAO {
+export class CompanyDAO implements IComapnyDAO {
   constructor(private readonly mysql: MySQL) {}
 
   async findCompanyList({
@@ -17,15 +17,25 @@ export class ComapnyDAO implements IComapnyDAO {
     const pool = this.mysql.getPool();
     const TYPE = "company";
 
-    const query2 = `SELECT * FROM ${USER_METAS_TABLE} WHERE type = ?`; // company
-    const query = `SELECT C.* FROM ${USER_TABLE} AS C JOIN (${query2}) AS M ON M.user_id = C.id WHERE C.id >= ? ORDER BY C.id LIMIT ?`;
+    const subQuery = `
+    SELECT * 
+    FROM ${USER_METAS_TABLE} 
+    WHERE type = ?`;
+
+    const query = `
+    SELECT C.* 
+    FROM ${USER_TABLE} AS C 
+    JOIN (${subQuery}) AS M ON M.user_id = C.id 
+    WHERE C.id >= ? 
+    ORDER BY C.id 
+    LIMIT ?`;
 
     const [rows] = await findOneOrWhole(
       { query, values: [TYPE, start, limit] },
       pool
     )();
 
-    if (rows.length === 0) {
+    if (!rows.length) {
       return undefined;
     }
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authRouter, resumeRouter, userRouter } from "./v1";
+import { authRouter, companyRouter, resumeRouter, userRouter } from "./v1";
 
 const router = Router();
 
@@ -21,25 +21,14 @@ const defaultRoutes: routes[] = [
     path: "/v1/resume",
     route: resumeRouter,
   },
+  {
+    path: "/v1/company",
+    route: companyRouter,
+  },
 ];
-
-// const devRoutes = [
-//   // routes available only in development mode
-//   {
-//     path: '/docs',
-//     route: docsRoute,
-//   },
-// ];
 
 defaultRoutes.forEach(({ path, route }) => {
   router.use(path, route);
 });
-
-/* istanbul ignore next */
-// if (config.env === 'development') {
-//   devRoutes.forEach((route) => {
-//     router.use(route.path, route.route);
-//   });
-// }
 
 export default router;
