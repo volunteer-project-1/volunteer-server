@@ -143,7 +143,6 @@ export class CertificateDto {
   institute!: string;
 
   @IsString()
-  //   @IsDateString()
   acquisition_at!: string;
 }
 

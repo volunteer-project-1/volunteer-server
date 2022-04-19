@@ -87,9 +87,9 @@ export interface ITraining {
 
 export interface ICertificate {
   id: number;
+  resume_id: number;
   name: string;
   institute: string;
-  resume_id: number;
   acquisition_at: string;
 }
 // 수상경력
