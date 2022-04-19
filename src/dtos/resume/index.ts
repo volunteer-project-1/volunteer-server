@@ -117,6 +117,36 @@ export class ActivityDto {
   description!: string;
 }
 
+export class TrainingDto {
+  @IsString()
+  name!: string;
+
+  @IsString()
+  institute!: string;
+
+  @IsString()
+  content!: string;
+
+  @IsString()
+  //   @IsDateString()
+  started_at!: string;
+
+  @IsString()
+  //   @IsDateString()
+  finished_at!: string;
+}
+export class CertificateDto {
+  @IsString()
+  name!: string;
+
+  @IsString()
+  institute!: string;
+
+  @IsString()
+  //   @IsDateString()
+  acquisition_at!: string;
+}
+
 export class AwardDto {
   @IsString()
   institute!: string;
@@ -130,6 +160,11 @@ export class AwardDto {
   finished_at!: string;
 }
 
+export class PortfolioDto {
+  @IsString()
+  @IsUrl()
+  url!: string;
+}
 export class MyVideoDto {
   @IsString()
   @IsUrl()

@@ -9,11 +9,19 @@ const resumeRouter = Router();
 const resumeController = Container.get(ResumeController);
 
 resumeRouter
-  .route("/upload")
+  .route("/video")
   .post(
     isAuthenticate,
-    upload.single("url"),
-    asyncHandler(resumeController.uploadVideo)
+    upload("video").single("url"),
+    asyncHandler(resumeController.upload)
+  );
+
+resumeRouter
+  .route("/pdf")
+  .post(
+    isAuthenticate,
+    upload("pdf").single("url"),
+    asyncHandler(resumeController.upload)
   );
 
 resumeRouter

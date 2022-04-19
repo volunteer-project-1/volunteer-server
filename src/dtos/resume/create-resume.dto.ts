@@ -11,16 +11,19 @@ import {
   ActivityDto,
   AwardDto,
   CareerDto,
+  CertificateDto,
   EducationDto,
   HelperVideoDto,
   MyVideoDto,
+  PortfolioDto,
   PreferenceDto,
   ResumeDto,
   ResumeInfoDto,
+  TrainingDto,
 } from ".";
 import { ICreateResume } from "../../types";
 
-export class CreateResumeDto {
+export class CreateResumeDto implements ICreateResume {
   @IsDefined()
   @IsNotEmptyObject()
   @IsObject()
@@ -54,8 +57,25 @@ export class CreateResumeDto {
   @IsDefined()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
+  @Type(() => TrainingDto)
+  trainings!: TrainingDto[];
+
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => CertificateDto)
+  certificates!: CertificateDto[];
+
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
   @Type(() => AwardDto)
   awards!: AwardDto[];
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => PortfolioDto)
+  portfolio!: PortfolioDto;
 
   @IsNotEmptyObject()
   @ValidateNested()

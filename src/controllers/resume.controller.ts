@@ -32,7 +32,7 @@ export class ResumeController implements IResumeController {
     private readonly multerS3: MulterS3
   ) {}
 
-  uploadVideo = async ({ file }: Request<unknown, unknown>, res: Response) => {
+  upload = async ({ file }: Request<unknown, unknown>, res: Response) => {
     assertNonNullish(file?.key);
     const url = this.multerS3.getSignedUrl(file.key);
 

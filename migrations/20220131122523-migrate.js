@@ -122,6 +122,32 @@ exports.up = function (db) {
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
 
+      CREATE TABLE if not exists trainings (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30),
+        institute VARCHAR(100),
+        started_at DATETIME(3) DEFAULT NULL,
+        finished_at DATETIME(3) DEFAULT NULL,
+        content VARCHAR(300),
+
+        resume_id BIGINT UNSIGNED NOT NULL,
+
+        PRIMARY KEY (id),
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE if not exists certificates (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30),
+        institute VARCHAR(100),
+        acquisition_at DATETIME(3) DEFAULT NULL,
+
+        resume_id BIGINT UNSIGNED NOT NULL,
+
+        PRIMARY KEY (id),
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+      );
+
       CREATE TABLE if not exists awards (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(20),
@@ -130,6 +156,15 @@ exports.up = function (db) {
         finished_at DATETIME(3) DEFAULT NULL,
         resume_id BIGINT UNSIGNED NOT NULL,
 
+        PRIMARY KEY (id),
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE if not exists portfolios (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        url VARCHAR(255),
+
+        resume_id BIGINT UNSIGNED NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );

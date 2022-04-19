@@ -34,6 +34,8 @@ import {
   PREFERNCE_JOB_TABLE,
   PREFERNCE_LOCATION_TABLE,
   USER_METAS_TABLE,
+  TRAINING_TABLE,
+  PORTFOLIO_TABLE,
 } from "../constants";
 
 @Service()
@@ -48,7 +50,10 @@ export class ResumeDAO implements IResumeDAO {
       educations,
       careers,
       activities,
+      trainings,
+      certificates,
       awards,
+      portfolio,
       myVideo,
       helperVideo,
       preference: { preferenceJobs, preferenceLocations, ...preference },
@@ -122,6 +127,33 @@ export class ResumeDAO implements IResumeDAO {
       );
     });
 
+    const trainingQueryFunctions = trainings.map((training) => {
+      const trainingFieldNames = Object.keys(training).concat("resume_id");
+      const trainingQuery = `INSERT INTO ${TRAINING_TABLE} (${trainingFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+      return insert(
+        {
+          query: trainingQuery,
+          values: [Object.values(training)],
+        },
+        conn
+      );
+    });
+
+    const certificateQueryFunctions = certificates.map((certificate) => {
+      const certificateFieldNames =
+        Object.keys(certificate).concat("resume_id");
+      const certificateQuery = `INSERT INTO ${TRAINING_TABLE} (${certificateFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+      return insert(
+        {
+          query: certificateQuery,
+          values: [Object.values(certificate)],
+        },
+        conn
+      );
+    });
+
     const awardQueryFunctions = awards.map((award) => {
       const awardFieldNames = Object.keys(award).concat("resume_id");
       const awardQuery = `INSERT INTO ${AWARD_TABLE} (${awardFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
@@ -131,6 +163,16 @@ export class ResumeDAO implements IResumeDAO {
         conn
       );
     });
+
+    const portfolioFieldNames = Object.keys(portfolio).concat("resume_id");
+    const portfolioQuery = `INSERT INTO ${PORTFOLIO_TABLE} (${portfolioFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+    const portfolioFunction = insert(
+      {
+        query: portfolioQuery,
+        values: [Object.values(portfolioFieldNames)],
+      },
+      conn
+    );
 
     const myVideoFieldNames = Object.keys(myVideo).concat("resume_id");
     const myVideoQuery = `INSERT INTO ${MY_VIDEO_TABLE} (${myVideoFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
@@ -204,7 +246,10 @@ export class ResumeDAO implements IResumeDAO {
         ...educationQueryFunctions,
         ...carrerQueryFunctions,
         ...activityQueryFunctions,
+        ...trainingQueryFunctions,
+        ...certificateQueryFunctions,
         ...awardQueryFunctions,
+        portfolioFunction,
         myVideoQueryFunction,
         helperVideoQueryFunction,
         preferenceQueryFunction,
