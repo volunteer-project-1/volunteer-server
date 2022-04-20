@@ -9,5 +9,10 @@ jest.mock("../src/middlewares/auth.ts", () => {
       req.user = user;
       next();
     }),
+
+    isCompanyAuthenticate: jest.fn(async (req, _res, next) => {
+      req.user = { id: 1, email: "company@gmail.com", type: "company" };
+      next();
+    }),
   };
 });

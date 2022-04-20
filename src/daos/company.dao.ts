@@ -7,7 +7,7 @@ import {
   USER_TABLE,
 } from "../constants";
 import { findOneOrWhole, insert, MySQL } from "../db";
-import { ICompany, IComapnyDAO, ICreateCompany } from "../types";
+import { ICompany, IComapnyDAO, ICreateCompany, ICompanyInfo } from "../types";
 import { queryTransactionWrapper } from "../utils";
 
 @Service()
@@ -65,6 +65,22 @@ export class CompanyDAO implements IComapnyDAO {
       info: results[2] as OkPacket,
       history: results[3] as OkPacket,
     };
+  }
+
+  async findCompanyInfo(id: number) {
+    const conn = await this.mysql.getConnection();
+    const query = `
+    SELECT * 
+    FROM ${COMPANY_INFO_TABLE} 
+    WHERE user_id = ? 
+    LIMIT 1`;
+
+    const [rows] = await findOneOrWhole({ query, values: [id] }, conn)();
+
+    if (!rows.length) {
+      return undefined;
+    }
+    return rows[0] as ICompanyInfo;
   }
 
   async findCompanyList({

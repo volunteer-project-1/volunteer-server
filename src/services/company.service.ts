@@ -22,4 +22,8 @@ export class CompanyService implements ICompanyService {
   findCompanyList(data: { start: number; limit: number }) {
     return this.companyDAO.findCompanyList(data);
   }
+
+  findCompanyInfo(id: number) {
+    return this.companyDAO.findCompanyInfo(id);
+  }
 }

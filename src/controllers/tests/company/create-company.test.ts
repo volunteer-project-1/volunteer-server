@@ -31,7 +31,7 @@ afterAll(async () => {
 });
 
 describe("create company api test", () => {
-  const URL = "/api/v1/company";
+  const URL = "/api/v1/auth/local/signup/company";
 
   //   const companyService = Container.get(CompanyService);
 
@@ -43,7 +43,7 @@ describe("create company api test", () => {
     expect(res.status).toBe(400);
   });
 
-  it("if passwordConfirm not valid, return 400", async () => {
+  it("if passwordConfirm not valid, return 200", async () => {
     const body: CreateCompanyByLocalDto = {
       email: "company@gmail.com",
       password: "comcomcomcom123!A.",

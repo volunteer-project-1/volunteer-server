@@ -49,6 +49,8 @@ export interface ICompanyService {
     limit: number;
   }) => Promise<ICompany[] | undefined>;
 
+  findCompanyInfo: (id: number) => Promise<ICompanyInfo | undefined>;
+
   createCompany: (
     data: CreateCompanyByLocalDto
   ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
@@ -58,6 +60,7 @@ export interface IComapnyDAO {
   createCompany: (
     data: ICreateCompany
   ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
+  findCompanyInfo: (id: number) => Promise<ICompanyInfo | undefined>;
   findCompanyList: ({
     start,
     limit,
