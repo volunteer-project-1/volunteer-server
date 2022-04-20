@@ -7,14 +7,14 @@ import {
   USER_TABLE,
 } from "../constants";
 import { findOneOrWhole, insert, MySQL } from "../db";
-import { ICompany, IComapnyDAO, ICreateComapny } from "../types";
+import { ICompany, IComapnyDAO, ICreateCompany } from "../types";
 import { queryTransactionWrapper } from "../utils";
 
 @Service()
 export class CompanyDAO implements IComapnyDAO {
   constructor(private readonly mysql: MySQL) {}
 
-  async createCompany({ email, password, salt }: ICreateComapny) {
+  async createCompany({ email, password, salt }: ICreateCompany) {
     const conn = await this.mysql.getConnection();
 
     const LAST_INSERTED_ID = "@last_inserted_id";

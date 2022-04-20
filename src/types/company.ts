@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { OkPacket } from "mysql2/promise";
 import { IUser } from ".";
+import { CreateCompanyByLocalDto } from "../dtos";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ICompany extends IUser {}
@@ -31,7 +32,7 @@ export interface ICompanyHistory {
   user_id: string;
 }
 
-export interface ICreateComapny {
+export interface ICreateCompany {
   email: string;
   password: string;
   salt: string;
@@ -47,11 +48,15 @@ export interface ICompanyService {
     start: number;
     limit: number;
   }) => Promise<ICompany[] | undefined>;
+
+  createCompany: (
+    data: CreateCompanyByLocalDto
+  ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
 }
 
 export interface IComapnyDAO {
   createCompany: (
-    data: ICreateComapny
+    data: ICreateCompany
   ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
   findCompanyList: ({
     start,
