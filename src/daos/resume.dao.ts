@@ -36,6 +36,7 @@ import {
   USER_METAS_TABLE,
   TRAINING_TABLE,
   PORTFOLIO_TABLE,
+  CERTIFICATE_TABLE,
 } from "../constants";
 
 @Service()
@@ -143,7 +144,7 @@ export class ResumeDAO implements IResumeDAO {
     const certificateQueryFunctions = certificates.map((certificate) => {
       const certificateFieldNames =
         Object.keys(certificate).concat("resume_id");
-      const certificateQuery = `INSERT INTO ${TRAINING_TABLE} (${certificateFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+      const certificateQuery = `INSERT INTO ${CERTIFICATE_TABLE} (${certificateFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
 
       return insert(
         {
@@ -169,7 +170,7 @@ export class ResumeDAO implements IResumeDAO {
     const portfolioFunction = insert(
       {
         query: portfolioQuery,
-        values: [Object.values(portfolioFieldNames)],
+        values: [Object.values(portfolio)],
       },
       conn
     );

@@ -15,6 +15,7 @@ const checkFileCheck = (
   cb: FileFilterCallback
 ) => {
   // Allowed ext
+  //   const filetypes = /mp4|avi|wmv|m4a/;
   const filetypes =
     type === "video" ? /mp4|avi|wmv|m4a/ : type === "pdf" ? /pdf|hwp/ : /etc/;
   // Check ext
@@ -29,27 +30,20 @@ const checkFileCheck = (
   }
 };
 
-const MULTER_OPTION = (type: string): Options => {
-  return {
-    storage: multerS3({
-      s3,
-      bucket: S3_BUCKET,
-      acl: "public-read",
-      contentType: AUTO_CONTENT_TYPE,
-      key: (req, file, cb) => {
-        cb(null, `${Date.now()}.${file.originalname.split(".").pop()}`);
-      },
-    }),
-    limits: { fileSize: MAX_SIZE },
-    fileFilter: (req, file, cb) => {
-      checkFileCheck(file, type, cb);
+const MULTER_OPTION: Options = {
+  storage: multerS3({
+    s3,
+    bucket: S3_BUCKET,
+    acl: "public-read",
+    contentType: AUTO_CONTENT_TYPE,
+    key: (req, file, cb) => {
+      cb(null, `${Date.now()}.${file.originalname.split(".").pop()}`);
     },
-  };
+  }),
+  limits: { fileSize: MAX_SIZE },
+  fileFilter: (req, file, cb) => {
+    checkFileCheck(file, req.url.split("/")[1], cb);
+  },
 };
 
-const FILE_TYPE = ["video", "pdf"] as const;
-
-type FileType = typeof FILE_TYPE[number];
-
-export const upload = (type: FileType) => multer(MULTER_OPTION(type));
-// export const upload = multer(MULTER_OPTION);
+export const upload = multer(MULTER_OPTION);

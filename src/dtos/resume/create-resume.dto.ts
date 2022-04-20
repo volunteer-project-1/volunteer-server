@@ -97,7 +97,10 @@ export class CreateResumeDto implements ICreateResume {
     educations,
     careers,
     activities,
+    trainings,
+    certificates,
     awards,
+    portfolio,
     myVideo,
     helperVideo,
     preference,
@@ -107,7 +110,10 @@ export class CreateResumeDto implements ICreateResume {
     this.educations = educations;
     this.careers = careers;
     this.activities = activities;
+    this.trainings = trainings;
+    this.certificates = certificates;
     this.awards = awards;
+    this.portfolio = portfolio;
     this.myVideo = myVideo;
     this.helperVideo = helperVideo;
     this.preference = preference;

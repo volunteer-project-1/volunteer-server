@@ -12,7 +12,7 @@ resumeRouter
   .route("/video")
   .post(
     isAuthenticate,
-    upload("video").single("url"),
+    upload.single("url"),
     asyncHandler(resumeController.upload)
   );
 
@@ -20,7 +20,7 @@ resumeRouter
   .route("/pdf")
   .post(
     isAuthenticate,
-    upload("pdf").single("url"),
+    upload.single("url"),
     asyncHandler(resumeController.upload)
   );
 
