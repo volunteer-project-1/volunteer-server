@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
+import { OkPacket } from "mysql2/promise";
 import { IUser } from ".";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IComapny extends IUser {}
+export interface ICompany extends IUser {}
 // export interface IComapny extends DefaultTime, ICompanySecret {
 //   id: number;
 //   email: string;
@@ -30,21 +31,35 @@ export interface ICompanyHistory {
   user_id: string;
 }
 
+export interface ICreateComapny {
+  email: string;
+  password: string;
+  salt: string;
+}
+// export interface ICreateComapny {
+//   company: Omit<ICompany, "id">;
+//   info: Omit<ICompanyInfo, "id" | "user_id">;
+//   history: Omit<ICompanyHistory, "id" | "user_id">;
+// }
+
 export interface ICompanyService {
   findCompanyList: (data: {
     start: number;
     limit: number;
-  }) => Promise<IComapny[] | undefined>;
+  }) => Promise<ICompany[] | undefined>;
 }
 
 export interface IComapnyDAO {
+  createCompany: (
+    data: ICreateComapny
+  ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
   findCompanyList: ({
     start,
     limit,
   }: {
     start: number;
     limit: number;
-  }) => Promise<IComapny[] | undefined>;
+  }) => Promise<ICompany[] | undefined>;
 }
 
 export interface ICompanyController {

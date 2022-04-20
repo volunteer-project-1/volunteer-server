@@ -1,11 +1,71 @@
+import { OkPacket } from "mysql2/promise";
 import { Service } from "typedi";
-import { USER_METAS_TABLE, USER_TABLE } from "../constants";
-import { findOneOrWhole, MySQL } from "../db";
-import { IComapny, IComapnyDAO } from "../types";
+import {
+  COMPANY_HISTORY_TABLE,
+  COMPANY_INFO_TABLE,
+  USER_METAS_TABLE,
+  USER_TABLE,
+} from "../constants";
+import { findOneOrWhole, insert, MySQL } from "../db";
+import { ICompany, IComapnyDAO, ICreateComapny } from "../types";
+import { queryTransactionWrapper } from "../utils";
 
 @Service()
 export class CompanyDAO implements IComapnyDAO {
   constructor(private readonly mysql: MySQL) {}
+
+  async createCompany({ email, password, salt }: ICreateComapny) {
+    const conn = await this.mysql.getConnection();
+
+    const LAST_INSERTED_ID = "@last_inserted_id";
+
+    const companyQuery = `
+        INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
+        `;
+
+    const createCompanyQuery = insert(
+      { query: companyQuery, values: [email, password, salt] },
+      conn
+    );
+
+    const setLastInsertedIdQuery = insert(
+      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
+      conn
+    );
+
+    const companyInfoQuery = `
+          INSERT INTO ${COMPANY_INFO_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+          `;
+
+    const createCompanyInfoQueryFunction = insert(
+      { query: companyInfoQuery },
+      conn
+    );
+
+    const companyHistoryQuery = `
+              INSERT INTO ${COMPANY_HISTORY_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+              `;
+
+    const createCompanyHistoryQueryFunction = insert(
+      { query: companyHistoryQuery },
+      conn
+    );
+    const results = await queryTransactionWrapper(
+      [
+        createCompanyQuery,
+        setLastInsertedIdQuery,
+        createCompanyInfoQueryFunction,
+        createCompanyHistoryQueryFunction,
+      ],
+      conn
+    );
+
+    return {
+      company: results[0] as OkPacket,
+      info: results[2] as OkPacket,
+      history: results[3] as OkPacket,
+    };
+  }
 
   async findCompanyList({
     start,
@@ -13,7 +73,7 @@ export class CompanyDAO implements IComapnyDAO {
   }: {
     start: number;
     limit: number;
-  }): Promise<IComapny[] | undefined> {
+  }): Promise<ICompany[] | undefined> {
     const pool = this.mysql.getPool();
     const TYPE = "company";
 
@@ -39,6 +99,6 @@ export class CompanyDAO implements IComapnyDAO {
       return undefined;
     }
 
-    return rows as IComapny[];
+    return rows as ICompany[];
   }
 }
