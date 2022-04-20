@@ -11,16 +11,19 @@ import {
   ActivityDto,
   AwardDto,
   CareerDto,
+  CertificateDto,
   EducationDto,
   HelperVideoDto,
   MyVideoDto,
+  PortfolioDto,
   PreferenceDto,
   ResumeDto,
   ResumeInfoDto,
+  TrainingDto,
 } from ".";
 import { ICreateResume } from "../../types";
 
-export class CreateResumeDto {
+export class CreateResumeDto implements ICreateResume {
   @IsDefined()
   @IsNotEmptyObject()
   @IsObject()
@@ -54,8 +57,25 @@ export class CreateResumeDto {
   @IsDefined()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
+  @Type(() => TrainingDto)
+  trainings!: TrainingDto[];
+
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => CertificateDto)
+  certificates!: CertificateDto[];
+
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
   @Type(() => AwardDto)
   awards!: AwardDto[];
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => PortfolioDto)
+  portfolio!: PortfolioDto;
 
   @IsNotEmptyObject()
   @ValidateNested()
@@ -77,7 +97,10 @@ export class CreateResumeDto {
     educations,
     careers,
     activities,
+    trainings,
+    certificates,
     awards,
+    portfolio,
     myVideo,
     helperVideo,
     preference,
@@ -87,7 +110,10 @@ export class CreateResumeDto {
     this.educations = educations;
     this.careers = careers;
     this.activities = activities;
+    this.trainings = trainings;
+    this.certificates = certificates;
     this.awards = awards;
+    this.portfolio = portfolio;
     this.myVideo = myVideo;
     this.helperVideo = helperVideo;
     this.preference = preference;

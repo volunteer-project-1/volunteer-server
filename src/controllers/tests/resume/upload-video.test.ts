@@ -17,9 +17,9 @@ afterAll(async () => {
 
 describe("updateResumeInfo test", () => {
   const URL = "/api/v1/resume";
-  const concatURL = "upload";
+  const concatURL = "video";
 
-  it("POST '/', If File uploaded, return 200", async () => {
+  it("POST '/', If video uploaded, return 200", async () => {
     const buffer = Buffer.from("some data");
 
     const res = await request(await startApp())

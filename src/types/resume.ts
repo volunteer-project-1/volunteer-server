@@ -72,13 +72,39 @@ export interface IActivity {
   organization: string;
   description: string;
 }
+// TODO 교육이수, 자격증, 포트폴리오, 자기소개서
 
+// 교육이수
+export interface ITraining {
+  id: number;
+  name: string;
+  institute: string;
+  content: string;
+  resume_id: number;
+  started_at: string;
+  finished_at: string;
+}
+
+export interface ICertificate {
+  id: number;
+  resume_id: number;
+  name: string;
+  institute: string;
+  acquisition_at: string;
+}
+// 수상경력
 export interface IAward {
   id: number;
   resume_id: number;
   institute: string;
   started_at: string;
   finished_at: string;
+}
+
+export interface IPortfolio {
+  id: number;
+  resume_id: number;
+  url: string;
 }
 
 export interface IMyVideo {
@@ -121,7 +147,10 @@ export interface ICreateResume {
   educations: Omit<IEducation, "id" | "resume_id">[];
   careers: Omit<ICareers, "id" | "resume_id">[];
   activities: Omit<IActivity, "id" | "resume_id">[];
+  trainings: Omit<ITraining, "id" | "resume_id">[];
+  certificates: Omit<ICertificate, "id" | "resume_id">[];
   awards: Omit<IAward, "id" | "resume_id">[];
+  portfolio: Omit<IPortfolio, "id" | "resume_id">;
   myVideo: Omit<IMyVideo, "id" | "resume_id">;
   helperVideo: Omit<IHelperVideo, "id" | "resume_id">;
   preference: Omit<IPreference, "id" | "resume_id"> & {
@@ -355,7 +384,7 @@ export interface IResumeService {
 }
 
 export interface IResumeController {
-  uploadVideo: (req: Request, res: Response) => Promise<Response>;
+  upload: (req: Request, res: Response) => Promise<Response>;
   createResume: (req: Request, res: Response) => Promise<Response>;
   findPublicResumes: (
     req: Request<unknown, unknown, unknown, { start: string; limit: string }>,

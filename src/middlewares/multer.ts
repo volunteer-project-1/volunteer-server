@@ -9,9 +9,15 @@ const MAX_SIZE = 60 * 1024 * 1024; // 60MB
 
 const s3 = Container.get(MulterS3).getS3();
 
-const checkFileType = (file: Express.Multer.File, cb: FileFilterCallback) => {
+const checkFileCheck = (
+  file: Express.Multer.File,
+  type: string,
+  cb: FileFilterCallback
+) => {
   // Allowed ext
-  const filetypes = /mp4|avi|wmv|m4a/;
+  //   const filetypes = /mp4|avi|wmv|m4a/;
+  const filetypes =
+    type === "video" ? /mp4|avi|wmv|m4a/ : type === "pdf" ? /pdf|hwp/ : /etc/;
   // Check ext
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   // Check mime
@@ -36,7 +42,7 @@ const MULTER_OPTION: Options = {
   }),
   limits: { fileSize: MAX_SIZE },
   fileFilter: (req, file, cb) => {
-    checkFileType(file, cb);
+    checkFileCheck(file, req.url.split("/")[1], cb);
   },
 };
 

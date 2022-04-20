@@ -20,7 +20,10 @@ export const newResumeFactory = ({
   educations,
   careers,
   activities,
+  trainings,
+  certificates,
   awards,
+  portfolio,
   myVideo,
   helperVideo,
   preference,
@@ -60,6 +63,22 @@ export const newResumeFactory = ({
       },
     ],
     activities: activities || [{ organization: "조직", description: "설명" }],
+    trainings: trainings || [
+      {
+        name: "교육이수1",
+        institute: "교육이수 기관1",
+        content: "교육내용",
+        started_at: convertDateToTimestamp(),
+        finished_at: convertDateToTimestamp(),
+      },
+    ],
+    certificates: certificates || [
+      {
+        name: "자격증1",
+        institute: "자격증 인증 기관",
+        acquisition_at: convertDateToTimestamp(),
+      },
+    ],
     awards: awards || [
       {
         institute: "학회",
@@ -67,6 +86,7 @@ export const newResumeFactory = ({
         finished_at: convertDateToTimestamp(),
       },
     ],
+    portfolio: portfolio || { url: "포트폴리오 링크" },
     myVideo: myVideo || { url: "내영상링크" },
     helperVideo: helperVideo || { url: "헬퍼영상링크" },
     preference: preference || {
