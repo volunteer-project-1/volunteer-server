@@ -51,6 +51,26 @@ exports.up = function (db) {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
+      CREATE TABLE if not exists company_infos (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(20),
+        address VARCHAR(255),
+        user_id BIGINT UNSIGNED NOT NULL,
+
+        PRIMARY KEY (id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE if not exists company_histories (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        content VARCHAR(600),
+        history_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        user_id BIGINT UNSIGNED NOT NULL,
+
+        PRIMARY KEY (id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
       CREATE TABLE if not exists resumes (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         title VARCHAR(100) NOT NULL UNIQUE,

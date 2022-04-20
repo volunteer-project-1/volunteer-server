@@ -1,14 +1,33 @@
 import { Request, Response } from "express";
-import { DefaultTime } from ".";
+import { IUser } from ".";
 
-export interface ICompanySecret {
-  password?: string;
-  salt?: string;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IComapny extends IUser {}
+// export interface IComapny extends DefaultTime, ICompanySecret {
+//   id: number;
+//   email: string;
+// }
+
+export interface ICompanyInfo {
+  id: number;
+  name: string;
+  introduce: string;
+  founded_at: string;
+  member: number;
+  investment: number;
+  homepage: string;
+  email: string;
+  phone_number: string;
+  address: string;
+  industry: string;
+  user_id: string;
 }
 
-export interface IComapny extends DefaultTime, ICompanySecret {
+export interface ICompanyHistory {
   id: number;
-  email: string;
+  content: string;
+  history_at: string;
+  user_id: string;
 }
 
 export interface ICompanyService {
