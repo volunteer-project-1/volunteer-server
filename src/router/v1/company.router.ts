@@ -7,6 +7,9 @@ const companyRouter = Router();
 
 const companyController = Container.get(CompanyController);
 
-companyRouter.route("").get(asyncHandler(companyController.findCompanyList));
+companyRouter
+  .route("")
+  .get(asyncHandler(companyController.findCompanyList))
+  .post(asyncHandler(companyController.createCompany));
 
 export { companyRouter };

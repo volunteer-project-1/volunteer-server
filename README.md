@@ -1,6 +1,6 @@
 # SEE ME
 
-장애인들만을 위한 채용 플랫폼 서버입니다.    
+장애인들만을 위한 채용 플랫폼 서버입니다.  
 Rest API 서버로써 `Next.js`와 함께 개발되었습니다.
 
 [클라이언트 Repo](https://github.com/volunteer-project-1/volunteer_client)
