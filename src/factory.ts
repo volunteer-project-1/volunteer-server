@@ -40,6 +40,7 @@ export const newResumeFactory = ({
       disability_level: 1,
       disability_type: "호흡기 장애",
       sex: "남",
+      avatar: "http://thisis.avatar.url.com",
     },
     educations: educations || [
       {

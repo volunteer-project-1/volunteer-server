@@ -64,6 +64,10 @@ export class ResumeInfoDto {
 
   @IsString()
   sex!: Sex;
+
+  @IsString()
+  @IsUrl()
+  avatar!: string;
 }
 
 export class EducationDto {

@@ -42,6 +42,7 @@ export interface IResumeInfo {
   disability_level: DisabilityLevel;
   disability_type: DisabilityType;
   sex: Sex;
+  avatar: string;
 }
 
 export interface IEducation {

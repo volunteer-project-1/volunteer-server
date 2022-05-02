@@ -75,6 +75,7 @@ exports.up = function (db) {
         disability_level INT,
         disability_type VARCHAR(20),
         sex VARCHAR(5),
+        avatar VARCHAR(255),
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),

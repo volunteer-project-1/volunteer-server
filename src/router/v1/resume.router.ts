@@ -25,6 +25,14 @@ resumeRouter
   );
 
 resumeRouter
+  .route("/avatar")
+  .post(
+    isAuthenticate,
+    upload.single("url"),
+    asyncHandler(resumeController.upload)
+  );
+
+resumeRouter
   .route("")
   .get(isAuthenticate, asyncHandler(resumeController.findMyResumes))
   .post(isAuthenticate, asyncHandler(resumeController.createResume));
