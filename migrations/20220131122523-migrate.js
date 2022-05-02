@@ -201,7 +201,7 @@ exports.up = function (db) {
       CREATE TABLE if not exists preferences (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         employ_type VARCHAR(20),
-        salary SMALLINT,
+        salary SMALLINT DEFAULT 0,
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
