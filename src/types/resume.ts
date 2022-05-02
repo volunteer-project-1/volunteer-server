@@ -39,9 +39,10 @@ export interface IResumeInfo {
   email: string;
   sido: string;
   sigungu: string;
-  disability_level: DisabilityLevel;
-  disability_type: DisabilityType;
+  disability_level?: DisabilityLevel;
+  disability_type?: DisabilityType;
   sex: Sex;
+  avatar?: string;
 }
 
 export interface IEducation {
@@ -106,6 +107,12 @@ export interface IPortfolio {
   resume_id: number;
   url: string;
 }
+export interface IIntroduction {
+  id: number;
+  resume_id: number;
+  title: string;
+  content: string;
+}
 
 export interface IMyVideo {
   id: number;
@@ -144,18 +151,19 @@ export interface IPreferenceJob {
 export interface ICreateResume {
   resume: Omit<IResume, "id" | "user_id">;
   resumeInfo: Omit<IResumeInfo, "id" | "resume_id">;
-  educations: Omit<IEducation, "id" | "resume_id">[];
-  careers: Omit<ICareers, "id" | "resume_id">[];
-  activities: Omit<IActivity, "id" | "resume_id">[];
-  trainings: Omit<ITraining, "id" | "resume_id">[];
-  certificates: Omit<ICertificate, "id" | "resume_id">[];
-  awards: Omit<IAward, "id" | "resume_id">[];
-  portfolio: Omit<IPortfolio, "id" | "resume_id">;
+  educations?: Omit<IEducation, "id" | "resume_id">[];
+  careers?: Omit<ICareers, "id" | "resume_id">[];
+  activities?: Omit<IActivity, "id" | "resume_id">[];
+  trainings?: Omit<ITraining, "id" | "resume_id">[];
+  certificates?: Omit<ICertificate, "id" | "resume_id">[];
+  awards?: Omit<IAward, "id" | "resume_id">[];
+  portfolio?: Omit<IPortfolio, "id" | "resume_id">;
+  introductions?: Omit<IIntroduction, "id" | "resume_id">[];
   myVideo: Omit<IMyVideo, "id" | "resume_id">;
-  helperVideo: Omit<IHelperVideo, "id" | "resume_id">;
-  preference: Omit<IPreference, "id" | "resume_id"> & {
-    preferenceLocations: Omit<IPreferenceLocation, "id" | "preference_id">[];
-    preferenceJobs: Omit<IPreferenceJob, "id" | "preference_id">[];
+  helperVideo?: Omit<IHelperVideo, "id" | "resume_id">;
+  preference?: Omit<IPreference, "id" | "resume_id"> & {
+    preferenceLocations?: Omit<IPreferenceLocation, "id" | "preference_id">[];
+    preferenceJobs?: Omit<IPreferenceJob, "id" | "preference_id">[];
   };
 }
 
@@ -199,10 +207,15 @@ export interface IUpdatePreferenceLocation {
 export type IFindResume = Omit<IResume, "user_id">;
 
 export interface IFindWholeResume extends Omit<IResume, "user_id"> {
+  resume_info: IResumeInfo;
   educations: IEducation[];
   careers: ICareers[];
+  certificates: ICertificate[];
   activities: IActivity[];
   awards: IAward[];
+  trainings: ITraining[];
+  introductions: IIntroduction[];
+  portfolio: IPortfolio;
   myVidoe: IMyVideo;
   helperVideo: IHelperVideo;
   preference: IPreference & {

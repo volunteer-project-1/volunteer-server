@@ -19,7 +19,6 @@ import {
   UpdatePreferenceJobDto,
   UpdatePreferenceLocationDto,
 } from "../dtos";
-// import { S3_BUCKET } from "../config";
 
 type ReqParams = {
   id?: string;

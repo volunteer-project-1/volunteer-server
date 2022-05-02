@@ -37,6 +37,7 @@ import {
   TRAINING_TABLE,
   PORTFOLIO_TABLE,
   CERTIFICATE_TABLE,
+  INTRODUCTION_TABLE,
 } from "../constants";
 
 @Service()
@@ -55,10 +56,12 @@ export class ResumeDAO implements IResumeDAO {
       certificates,
       awards,
       portfolio,
+      introductions,
       myVideo,
       helperVideo,
-      preference: { preferenceJobs, preferenceLocations, ...preference },
-    }: ICreateResume
+      preference,
+    }: //   preference: { preferenceJobs, preferenceLocations, ...preference },
+    ICreateResume
   ) {
     const conn = await this.mysql.getConnection();
 
@@ -67,6 +70,7 @@ export class ResumeDAO implements IResumeDAO {
 
     const resumeField = Object.keys(resume).concat("user_id");
     const resumeQuery = `INSERT INTO ${RESUME_TABLE} (${resumeField}) VALUES (?)`;
+    const queries = [];
 
     const resumeQueryFunction = insert(
       {
@@ -91,89 +95,129 @@ export class ResumeDAO implements IResumeDAO {
       { query: resumeInfosQuery, values: resumeValues },
       conn
     );
-
-    const educationQueryFunctions = educations.map((education) => {
-      const educationFieldNames = Object.keys(education).concat("resume_id");
-      const educationQuery = `INSERT INTO ${EDUCATION_TABLE} (${educationFieldNames}) VALUES (?, ${LAST_RESUME_ID});`;
-
-      return insert(
-        {
-          query: educationQuery,
-          values: [Object.values<any>(education)],
-        },
-        conn
-      );
-    });
-
-    const carrerQueryFunctions = careers.map((career) => {
-      const carrerFieldNames = Object.keys(career).concat("resume_id");
-      const carrerQuery = `INSERT INTO ${CAREER_TABLE} (${carrerFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-
-      return insert(
-        { query: carrerQuery, values: [Object.values(career)] },
-        conn
-      );
-    });
-
-    const activityQueryFunctions = activities.map((activity) => {
-      const activityFieldNames = Object.keys(activity).concat("resume_id");
-      const activityQuery = `INSERT INTO ${ACTIVITY_TABLE} (${activityFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-
-      return insert(
-        {
-          query: activityQuery,
-          values: [Object.values(activity)],
-        },
-        conn
-      );
-    });
-
-    const trainingQueryFunctions = trainings.map((training) => {
-      const trainingFieldNames = Object.keys(training).concat("resume_id");
-      const trainingQuery = `INSERT INTO ${TRAINING_TABLE} (${trainingFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-
-      return insert(
-        {
-          query: trainingQuery,
-          values: [Object.values(training)],
-        },
-        conn
-      );
-    });
-
-    const certificateQueryFunctions = certificates.map((certificate) => {
-      const certificateFieldNames =
-        Object.keys(certificate).concat("resume_id");
-      const certificateQuery = `INSERT INTO ${CERTIFICATE_TABLE} (${certificateFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-
-      return insert(
-        {
-          query: certificateQuery,
-          values: [Object.values(certificate)],
-        },
-        conn
-      );
-    });
-
-    const awardQueryFunctions = awards.map((award) => {
-      const awardFieldNames = Object.keys(award).concat("resume_id");
-      const awardQuery = `INSERT INTO ${AWARD_TABLE} (${awardFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-
-      return insert(
-        { query: awardQuery, values: [Object.values(award)] },
-        conn
-      );
-    });
-
-    const portfolioFieldNames = Object.keys(portfolio).concat("resume_id");
-    const portfolioQuery = `INSERT INTO ${PORTFOLIO_TABLE} (${portfolioFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-    const portfolioFunction = insert(
-      {
-        query: portfolioQuery,
-        values: [Object.values(portfolio)],
-      },
-      conn
+    queries.push(
+      resumeQueryFunction,
+      setLastResumeIdQueryFunction,
+      resumeInfoQueryFunction
     );
+
+    if (educations) {
+      const educationQueryFunctions = educations.map((education) => {
+        const educationFieldNames = Object.keys(education).concat("resume_id");
+        const educationQuery = `INSERT INTO ${EDUCATION_TABLE} (${educationFieldNames}) VALUES (?, ${LAST_RESUME_ID});`;
+
+        return insert(
+          {
+            query: educationQuery,
+            values: [Object.values<any>(education)],
+          },
+          conn
+        );
+      });
+      queries.push(...educationQueryFunctions);
+    }
+
+    if (careers) {
+      const carrerQueryFunctions = careers.map((career) => {
+        const carrerFieldNames = Object.keys(career).concat("resume_id");
+        const carrerQuery = `INSERT INTO ${CAREER_TABLE} (${carrerFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+        return insert(
+          { query: carrerQuery, values: [Object.values(career)] },
+          conn
+        );
+      });
+      queries.push(...carrerQueryFunctions);
+    }
+
+    if (activities) {
+      const activityQueryFunctions = activities.map((activity) => {
+        const activityFieldNames = Object.keys(activity).concat("resume_id");
+        const activityQuery = `INSERT INTO ${ACTIVITY_TABLE} (${activityFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+        return insert(
+          {
+            query: activityQuery,
+            values: [Object.values(activity)],
+          },
+          conn
+        );
+      });
+      queries.push(...activityQueryFunctions);
+    }
+
+    if (trainings) {
+      const trainingQueryFunctions = trainings.map((training) => {
+        const trainingFieldNames = Object.keys(training).concat("resume_id");
+        const trainingQuery = `INSERT INTO ${TRAINING_TABLE} (${trainingFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+        return insert(
+          {
+            query: trainingQuery,
+            values: [Object.values(training)],
+          },
+          conn
+        );
+      });
+      queries.push(...trainingQueryFunctions);
+    }
+
+    if (certificates) {
+      const certificateQueryFunctions = certificates.map((certificate) => {
+        const certificateFieldNames =
+          Object.keys(certificate).concat("resume_id");
+        const certificateQuery = `INSERT INTO ${CERTIFICATE_TABLE} (${certificateFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+        return insert(
+          {
+            query: certificateQuery,
+            values: [Object.values(certificate)],
+          },
+          conn
+        );
+      });
+      queries.push(...certificateQueryFunctions);
+    }
+
+    if (awards) {
+      const awardQueryFunctions = awards.map((award) => {
+        const awardFieldNames = Object.keys(award).concat("resume_id");
+        const awardQuery = `INSERT INTO ${AWARD_TABLE} (${awardFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+        return insert(
+          { query: awardQuery, values: [Object.values(award)] },
+          conn
+        );
+      });
+      queries.push(...awardQueryFunctions);
+    }
+
+    if (portfolio) {
+      const portfolioFieldNames = Object.keys(portfolio).concat("resume_id");
+      const portfolioQuery = `INSERT INTO ${PORTFOLIO_TABLE} (${portfolioFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+      const portfolioFunction = insert(
+        {
+          query: portfolioQuery,
+          values: [Object.values(portfolio)],
+        },
+        conn
+      );
+      queries.push(portfolioFunction);
+    }
+
+    if (introductions) {
+      const introductionQueryFunctions = introductions.map((introduction) => {
+        const introductionFieldNames =
+          Object.keys(introduction).concat("resume_id");
+        const introductionQuery = `INSERT INTO ${INTRODUCTION_TABLE} (${introductionFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+        return insert(
+          { query: introductionQuery, values: [Object.values(introduction)] },
+          conn
+        );
+      });
+      queries.push(...introductionQueryFunctions);
+    }
 
     const myVideoFieldNames = Object.keys(myVideo).concat("resume_id");
     const myVideoQuery = `INSERT INTO ${MY_VIDEO_TABLE} (${myVideoFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
@@ -181,52 +225,73 @@ export class ResumeDAO implements IResumeDAO {
       { query: myVideoQuery, values: [Object.values(myVideo)] },
       conn
     );
+    queries.push(myVideoQueryFunction);
 
-    const helperVideoFieldNames = Object.keys(helperVideo).concat("resume_id");
-    const helperVideoQuery = `INSERT INTO ${HELPER_VIDEO_TABLE} (${helperVideoFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-    const helperVideoQueryFunction = insert(
-      { query: helperVideoQuery, values: [Object.values(helperVideo)] },
-      conn
-    );
-
-    const preferenceFieldNames = Object.keys(preference).concat("resume_id");
-    const preferenceQuery = `INSERT INTO ${PREFERNCE_TABLE} (${preferenceFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
-    const preferenceQueryFunction = insert(
-      { query: preferenceQuery, values: [Object.values(preference)] },
-      conn
-    );
-
-    const setLastPreferenceIdQueryFunction = insert(
-      {
-        query: `SET ${LAST_PREFERENCE_ID} = Last_insert_id();`,
-      },
-      conn
-    );
-
-    const preferenceJobQueryFunctions = preferenceJobs.map((preferenceJob) => {
-      const preferenceJobFieldNames =
-        Object.keys(preferenceJob).concat("preference_id");
-      const preferenceJobQuery = `INSERT INTO ${PREFERNCE_JOB_TABLE} (${preferenceJobFieldNames}) VALUES (?, ${LAST_PREFERENCE_ID})`;
-      return insert(
-        { query: preferenceJobQuery, values: [Object.values(preferenceJob)] },
+    if (helperVideo) {
+      const helperVideoFieldNames =
+        Object.keys(helperVideo).concat("resume_id");
+      const helperVideoQuery = `INSERT INTO ${HELPER_VIDEO_TABLE} (${helperVideoFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+      const helperVideoQueryFunction = insert(
+        { query: helperVideoQuery, values: [Object.values(helperVideo)] },
         conn
       );
-    });
+      queries.push(helperVideoQueryFunction);
+    }
 
-    const preferenceLocationQueryFunctions = preferenceLocations.map(
-      (preferenceLocation) => {
-        const preferenceLocationFieldNames =
-          Object.keys(preferenceLocation).concat("preference_id");
-        const preferenceLocationQuery = `INSERT INTO ${PREFERNCE_LOCATION_TABLE} (${preferenceLocationFieldNames}) VALUES (?, ${LAST_PREFERENCE_ID})`;
-        return insert(
-          {
-            query: preferenceLocationQuery,
-            values: [Object.values(preferenceLocation)],
-          },
-          conn
+    if (preference) {
+      const { preferenceJobs, preferenceLocations, ...restPreference } =
+        preference;
+      const preferenceFieldNames =
+        Object.keys(restPreference).concat("resume_id");
+      const preferenceQuery = `INSERT INTO ${PREFERNCE_TABLE} (${preferenceFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+      const preferenceQueryFunction = insert(
+        { query: preferenceQuery, values: [Object.values(restPreference)] },
+        conn
+      );
+
+      const setLastPreferenceIdQueryFunction = insert(
+        {
+          query: `SET ${LAST_PREFERENCE_ID} = Last_insert_id();`,
+        },
+        conn
+      );
+      queries.push(preferenceQueryFunction, setLastPreferenceIdQueryFunction);
+
+      if (preferenceJobs) {
+        const preferenceJobQueryFunctions = preferenceJobs.map(
+          (preferenceJob) => {
+            const preferenceJobFieldNames =
+              Object.keys(preferenceJob).concat("preference_id");
+            const preferenceJobQuery = `INSERT INTO ${PREFERNCE_JOB_TABLE} (${preferenceJobFieldNames}) VALUES (?, ${LAST_PREFERENCE_ID})`;
+            return insert(
+              {
+                query: preferenceJobQuery,
+                values: [Object.values(preferenceJob)],
+              },
+              conn
+            );
+          }
         );
+        queries.push(...preferenceJobQueryFunctions);
       }
-    );
+      if (preferenceLocations) {
+        const preferenceLocationQueryFunctions = preferenceLocations.map(
+          (preferenceLocation) => {
+            const preferenceLocationFieldNames =
+              Object.keys(preferenceLocation).concat("preference_id");
+            const preferenceLocationQuery = `INSERT INTO ${PREFERNCE_LOCATION_TABLE} (${preferenceLocationFieldNames}) VALUES (?, ${LAST_PREFERENCE_ID})`;
+            return insert(
+              {
+                query: preferenceLocationQuery,
+                values: [Object.values(preferenceLocation)],
+              },
+              conn
+            );
+          }
+        );
+        queries.push(...preferenceLocationQueryFunctions);
+      }
+    }
 
     const updateUserMetaQueryFunction = insert(
       {
@@ -238,27 +303,30 @@ export class ResumeDAO implements IResumeDAO {
       },
       conn
     );
+    queries.push(updateUserMetaQueryFunction);
 
     const results = await queryTransactionWrapper(
-      [
-        resumeQueryFunction,
-        setLastResumeIdQueryFunction,
-        resumeInfoQueryFunction,
-        ...educationQueryFunctions,
-        ...carrerQueryFunctions,
-        ...activityQueryFunctions,
-        ...trainingQueryFunctions,
-        ...certificateQueryFunctions,
-        ...awardQueryFunctions,
-        portfolioFunction,
-        myVideoQueryFunction,
-        helperVideoQueryFunction,
-        preferenceQueryFunction,
-        setLastPreferenceIdQueryFunction,
-        ...preferenceJobQueryFunctions,
-        ...preferenceLocationQueryFunctions,
-        updateUserMetaQueryFunction,
-      ],
+      queries,
+      //   [
+      //     resumeQueryFunction,
+      //     setLastResumeIdQueryFunction,
+      //     resumeInfoQueryFunction,
+      //     ...educationQueryFunctions,
+      //     ...carrerQueryFunctions,
+      //     ...activityQueryFunctions,
+      //     ...trainingQueryFunctions,
+      //     ...certificateQueryFunctions,
+      //     ...awardQueryFunctions,
+      //     portfolioFunction,
+      //     ...introductionQueryFunctions,
+      //     myVideoQueryFunction,
+      //     helperVideoQueryFunction,
+      //     preferenceQueryFunction,
+      //     setLastPreferenceIdQueryFunction,
+      //     ...preferenceJobQueryFunctions,
+      //     ...preferenceLocationQueryFunctions,
+      //     updateUserMetaQueryFunction,
+      //   ],
       conn
     );
 
@@ -305,43 +373,102 @@ export class ResumeDAO implements IResumeDAO {
   async findResumeById(resumeId: number): Promise<IFindWholeResume> {
     const pool = this.mysql.getPool();
 
-    const subQuery1 = `
-    SELECT resume_id, json_object('id', RI.id, 'name', RI.name, 'birthday', RI.birthday, 'phone_number', RI.phone_number, 'email', RI.email, 'sido', RI.sido, 'sigungu', RI.sigungu, 'disability_level', RI.disability_level, 'disability_type', RI.disability_type, 'sex', RI.sex) AS resume_info
+    const resumeQuery = `
+    SELECT resume_id, json_object(
+        'id', RI.id, 
+        'name', RI.name, 
+        'birthday', RI.birthday, 
+        'phone_number', RI.phone_number, 
+        'email', RI.email, 
+        'sido', RI.sido, 
+        'sigungu', RI.sigungu, 
+        'disability_level', RI.disability_level, 
+        'disability_type', RI.disability_type, 
+        'sex', RI.sex) AS resume_info
     FROM ${RESUME_INFO_TABLE} AS RI
     WHERE resume_id = ?
     GROUP BY resume_id
     LIMIT 1
     `;
 
-    const subQuery2 = `
+    const careerQuery = `
     SELECT resume_id, json_arrayagg(json_object('id', C.id, 'company', C.company, 'department', C.department)) AS careers
     FROM ${CAREER_TABLE} AS C
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery3 = `
+    const educationQuery = `
     SELECT resume_id, json_arrayagg(json_object('id', E.id, 'type', E.type, 'school_name', E.school_name)) AS educations
     FROM ${EDUCATION_TABLE} AS E
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery4 = `
-    SELECT resume_id, json_arrayagg(json_object('id', A.id, 'organization', A.organization, 'description', A.description)) AS activities
+    const activityQuery = `
+    SELECT resume_id, json_arrayagg(json_object(
+        'id', A.id, 
+        'organization', A.organization, 
+        'description', A.description)) AS activities
     FROM ${ACTIVITY_TABLE} AS A
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery5 = `
+    const trainingQuery = `
+    SELECT 
+        resume_id, 
+        json_arrayagg(json_object(
+            'id', TR.id, 
+            'name', TR.name, 
+            'institute', TR.institute, 
+            'started_at', TR.started_at, 
+            'finished_at', TR.finished_at, 
+            'content', TR.content)) AS trainings
+    FROM ${TRAINING_TABLE} AS TR
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
+
+    const certificateQuery = `
+    SELECT resume_id, json_arrayagg(json_object(
+        'id', CE.id, 
+        'name', CE.name, 
+        'institute', CE.institute, 
+        'acquisition_at', CE.acquisition_at)) AS certificates
+    FROM ${CERTIFICATE_TABLE} AS CE
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
+
+    const awardQuery = `
     SELECT resume_id, json_arrayagg(json_object('id', W.id, 'institute', W.institute, 'started_at', W.started_at)) AS awards
     FROM ${AWARD_TABLE} AS W
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery6 = `
+    const portfolioQuery = `
+    SELECT resume_id, json_object(
+        'id', PO.id, 
+        'url', PO.url) AS portfolio
+    FROM ${PORTFOLIO_TABLE} AS PO
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    LIMIT 1
+    `;
+
+    const introductionQuery = `
+    SELECT resume_id, json_arrayagg(json_object(
+        'id', INTRO.id, 
+        'title', INTRO.title, 
+        'content', INTRO.content)) AS introductions
+    FROM ${INTRODUCTION_TABLE} AS INTRO
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
+
+    const myVideoQuery = `
     SELECT resume_id, json_object('id', MY.id, 'url', MY.url) AS my_video
     FROM ${MY_VIDEO_TABLE} AS MY
     WHERE resume_id = ?
@@ -349,7 +476,7 @@ export class ResumeDAO implements IResumeDAO {
     LIMIT 1
     `;
 
-    const subQuery7 = `
+    const helperVideoQuery = `
     SELECT resume_id, json_object('id', H.id, 'url', H.url) AS helper_video
     FROM ${HELPER_VIDEO_TABLE} AS H
     WHERE resume_id = ?
@@ -357,21 +484,21 @@ export class ResumeDAO implements IResumeDAO {
     LIMIT 1
     `;
 
-    const subsubQuery1 = `
+    const preferenceJobQuery = `
     SELECT preference_id, json_arrayagg(json_object('name', PJ.name)) AS preference_jobs
     FROM ${PREFERNCE_JOB_TABLE} AS PJ
     GROUP BY preference_id`;
 
-    const subsubQuery2 = `
+    const preferenceLocationQuery = `
     SELECT preference_id, json_arrayagg(json_object('sido', PL.sido, 'sigungu', PL.sigungu)) AS preference_locations
     FROM ${PREFERNCE_LOCATION_TABLE} AS PL
     GROUP BY preference_id`;
 
-    const subQuery8 = `
+    const preferenceQuery = `
     SELECT resume_id, json_object('id', P.id, 'employ_type', P.employ_type, 'salary', P.salary, 'preference_jobs', pj.preference_jobs, 'preference_locations', pl.preference_locations) AS preference
     FROM ${PREFERNCE_TABLE} AS P
-        JOIN (${subsubQuery1}) AS pj ON pj.preference_id = P.id
-        JOIN (${subsubQuery2}) AS pl ON pl.preference_id = P.id
+        JOIN (${preferenceJobQuery}) AS pj ON pj.preference_id = P.id
+        JOIN (${preferenceLocationQuery}) AS pl ON pl.preference_id = P.id
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
@@ -388,22 +515,34 @@ export class ResumeDAO implements IResumeDAO {
             w.awards,
             my.my_video,
             h.helper_video,
-            p.preference
+            p.preference,
+            tr.trainings,
+            ce.certificates,
+            po.portfolio,
+            intro.introductions
         FROM ${RESUME_TABLE} AS R
-        JOIN (${subQuery1}) AS ri ON ri.resume_id = R.id
-        JOIN (${subQuery2}) AS c ON c.resume_id = R.id
-        JOIN (${subQuery3}) AS e ON e.resume_id = R.id
-        JOIN (${subQuery4}) AS a ON a.resume_id = R.id
-        JOIN (${subQuery5}) AS w ON w.resume_id = R.id
-        JOIN (${subQuery6}) AS my ON my.resume_id = R.id
-        JOIN (${subQuery7}) AS h ON h.resume_id = R.id
-        JOIN (${subQuery8}) AS p ON p.resume_id = R.id
+        LEFT JOIN (${resumeQuery}) AS ri ON ri.resume_id = R.id
+        LEFT JOIN (${careerQuery}) AS c ON c.resume_id = R.id
+        LEFT JOIN (${educationQuery}) AS e ON e.resume_id = R.id
+        LEFT JOIN (${activityQuery}) AS a ON a.resume_id = R.id
+        LEFT JOIN (${awardQuery}) AS w ON w.resume_id = R.id
+        LEFT JOIN (${myVideoQuery}) AS my ON my.resume_id = R.id
+        LEFT JOIN (${helperVideoQuery}) AS h ON h.resume_id = R.id
+        LEFT JOIN (${preferenceQuery}) AS p ON p.resume_id = R.id
+        LEFT JOIN (${trainingQuery}) AS tr ON tr.resume_id = R.id
+        LEFT JOIN (${certificateQuery}) AS ce ON ce.resume_id = R.id
+        LEFT JOIN (${portfolioQuery}) AS po ON po.resume_id = R.id
+        LEFT JOIN (${introductionQuery}) AS intro ON intro.resume_id = R.id
         WHERE R.id = ?;
     `;
     const [rows] = await findOneOrWhole(
       {
         query,
         values: [
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
           resumeId,
           resumeId,
           resumeId,

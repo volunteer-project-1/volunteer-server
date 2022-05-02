@@ -75,6 +75,7 @@ exports.up = function (db) {
         disability_level INT,
         disability_type VARCHAR(20),
         sex VARCHAR(5),
+        avatar VARCHAR(255),
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
@@ -168,6 +169,16 @@ exports.up = function (db) {
         PRIMARY KEY (id),
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
+      
+      CREATE TABLE if not exists introductions (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        title VARCHAR(30),
+        content VARCHAR(800),
+
+        resume_id BIGINT UNSIGNED NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+      );
 
       CREATE TABLE if not exists my_videos (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -190,7 +201,7 @@ exports.up = function (db) {
       CREATE TABLE if not exists preferences (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         employ_type VARCHAR(20),
-        salary SMALLINT,
+        salary SMALLINT DEFAULT 0,
         resume_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),

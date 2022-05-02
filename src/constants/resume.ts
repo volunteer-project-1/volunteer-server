@@ -7,6 +7,7 @@ export const TRAINING_TABLE = "trainings";
 export const CERTIFICATE_TABLE = "certificates";
 export const AWARD_TABLE = "awards";
 export const PORTFOLIO_TABLE = "portfolios";
+export const INTRODUCTION_TABLE = "introductions";
 export const MY_VIDEO_TABLE = "my_videos";
 export const HELPER_VIDEO_TABLE = "helper_videos";
 export const PREFERNCE_TABLE = "preferences";

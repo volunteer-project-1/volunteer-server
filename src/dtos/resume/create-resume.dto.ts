@@ -5,6 +5,7 @@ import {
   IsNotEmptyObject,
   IsObject,
   ArrayMinSize,
+  IsOptional,
 } from "class-validator";
 import { Type } from "class-transformer";
 import {
@@ -14,6 +15,7 @@ import {
   CertificateDto,
   EducationDto,
   HelperVideoDto,
+  IntroductionDto,
   MyVideoDto,
   PortfolioDto,
   PreferenceDto,
@@ -36,60 +38,68 @@ export class CreateResumeDto implements ICreateResume {
   @Type(() => ResumeInfoDto)
   resumeInfo!: ResumeInfoDto;
 
-  @IsDefined()
+  //   @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => EducationDto)
-  educations!: EducationDto[];
+  educations?: EducationDto[];
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => CareerDto)
-  careers!: CareerDto[];
+  careers?: CareerDto[];
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => ActivityDto)
-  activities!: ActivityDto[];
+  activities?: ActivityDto[];
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => TrainingDto)
-  trainings!: TrainingDto[];
+  trainings?: TrainingDto[];
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => CertificateDto)
-  certificates!: CertificateDto[];
+  certificates?: CertificateDto[];
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => AwardDto)
-  awards!: AwardDto[];
+  awards?: AwardDto[];
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => PortfolioDto)
-  portfolio!: PortfolioDto;
+  portfolio?: PortfolioDto;
+
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => IntroductionDto)
+  introductions?: IntroductionDto[];
 
   @IsNotEmptyObject()
   @ValidateNested()
   @Type(() => MyVideoDto)
   myVideo!: MyVideoDto;
 
-  @IsNotEmptyObject()
+  @IsOptional()
   @ValidateNested()
   @Type(() => HelperVideoDto)
-  helperVideo!: HelperVideoDto;
+  helperVideo?: HelperVideoDto;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => PreferenceDto)
-  preference!: PreferenceDto;
+  preference?: PreferenceDto;
 
   constructor({
     resume,
@@ -101,6 +111,7 @@ export class CreateResumeDto implements ICreateResume {
     certificates,
     awards,
     portfolio,
+    introductions,
     myVideo,
     helperVideo,
     preference,
@@ -114,6 +125,7 @@ export class CreateResumeDto implements ICreateResume {
     this.certificates = certificates;
     this.awards = awards;
     this.portfolio = portfolio;
+    this.introductions = introductions;
     this.myVideo = myVideo;
     this.helperVideo = helperVideo;
     this.preference = preference;

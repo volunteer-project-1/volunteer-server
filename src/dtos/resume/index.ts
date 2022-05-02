@@ -1,17 +1,16 @@
 /* eslint-disable max-classes-per-file */
 import {
   ValidateNested,
-  IsDefined,
   ArrayMinSize,
   IsNumber,
   IsString,
   IsBoolean,
   IsUrl,
+  MaxLength,
+  IsOptional,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { DisabilityLevel, DisabilityType, Sex } from "../../types";
-
-// export * from "./create.dto";
 
 export * from "./create-resume.dto";
 export * from "./update-resume.dto";
@@ -57,13 +56,17 @@ export class ResumeInfoDto {
   sigungu!: string;
 
   @IsNumber()
-  disability_level!: DisabilityLevel;
+  disability_level?: DisabilityLevel;
 
   @IsString()
-  disability_type!: DisabilityType;
+  disability_type?: DisabilityType;
 
   @IsString()
   sex!: Sex;
+
+  @IsString()
+  @IsUrl()
+  avatar?: string;
 }
 
 export class EducationDto {
@@ -164,6 +167,15 @@ export class PortfolioDto {
   @IsUrl()
   url!: string;
 }
+export class IntroductionDto {
+  @IsString()
+  @MaxLength(20)
+  title!: string;
+
+  @IsString()
+  @MaxLength(800)
+  content!: string;
+}
 export class MyVideoDto {
   @IsString()
   @IsUrl()
@@ -196,15 +208,15 @@ export class PreferenceDto {
   @IsNumber()
   salary!: number;
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => PreferenceLocationDto)
-  preferenceLocations!: PreferenceLocationDto[];
+  preferenceLocations?: PreferenceLocationDto[];
 
-  @IsDefined()
+  @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => PreferenceJobDto)
-  preferenceJobs!: PreferenceJobDto[];
+  preferenceJobs?: PreferenceJobDto[];
 }

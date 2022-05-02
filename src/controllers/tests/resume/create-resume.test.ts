@@ -3,8 +3,10 @@ import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
 import { MySQL } from "../../../db";
+import { CreateResumeDto } from "../../../dtos";
 import { newResumeFactory } from "../../../factory";
 import { UserService } from "../../../services";
+import { convertDateToTimestamp } from "../../../utils";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -49,7 +51,28 @@ describe("createResume test", () => {
     expect(res.status).toBe(400);
   });
 
-  it("GET '/',If Created, return 204", async () => {
+  it("GET '/',If Created(필수항목), return 204", async () => {
+    const data: CreateResumeDto = {
+      resume: { title: "레쥬메1", content: "블라블라 내용", is_public: true },
+      resumeInfo: {
+        name: "홍길동",
+        birthday: convertDateToTimestamp(),
+        phone_number: "010-1234-5678",
+        email: "test@gmail.com",
+        sido: "서울시",
+        sigungu: "강서구",
+        sex: "남",
+      },
+      myVideo: { url: "url.link.com" },
+    };
+    const res = await request(await startApp())
+      .post(URL)
+      .send(data);
+
+    expect(res.status).toBe(204);
+  });
+
+  it("GET '/',If Created(전체항목), return 204", async () => {
     const res = await request(await startApp())
       .post(URL)
       .send(newResumeFactory());

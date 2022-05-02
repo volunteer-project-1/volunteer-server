@@ -5,6 +5,8 @@ import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { ResumeService, UserService } from "../..";
 import { newResumeFactory } from "../../../factory";
+import { CreateResumeDto } from "../../../dtos";
+import { convertDateToTimestamp } from "../../../utils";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -34,7 +36,41 @@ afterAll(async () => {
 describe("findResumeById Test", () => {
   const userService = Container.get(UserService);
   const resumeService = Container.get(ResumeService);
-  it("return undefined", async () => {
+  it("필수항목, return Resume", async () => {
+    const id = 1;
+
+    const { user } = await userService.createUserBySocial(
+      "ehgks0083@gmail.com"
+    );
+    const data: CreateResumeDto = {
+      resume: { title: "레쥬메1", content: "블라블라 내용", is_public: true },
+      resumeInfo: {
+        name: "홍길동",
+        birthday: convertDateToTimestamp(),
+        phone_number: "010-1234-5678",
+        email: "test@gmail.com",
+        sido: "서울시",
+        sigungu: "강서구",
+        sex: "남",
+      },
+      myVideo: { url: "url.link.com" },
+    };
+
+    await resumeService.createResume(user.insertId, data);
+
+    const spy = jest.spyOn(resumeService, "findResumeById");
+
+    const result = await resumeService.findResumeById(id);
+
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith(id);
+
+    expect(result.resume_info).not.toBeNull();
+    expect(result.myVidoe).not.toBeNull();
+    expect(result).not.toBeNull();
+  });
+
+  it("return Resume", async () => {
     const id = 1;
 
     const { user } = await userService.createUserBySocial(
@@ -49,13 +85,7 @@ describe("findResumeById Test", () => {
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(id);
-    expect(result.title).toBe(data.resume.title);
-    expect(result.content).toBe(data.resume.content);
 
-    expect(result.activities).toEqual(
-      expect.arrayContaining(
-        data.activities.map((activity) => expect.objectContaining(activity))
-      )
-    );
+    expect(result).not.toBeNull();
   });
 });
