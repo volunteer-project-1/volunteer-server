@@ -207,10 +207,15 @@ export interface IUpdatePreferenceLocation {
 export type IFindResume = Omit<IResume, "user_id">;
 
 export interface IFindWholeResume extends Omit<IResume, "user_id"> {
+  resume_info: IResumeInfo;
   educations: IEducation[];
   careers: ICareers[];
+  certificates: ICertificate[];
   activities: IActivity[];
   awards: IAward[];
+  trainings: ITraining[];
+  introductions: IIntroduction[];
+  portfolio: IPortfolio;
   myVidoe: IMyVideo;
   helperVideo: IHelperVideo;
   preference: IPreference & {

@@ -373,43 +373,102 @@ export class ResumeDAO implements IResumeDAO {
   async findResumeById(resumeId: number): Promise<IFindWholeResume> {
     const pool = this.mysql.getPool();
 
-    const subQuery1 = `
-    SELECT resume_id, json_object('id', RI.id, 'name', RI.name, 'birthday', RI.birthday, 'phone_number', RI.phone_number, 'email', RI.email, 'sido', RI.sido, 'sigungu', RI.sigungu, 'disability_level', RI.disability_level, 'disability_type', RI.disability_type, 'sex', RI.sex) AS resume_info
+    const resumeQuery = `
+    SELECT resume_id, json_object(
+        'id', RI.id, 
+        'name', RI.name, 
+        'birthday', RI.birthday, 
+        'phone_number', RI.phone_number, 
+        'email', RI.email, 
+        'sido', RI.sido, 
+        'sigungu', RI.sigungu, 
+        'disability_level', RI.disability_level, 
+        'disability_type', RI.disability_type, 
+        'sex', RI.sex) AS resume_info
     FROM ${RESUME_INFO_TABLE} AS RI
     WHERE resume_id = ?
     GROUP BY resume_id
     LIMIT 1
     `;
 
-    const subQuery2 = `
+    const careerQuery = `
     SELECT resume_id, json_arrayagg(json_object('id', C.id, 'company', C.company, 'department', C.department)) AS careers
     FROM ${CAREER_TABLE} AS C
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery3 = `
+    const educationQuery = `
     SELECT resume_id, json_arrayagg(json_object('id', E.id, 'type', E.type, 'school_name', E.school_name)) AS educations
     FROM ${EDUCATION_TABLE} AS E
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery4 = `
-    SELECT resume_id, json_arrayagg(json_object('id', A.id, 'organization', A.organization, 'description', A.description)) AS activities
+    const activityQuery = `
+    SELECT resume_id, json_arrayagg(json_object(
+        'id', A.id, 
+        'organization', A.organization, 
+        'description', A.description)) AS activities
     FROM ${ACTIVITY_TABLE} AS A
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery5 = `
+    const trainingQuery = `
+    SELECT 
+        resume_id, 
+        json_arrayagg(json_object(
+            'id', TR.id, 
+            'name', TR.name, 
+            'institute', TR.institute, 
+            'started_at', TR.started_at, 
+            'finished_at', TR.finished_at, 
+            'content', TR.content)) AS trainings
+    FROM ${TRAINING_TABLE} AS TR
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
+
+    const certificateQuery = `
+    SELECT resume_id, json_arrayagg(json_object(
+        'id', CE.id, 
+        'name', CE.name, 
+        'institute', CE.institute, 
+        'acquisition_at', CE.acquisition_at)) AS certificates
+    FROM ${CERTIFICATE_TABLE} AS CE
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
+
+    const awardQuery = `
     SELECT resume_id, json_arrayagg(json_object('id', W.id, 'institute', W.institute, 'started_at', W.started_at)) AS awards
     FROM ${AWARD_TABLE} AS W
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
 
-    const subQuery6 = `
+    const portfolioQuery = `
+    SELECT resume_id, json_object(
+        'id', PO.id, 
+        'url', PO.url) AS portfolio
+    FROM ${PORTFOLIO_TABLE} AS PO
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    LIMIT 1
+    `;
+
+    const introductionQuery = `
+    SELECT resume_id, json_arrayagg(json_object(
+        'id', INTRO.id, 
+        'title', INTRO.title, 
+        'content', INTRO.content)) AS introductions
+    FROM ${INTRODUCTION_TABLE} AS INTRO
+    WHERE resume_id = ?
+    GROUP BY resume_id
+    `;
+
+    const myVideoQuery = `
     SELECT resume_id, json_object('id', MY.id, 'url', MY.url) AS my_video
     FROM ${MY_VIDEO_TABLE} AS MY
     WHERE resume_id = ?
@@ -417,7 +476,7 @@ export class ResumeDAO implements IResumeDAO {
     LIMIT 1
     `;
 
-    const subQuery7 = `
+    const helperVideoQuery = `
     SELECT resume_id, json_object('id', H.id, 'url', H.url) AS helper_video
     FROM ${HELPER_VIDEO_TABLE} AS H
     WHERE resume_id = ?
@@ -425,21 +484,21 @@ export class ResumeDAO implements IResumeDAO {
     LIMIT 1
     `;
 
-    const subsubQuery1 = `
+    const preferenceJobQuery = `
     SELECT preference_id, json_arrayagg(json_object('name', PJ.name)) AS preference_jobs
     FROM ${PREFERNCE_JOB_TABLE} AS PJ
     GROUP BY preference_id`;
 
-    const subsubQuery2 = `
+    const preferenceLocationQuery = `
     SELECT preference_id, json_arrayagg(json_object('sido', PL.sido, 'sigungu', PL.sigungu)) AS preference_locations
     FROM ${PREFERNCE_LOCATION_TABLE} AS PL
     GROUP BY preference_id`;
 
-    const subQuery8 = `
+    const preferenceQuery = `
     SELECT resume_id, json_object('id', P.id, 'employ_type', P.employ_type, 'salary', P.salary, 'preference_jobs', pj.preference_jobs, 'preference_locations', pl.preference_locations) AS preference
     FROM ${PREFERNCE_TABLE} AS P
-        JOIN (${subsubQuery1}) AS pj ON pj.preference_id = P.id
-        JOIN (${subsubQuery2}) AS pl ON pl.preference_id = P.id
+        JOIN (${preferenceJobQuery}) AS pj ON pj.preference_id = P.id
+        JOIN (${preferenceLocationQuery}) AS pl ON pl.preference_id = P.id
     WHERE resume_id = ?
     GROUP BY resume_id
     `;
@@ -456,22 +515,34 @@ export class ResumeDAO implements IResumeDAO {
             w.awards,
             my.my_video,
             h.helper_video,
-            p.preference
+            p.preference,
+            tr.trainings,
+            ce.certificates,
+            po.portfolio,
+            intro.introductions
         FROM ${RESUME_TABLE} AS R
-        JOIN (${subQuery1}) AS ri ON ri.resume_id = R.id
-        JOIN (${subQuery2}) AS c ON c.resume_id = R.id
-        JOIN (${subQuery3}) AS e ON e.resume_id = R.id
-        JOIN (${subQuery4}) AS a ON a.resume_id = R.id
-        JOIN (${subQuery5}) AS w ON w.resume_id = R.id
-        JOIN (${subQuery6}) AS my ON my.resume_id = R.id
-        JOIN (${subQuery7}) AS h ON h.resume_id = R.id
-        JOIN (${subQuery8}) AS p ON p.resume_id = R.id
+        LEFT JOIN (${resumeQuery}) AS ri ON ri.resume_id = R.id
+        LEFT JOIN (${careerQuery}) AS c ON c.resume_id = R.id
+        LEFT JOIN (${educationQuery}) AS e ON e.resume_id = R.id
+        LEFT JOIN (${activityQuery}) AS a ON a.resume_id = R.id
+        LEFT JOIN (${awardQuery}) AS w ON w.resume_id = R.id
+        LEFT JOIN (${myVideoQuery}) AS my ON my.resume_id = R.id
+        LEFT JOIN (${helperVideoQuery}) AS h ON h.resume_id = R.id
+        LEFT JOIN (${preferenceQuery}) AS p ON p.resume_id = R.id
+        LEFT JOIN (${trainingQuery}) AS tr ON tr.resume_id = R.id
+        LEFT JOIN (${certificateQuery}) AS ce ON ce.resume_id = R.id
+        LEFT JOIN (${portfolioQuery}) AS po ON po.resume_id = R.id
+        LEFT JOIN (${introductionQuery}) AS intro ON intro.resume_id = R.id
         WHERE R.id = ?;
     `;
     const [rows] = await findOneOrWhole(
       {
         query,
         values: [
+          resumeId,
+          resumeId,
+          resumeId,
+          resumeId,
           resumeId,
           resumeId,
           resumeId,
