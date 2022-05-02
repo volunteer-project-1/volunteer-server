@@ -14,6 +14,7 @@ import {
   CertificateDto,
   EducationDto,
   HelperVideoDto,
+  IntroductionDto,
   MyVideoDto,
   PortfolioDto,
   PreferenceDto,
@@ -77,6 +78,12 @@ export class CreateResumeDto implements ICreateResume {
   @Type(() => PortfolioDto)
   portfolio!: PortfolioDto;
 
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => IntroductionDto)
+  introductions!: IntroductionDto[];
+
   @IsNotEmptyObject()
   @ValidateNested()
   @Type(() => MyVideoDto)
@@ -101,6 +108,7 @@ export class CreateResumeDto implements ICreateResume {
     certificates,
     awards,
     portfolio,
+    introductions,
     myVideo,
     helperVideo,
     preference,
@@ -114,6 +122,7 @@ export class CreateResumeDto implements ICreateResume {
     this.certificates = certificates;
     this.awards = awards;
     this.portfolio = portfolio;
+    this.introductions = introductions;
     this.myVideo = myVideo;
     this.helperVideo = helperVideo;
     this.preference = preference;

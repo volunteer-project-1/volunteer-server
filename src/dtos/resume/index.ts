@@ -7,6 +7,7 @@ import {
   IsString,
   IsBoolean,
   IsUrl,
+  MaxLength,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { DisabilityLevel, DisabilityType, Sex } from "../../types";
@@ -167,6 +168,15 @@ export class PortfolioDto {
   @IsString()
   @IsUrl()
   url!: string;
+}
+export class IntroductionDto {
+  @IsString()
+  @MaxLength(20)
+  title!: string;
+
+  @IsString()
+  @MaxLength(800)
+  content!: string;
 }
 export class MyVideoDto {
   @IsString()

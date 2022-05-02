@@ -37,6 +37,7 @@ import {
   TRAINING_TABLE,
   PORTFOLIO_TABLE,
   CERTIFICATE_TABLE,
+  INTRODUCTION_TABLE,
 } from "../constants";
 
 @Service()
@@ -55,6 +56,7 @@ export class ResumeDAO implements IResumeDAO {
       certificates,
       awards,
       portfolio,
+      introductions,
       myVideo,
       helperVideo,
       preference: { preferenceJobs, preferenceLocations, ...preference },
@@ -175,6 +177,17 @@ export class ResumeDAO implements IResumeDAO {
       conn
     );
 
+    const introductionQueryFunctions = introductions.map((introduction) => {
+      const introductionFieldNames =
+        Object.keys(introduction).concat("resume_id");
+      const introductionQuery = `INSERT INTO ${INTRODUCTION_TABLE} (${introductionFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
+
+      return insert(
+        { query: introductionQuery, values: [Object.values(introduction)] },
+        conn
+      );
+    });
+
     const myVideoFieldNames = Object.keys(myVideo).concat("resume_id");
     const myVideoQuery = `INSERT INTO ${MY_VIDEO_TABLE} (${myVideoFieldNames}) VALUES (?, ${LAST_RESUME_ID})`;
     const myVideoQueryFunction = insert(
@@ -251,6 +264,7 @@ export class ResumeDAO implements IResumeDAO {
         ...certificateQueryFunctions,
         ...awardQueryFunctions,
         portfolioFunction,
+        ...introductionQueryFunctions,
         myVideoQueryFunction,
         helperVideoQueryFunction,
         preferenceQueryFunction,

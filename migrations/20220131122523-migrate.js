@@ -169,6 +169,16 @@ exports.up = function (db) {
         PRIMARY KEY (id),
         FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
       );
+      
+      CREATE TABLE if not exists introductions (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        title VARCHAR(30),
+        content VARCHAR(800),
+
+        resume_id BIGINT UNSIGNED NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE
+      );
 
       CREATE TABLE if not exists my_videos (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

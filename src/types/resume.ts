@@ -107,6 +107,12 @@ export interface IPortfolio {
   resume_id: number;
   url: string;
 }
+export interface IIntroduction {
+  id: number;
+  resume_id: number;
+  title: string;
+  content: string;
+}
 
 export interface IMyVideo {
   id: number;
@@ -152,6 +158,7 @@ export interface ICreateResume {
   certificates: Omit<ICertificate, "id" | "resume_id">[];
   awards: Omit<IAward, "id" | "resume_id">[];
   portfolio: Omit<IPortfolio, "id" | "resume_id">;
+  introductions: Omit<IIntroduction, "id" | "resume_id">[];
   myVideo: Omit<IMyVideo, "id" | "resume_id">;
   helperVideo: Omit<IHelperVideo, "id" | "resume_id">;
   preference: Omit<IPreference, "id" | "resume_id"> & {

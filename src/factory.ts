@@ -24,6 +24,7 @@ export const newResumeFactory = ({
   certificates,
   awards,
   portfolio,
+  introductions,
   myVideo,
   helperVideo,
   preference,
@@ -88,6 +89,9 @@ export const newResumeFactory = ({
       },
     ],
     portfolio: portfolio || { url: "포트폴리오 링크" },
+    introductions: introductions || [
+      { title: "왜 이 직무를 선택했나요?", content: "좋아서 했습니다" },
+    ],
     myVideo: myVideo || { url: "내영상링크" },
     helperVideo: helperVideo || { url: "헬퍼영상링크" },
     preference: preference || {
