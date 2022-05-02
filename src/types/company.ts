@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import { Request, Response } from "express";
 import { OkPacket } from "mysql2/promise";
 import { IUser } from ".";
@@ -16,12 +17,12 @@ export interface ICompanyInfo {
   introduce: string;
   founded_at: string;
   member: number;
-  investment: number;
+  acc_investment: number;
   homepage: string;
   email: string;
   phone_number: string;
   address: string;
-  industry: string;
+  industry_type: string;
   user_id: string;
 }
 
@@ -37,6 +38,9 @@ export interface ICreateCompany {
   password: string;
   salt: string;
 }
+
+export interface IUpdateCompanyInfo
+  extends Omit<ICompanyInfo, "id" | "user_id"> {}
 // export interface ICreateComapny {
 //   company: Omit<ICompany, "id">;
 //   info: Omit<ICompanyInfo, "id" | "user_id">;
@@ -51,15 +55,11 @@ export interface ICompanyService {
 
   findCompanyInfo: (id: number) => Promise<ICompanyInfo | undefined>;
 
-  createCompany: (
-    data: CreateCompanyByLocalDto
-  ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
+  createCompany: (data: CreateCompanyByLocalDto) => Promise<OkPacket>;
 }
 
 export interface IComapnyDAO {
-  createCompany: (
-    data: ICreateCompany
-  ) => Promise<{ company: OkPacket; info: OkPacket; history: OkPacket }>;
+  createCompany: (data: ICreateCompany) => Promise<OkPacket>;
   findCompanyInfo: (id: number) => Promise<ICompanyInfo | undefined>;
   findCompanyList: ({
     start,

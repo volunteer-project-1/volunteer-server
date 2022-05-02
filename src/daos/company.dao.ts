@@ -1,4 +1,3 @@
-import { OkPacket } from "mysql2/promise";
 import { Service } from "typedi";
 import {
   COMPANY_HISTORY_TABLE,
@@ -7,8 +6,8 @@ import {
   USER_TABLE,
 } from "../constants";
 import { findOneOrWhole, insert, MySQL } from "../db";
+import { CreateCompanyHistoryDto, CreateCompanyInfoDto } from "../dtos";
 import { ICompany, IComapnyDAO, ICreateCompany, ICompanyInfo } from "../types";
-import { queryTransactionWrapper } from "../utils";
 
 @Service()
 export class CompanyDAO implements IComapnyDAO {
@@ -17,54 +16,16 @@ export class CompanyDAO implements IComapnyDAO {
   async createCompany({ email, password, salt }: ICreateCompany) {
     const conn = await this.mysql.getConnection();
 
-    const LAST_INSERTED_ID = "@last_inserted_id";
-
     const companyQuery = `
         INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
         `;
 
-    const createCompanyQuery = insert(
+    const [result] = await insert(
       { query: companyQuery, values: [email, password, salt] },
       conn
-    );
+    )();
 
-    const setLastInsertedIdQuery = insert(
-      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
-      conn
-    );
-
-    const companyInfoQuery = `
-          INSERT INTO ${COMPANY_INFO_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
-          `;
-
-    const createCompanyInfoQueryFunction = insert(
-      { query: companyInfoQuery },
-      conn
-    );
-
-    const companyHistoryQuery = `
-              INSERT INTO ${COMPANY_HISTORY_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
-              `;
-
-    const createCompanyHistoryQueryFunction = insert(
-      { query: companyHistoryQuery },
-      conn
-    );
-    const results = await queryTransactionWrapper(
-      [
-        createCompanyQuery,
-        setLastInsertedIdQuery,
-        createCompanyInfoQueryFunction,
-        createCompanyHistoryQueryFunction,
-      ],
-      conn
-    );
-
-    return {
-      company: results[0] as OkPacket,
-      info: results[2] as OkPacket,
-      history: results[3] as OkPacket,
-    };
+    return result;
   }
 
   async findCompanyInfo(id: number) {
@@ -116,5 +77,49 @@ export class CompanyDAO implements IComapnyDAO {
     }
 
     return rows as ICompany[];
+  }
+
+  async createCompanyInfo(companyId: number, data: CreateCompanyInfoDto) {
+    const conn = this.mysql.getPool();
+
+    const companyInfoField = Object.keys(data).concat("user_id");
+
+    const query = `
+    INSERT INTO ${COMPANY_INFO_TABLE} 
+    (${companyInfoField})
+    VALUES (?)`;
+
+    const [result] = await insert(
+      { query, values: [Object.values<any>(data).concat(companyId)] },
+      conn
+    )();
+
+    if (result.affectedRows === 0) {
+      throw new Error();
+    }
+
+    return result;
+  }
+
+  async createCompanyHistory(companyId: number, data: CreateCompanyHistoryDto) {
+    const conn = this.mysql.getPool();
+
+    const companyHistoryField = Object.keys(data).concat("user_id");
+
+    const query = `
+    INSERT INTO ${COMPANY_HISTORY_TABLE} 
+    (${companyHistoryField})
+    VALUES (?)`;
+
+    const [result] = await insert(
+      { query, values: [Object.values<any>(data).concat(companyId)] },
+      conn
+    )();
+
+    if (result.affectedRows === 0) {
+      throw new Error();
+    }
+
+    return result;
   }
 }

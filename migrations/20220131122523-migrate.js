@@ -53,23 +53,35 @@ exports.up = function (db) {
 
       CREATE TABLE if not exists company_infos (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        name VARCHAR(20),
+        name VARCHAR(20) NOT NULL,
+        introduce VARCHAR(5000) NOT NULL,
+        founded_at DATETIME(3) NOT NULL,
+        member SMALLINT NOT NULL DEFAULT 1,
+        acc_investment SMALLINT NOT NULL DEFAULT 0,
+        homepage VARCHAR(255),
+        email VARCHAR(30) NOT NULL,
+        phone_number VARCHAR(20) NOT NULL,
         address VARCHAR(255),
+        industry_type VARCHAR(20),
         user_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
+      ALTER TABLE company_infos ADD UNIQUE INDEX (user_id);
+
       CREATE TABLE if not exists company_histories (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        content VARCHAR(600),
+        content VARCHAR(600) NOT NULL,
         history_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         user_id BIGINT UNSIGNED NOT NULL,
 
         PRIMARY KEY (id),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
+
+      ALTER TABLE company_histories ADD UNIQUE INDEX (user_id);
 
       CREATE TABLE if not exists resumes (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

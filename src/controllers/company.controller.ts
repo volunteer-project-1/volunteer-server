@@ -1,14 +1,14 @@
 import { Service } from "typedi";
 import { Request, Response } from "express";
+import { plainToInstance } from "class-transformer";
 import { CompanyService } from "../services";
 import { ICompanyController } from "../types";
 import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
-import { CreateCompanyByLocalDto } from "../dtos";
-
-type ReqQuery = {
-  start?: string;
-  limit?: string;
-};
+import {
+  CreateCompanyByLocalDto,
+  CreateCompanyHistoryDto,
+  CreateCompanyInfoDto,
+} from "../dtos";
 
 @Service()
 export class CompanyController implements ICompanyController {
@@ -19,12 +19,22 @@ export class CompanyController implements ICompanyController {
     res: Response
   ) => {
     await validateDtos(new CreateCompanyByLocalDto(body));
-    const { company } = await this.companyService.createCompany(body);
+    const company = await this.companyService.createCompany(body);
     res.json({ company });
   };
 
   findCompanyList = async (
-    { query: { start, limit } }: Request<unknown, unknown, unknown, ReqQuery>,
+    {
+      query: { start, limit },
+    }: Request<
+      unknown,
+      unknown,
+      unknown,
+      {
+        start?: string;
+        limit?: string;
+      }
+    >,
     res: Response
   ) => {
     assertNonNullish(start);
@@ -42,5 +52,41 @@ export class CompanyController implements ICompanyController {
     }
 
     return res.json({ companys });
+  };
+
+  createCompanyInfo = async (
+    {
+      body,
+      params: { id },
+    }: Request<{ id?: string }, unknown, CreateCompanyInfoDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+    await validateDtos(plainToInstance(CreateCompanyInfoDto, body));
+
+    const companyInfo = await this.companyService.createCompanyInfo(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    res.json({ companyInfo });
+  };
+
+  createCompanyHistory = async (
+    {
+      body,
+      params: { id },
+    }: Request<{ id?: string }, unknown, CreateCompanyHistoryDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+    await validateDtos(plainToInstance(CreateCompanyHistoryDto, body));
+
+    const companyHistory = await this.companyService.createCompanyHistory(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    res.json({ companyHistory });
   };
 }

@@ -4,8 +4,12 @@ import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { CompanyService } from "../..";
-import { CreateCompanyByLocalDto } from "../../../dtos";
-import { BadReqError } from "../../../lib";
+import {
+  CreateCompanyByLocalDto,
+  CreateCompanyHistoryDto,
+  CreateCompanyInfoDto,
+} from "../../../dtos";
+import { convertDateToTimestamp } from "../../../utils";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -32,42 +36,30 @@ afterAll(async () => {
   await Container.get(MySQL).closePool();
 });
 
-describe("create-company Test", () => {
+describe("create-company-history Test", () => {
   const companyService = Container.get(CompanyService);
-  it("If duplicated created, return company", async () => {
+  it("If created, return companyHistory", async () => {
     const data = {
       email: "company@gmail.com",
       password: "company",
     } as CreateCompanyByLocalDto;
-
-    const spy = jest.spyOn(companyService, "createCompany");
-
-    await companyService.createCompany(data);
-    try {
-      await companyService.createCompany(data);
-      throw new BadReqError("You Should not reach this");
-    } catch (e) {
-      expect(spy).toBeCalled();
-      expect(spy).toBeCalledWith(data);
-
-      //   expect(e.message).toEqual(expect.stringContaining("Duplicate"));
-      expect(e).not.toBeInstanceOf(BadReqError);
-    }
-  });
-
-  it("If created, return company", async () => {
-    const data = {
-      email: "company@gmail.com",
-      password: "company",
-    } as CreateCompanyByLocalDto;
-
-    const spy = jest.spyOn(companyService, "createCompany");
 
     const company = await companyService.createCompany(data);
 
-    expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(data);
+    const companyHistoryData: CreateCompanyHistoryDto = {
+      content: "블라블라 VC 투자",
+      history_at: convertDateToTimestamp(),
+    };
 
-    expect(company.affectedRows).toEqual(1);
+    const spy = jest.spyOn(companyService, "createCompanyHistory");
+    const companyHistory = await companyService.createCompanyHistory(
+      company.insertId,
+      companyHistoryData
+    );
+
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith(company.insertId, companyHistoryData);
+
+    expect(companyHistory.affectedRows).toEqual(1);
   });
 });

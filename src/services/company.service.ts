@@ -1,6 +1,10 @@
 import { Service } from "typedi";
 import { CompanyDAO } from "../daos";
-import { CreateCompanyByLocalDto } from "../dtos";
+import {
+  CreateCompanyByLocalDto,
+  CreateCompanyHistoryDto,
+  CreateCompanyInfoDto,
+} from "../dtos";
 import { ICompanyService } from "../types";
 import { generateHashPassword } from "../utils";
 
@@ -25,5 +29,13 @@ export class CompanyService implements ICompanyService {
 
   findCompanyInfo(id: number) {
     return this.companyDAO.findCompanyInfo(id);
+  }
+
+  createCompanyInfo(id: number, data: CreateCompanyInfoDto) {
+    return this.companyDAO.createCompanyInfo(id, data);
+  }
+
+  createCompanyHistory(id: number, data: CreateCompanyHistoryDto) {
+    return this.companyDAO.createCompanyHistory(id, data);
   }
 }
