@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { Request, Response } from "express";
-import { OkPacket } from "mysql2/promise";
+import { OkPacket, ResultSetHeader } from "mysql2/promise";
 import { IUser } from ".";
 import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
   CreateCompanyInfoDto,
+  UpdateCompanyHistoryDto,
+  UpdateCompanyInfoDto,
 } from "../dtos";
 
 export interface ICompany extends IUser {}
@@ -56,10 +58,20 @@ export interface ICompanyService {
     id: number,
     data: CreateCompanyInfoDto
   ) => Promise<OkPacket>;
+
+  updateCompanyInfo: (
+    id: number,
+    data: CreateCompanyInfoDto
+  ) => Promise<ResultSetHeader>;
+
   createCompanyHistory: (
     id: number,
     data: CreateCompanyHistoryDto
   ) => Promise<OkPacket>;
+  updateCompanyHistory: (
+    id: number,
+    data: UpdateCompanyHistoryDto
+  ) => Promise<ResultSetHeader>;
 }
 
 export interface IComapnyDAO {
@@ -82,6 +94,16 @@ export interface IComapnyDAO {
     companyId: number,
     data: CreateCompanyHistoryDto
   ) => Promise<OkPacket>;
+
+  updateCompanyInfo: (
+    id: number,
+    data: UpdateCompanyInfoDto
+  ) => Promise<ResultSetHeader>;
+
+  updateCompanyHistory: (
+    id: number,
+    data: UpdateCompanyHistoryDto
+  ) => Promise<ResultSetHeader>;
 }
 
 export interface ICompanyController {
@@ -89,4 +111,6 @@ export interface ICompanyController {
   findCompanyList: (req: Request, res: Response) => Promise<Response>;
   createCompanyInfo: (req: Request, res: Response) => Promise<Response>;
   createCompanyHistory: (req: Request, res: Response) => Promise<Response>;
+  updateCompanyInfo: (req: Request, res: Response) => Promise<Response>;
+  updateCompanyHistory: (req: Request, res: Response) => Promise<Response>;
 }

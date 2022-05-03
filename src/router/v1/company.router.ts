@@ -10,11 +10,13 @@ const companyController = Container.get(CompanyController);
 companyRouter.route("").get(asyncHandler(companyController.findCompanyList));
 companyRouter
   .route("/:id/info")
-  .post(asyncHandler(companyController.createCompanyInfo));
+  .post(asyncHandler(companyController.createCompanyInfo))
+  .patch(asyncHandler(companyController.updateCompanyInfo));
 
 companyRouter
   .route("/:id/history")
-  .post(asyncHandler(companyController.createCompanyHistory));
+  .post(asyncHandler(companyController.createCompanyHistory))
+  .patch(asyncHandler(companyController.updateCompanyHistory));
 //   .post(asyncHandler(companyController.createCompany));
 
 export { companyRouter };

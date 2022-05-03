@@ -8,8 +8,10 @@ import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
   CreateCompanyInfoDto,
+  UpdateCompanyHistoryDto,
+  UpdateCompanyInfoDto,
 } from "../dtos";
-import { NotFoundError } from "../lib";
+import { BadReqError, NotFoundError } from "../lib";
 
 @Service()
 export class CompanyController implements ICompanyController {
@@ -90,6 +92,36 @@ export class CompanyController implements ICompanyController {
     return res.json({ companyInfo });
   };
 
+  updateCompanyInfo = async (
+    {
+      body,
+      params: { id },
+    }: Request<{ id?: string }, unknown, UpdateCompanyInfoDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+    await validateDtos(plainToInstance(UpdateCompanyInfoDto, body));
+
+    const updatedCompanyInfo = await this.companyService.updateCompanyInfo(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    if (updatedCompanyInfo.affectedRows === 0) {
+      throw new BadReqError();
+    }
+
+    const companyInfo = await this.companyService.findCompanyInfo(
+      parseToNumberOrThrow(id)
+    );
+
+    if (!companyInfo) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ companyInfo });
+  };
+
   createCompanyHistory = async (
     {
       body,
@@ -108,6 +140,37 @@ export class CompanyController implements ICompanyController {
 
     const companyHistory = await this.companyService.findCompanyHistory(
       createdCompanyHistory.insertId
+    );
+
+    if (!companyHistory) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ companyHistory });
+  };
+
+  updateCompanyHistory = async (
+    {
+      body,
+      params: { id },
+    }: Request<{ id?: string }, unknown, UpdateCompanyHistoryDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+    await validateDtos(plainToInstance(UpdateCompanyHistoryDto, body));
+
+    const updatedCompanyHistory =
+      await this.companyService.updateCompanyHistory(
+        parseToNumberOrThrow(id),
+        body
+      );
+
+    if (updatedCompanyHistory.affectedRows === 0) {
+      throw new BadReqError();
+    }
+
+    const companyHistory = await this.companyService.findCompanyHistory(
+      parseToNumberOrThrow(id)
     );
 
     if (!companyHistory) {

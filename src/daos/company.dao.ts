@@ -6,13 +6,15 @@ import {
   USER_METAS_TABLE,
   USER_TABLE,
 } from "../constants";
-import { findOneOrWhole, insert, MySQL } from "../db";
+import { findOneOrWhole, insert, MySQL, update } from "../db";
 import {
   CreateCompanyHistoryDto,
   CreateCompanyInfoDto,
   FindCompanyDto,
   FindCompanyHistoryDto,
   FindCompanyInfoDto,
+  UpdateCompanyHistoryDto,
+  UpdateCompanyInfoDto,
 } from "../dtos";
 import { ICompany, IComapnyDAO, ICreateCompany } from "../types";
 
@@ -141,6 +143,19 @@ export class CompanyDAO implements IComapnyDAO {
     return result;
   }
 
+  async updateCompanyInfo(id: number, data: UpdateCompanyInfoDto) {
+    const conn = this.mysql.getPool();
+
+    const query = `
+        UPDATE ${COMPANY_INFO_TABLE} 
+        SET ?
+        WHERE id = ?`;
+
+    const [result] = await update({ query, values: [data, id] }, conn)();
+
+    return result;
+  }
+
   async createCompanyHistory(companyId: number, data: CreateCompanyHistoryDto) {
     const conn = this.mysql.getPool();
 
@@ -159,6 +174,19 @@ export class CompanyDAO implements IComapnyDAO {
     if (result.affectedRows === 0) {
       throw new Error();
     }
+
+    return result;
+  }
+
+  async updateCompanyHistory(id: number, data: UpdateCompanyHistoryDto) {
+    const conn = this.mysql.getPool();
+
+    const query = `
+        UPDATE ${COMPANY_HISTORY_TABLE} 
+        SET ?
+        WHERE id = ?`;
+
+    const [result] = await update({ query, values: [data, id] }, conn)();
 
     return result;
   }

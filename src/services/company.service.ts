@@ -4,6 +4,8 @@ import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
   CreateCompanyInfoDto,
+  UpdateCompanyHistoryDto,
+  UpdateCompanyInfoDto,
 } from "../dtos";
 import { ICompanyService } from "../types";
 import { generateHashPassword } from "../utils";
@@ -46,7 +48,15 @@ export class CompanyService implements ICompanyService {
     return this.companyDAO.createCompanyInfo(id, data);
   }
 
+  updateCompanyInfo(id: number, data: UpdateCompanyInfoDto) {
+    return this.companyDAO.updateCompanyInfo(id, data);
+  }
+
   createCompanyHistory(id: number, data: CreateCompanyHistoryDto) {
     return this.companyDAO.createCompanyHistory(id, data);
+  }
+
+  updateCompanyHistory(id: number, data: UpdateCompanyHistoryDto) {
+    return this.companyDAO.updateCompanyHistory(id, data);
   }
 }

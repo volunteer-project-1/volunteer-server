@@ -4,3 +4,5 @@ export * from "./create-company-history.dto";
 export * from "./find-company-history.dto";
 export * from "./find-company-info.dto";
 export * from "./find-company.dto";
+export * from "./update-company-info.dto";
+export * from "./update-company-history.dto";
