@@ -1,3 +1,4 @@
+import { plainToInstance } from "class-transformer";
 import { Service } from "typedi";
 import {
   COMPANY_HISTORY_TABLE,
@@ -6,8 +7,14 @@ import {
   USER_TABLE,
 } from "../constants";
 import { findOneOrWhole, insert, MySQL } from "../db";
-import { CreateCompanyHistoryDto, CreateCompanyInfoDto } from "../dtos";
-import { ICompany, IComapnyDAO, ICreateCompany, ICompanyInfo } from "../types";
+import {
+  CreateCompanyHistoryDto,
+  CreateCompanyInfoDto,
+  FindCompanyDto,
+  FindCompanyHistoryDto,
+  FindCompanyInfoDto,
+} from "../dtos";
+import { ICompany, IComapnyDAO, ICreateCompany } from "../types";
 
 @Service()
 export class CompanyDAO implements IComapnyDAO {
@@ -28,12 +35,45 @@ export class CompanyDAO implements IComapnyDAO {
     return result;
   }
 
+  async findCompanyById(id: number) {
+    const conn = await this.mysql.getConnection();
+    const query = `
+        SELECT * 
+        FROM ${USER_TABLE} 
+        WHERE id = ? 
+        LIMIT 1`;
+
+    const [rows] = await findOneOrWhole({ query, values: [id] }, conn)();
+
+    if (!rows.length) {
+      return undefined;
+    }
+    return plainToInstance(FindCompanyDto, rows[0]);
+  }
+
   async findCompanyInfo(id: number) {
     const conn = await this.mysql.getConnection();
     const query = `
+        SELECT * 
+        FROM ${COMPANY_INFO_TABLE} 
+        WHERE id = ? 
+        LIMIT 1`;
+
+    const [rows] = await findOneOrWhole({ query, values: [id] }, conn)();
+
+    if (!rows.length) {
+      return undefined;
+    }
+    return plainToInstance(FindCompanyInfoDto, rows[0]);
+    // return rows[0] as ICompanyInfo;
+  }
+
+  async findCompanyHistory(id: number) {
+    const conn = await this.mysql.getConnection();
+    const query = `
     SELECT * 
-    FROM ${COMPANY_INFO_TABLE} 
-    WHERE user_id = ? 
+    FROM ${COMPANY_HISTORY_TABLE} 
+    WHERE id = ? 
     LIMIT 1`;
 
     const [rows] = await findOneOrWhole({ query, values: [id] }, conn)();
@@ -41,7 +81,7 @@ export class CompanyDAO implements IComapnyDAO {
     if (!rows.length) {
       return undefined;
     }
-    return rows[0] as ICompanyInfo;
+    return plainToInstance(FindCompanyHistoryDto, rows[0]);
   }
 
   async findCompanyList({

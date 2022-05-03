@@ -9,6 +9,7 @@ import {
   CreateCompanyHistoryDto,
   CreateCompanyInfoDto,
 } from "../dtos";
+import { NotFoundError } from "../lib";
 
 @Service()
 export class CompanyController implements ICompanyController {
@@ -19,8 +20,17 @@ export class CompanyController implements ICompanyController {
     res: Response
   ) => {
     await validateDtos(new CreateCompanyByLocalDto(body));
-    const company = await this.companyService.createCompany(body);
-    res.json({ company });
+    const createdCompany = await this.companyService.createCompany(body);
+
+    const company = await this.companyService.findCompanyById(
+      createdCompany.insertId
+    );
+
+    if (!company) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ company });
   };
 
   findCompanyList = async (
@@ -64,12 +74,20 @@ export class CompanyController implements ICompanyController {
     assertNonNullish(id);
     await validateDtos(plainToInstance(CreateCompanyInfoDto, body));
 
-    const companyInfo = await this.companyService.createCompanyInfo(
+    const createdCompanyInfo = await this.companyService.createCompanyInfo(
       parseToNumberOrThrow(id),
       body
     );
 
-    res.json({ companyInfo });
+    const companyInfo = await this.companyService.findCompanyInfo(
+      createdCompanyInfo.insertId
+    );
+
+    if (!companyInfo) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ companyInfo });
   };
 
   createCompanyHistory = async (
@@ -82,11 +100,20 @@ export class CompanyController implements ICompanyController {
     assertNonNullish(id);
     await validateDtos(plainToInstance(CreateCompanyHistoryDto, body));
 
-    const companyHistory = await this.companyService.createCompanyHistory(
-      parseToNumberOrThrow(id),
-      body
+    const createdCompanyHistory =
+      await this.companyService.createCompanyHistory(
+        parseToNumberOrThrow(id),
+        body
+      );
+
+    const companyHistory = await this.companyService.findCompanyHistory(
+      createdCompanyHistory.insertId
     );
 
-    res.json({ companyHistory });
+    if (!companyHistory) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ companyHistory });
   };
 }

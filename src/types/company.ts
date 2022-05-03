@@ -2,14 +2,13 @@
 import { Request, Response } from "express";
 import { OkPacket } from "mysql2/promise";
 import { IUser } from ".";
-import { CreateCompanyByLocalDto } from "../dtos";
+import {
+  CreateCompanyByLocalDto,
+  CreateCompanyHistoryDto,
+  CreateCompanyInfoDto,
+} from "../dtos";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ICompany extends IUser {}
-// export interface IComapny extends DefaultTime, ICompanySecret {
-//   id: number;
-//   email: string;
-// }
 
 export interface ICompanyInfo {
   id: number;
@@ -41,11 +40,6 @@ export interface ICreateCompany {
 
 export interface IUpdateCompanyInfo
   extends Omit<ICompanyInfo, "id" | "user_id"> {}
-// export interface ICreateComapny {
-//   company: Omit<ICompany, "id">;
-//   info: Omit<ICompanyInfo, "id" | "user_id">;
-//   history: Omit<ICompanyHistory, "id" | "user_id">;
-// }
 
 export interface ICompanyService {
   findCompanyList: (data: {
@@ -53,14 +47,26 @@ export interface ICompanyService {
     limit: number;
   }) => Promise<ICompany[] | undefined>;
 
+  findCompanyById: (id: number) => Promise<ICompany | undefined>;
   findCompanyInfo: (id: number) => Promise<ICompanyInfo | undefined>;
+  findCompanyHistory: (id: number) => Promise<ICompanyHistory | undefined>;
 
   createCompany: (data: CreateCompanyByLocalDto) => Promise<OkPacket>;
+  createCompanyInfo: (
+    id: number,
+    data: CreateCompanyInfoDto
+  ) => Promise<OkPacket>;
+  createCompanyHistory: (
+    id: number,
+    data: CreateCompanyHistoryDto
+  ) => Promise<OkPacket>;
 }
 
 export interface IComapnyDAO {
   createCompany: (data: ICreateCompany) => Promise<OkPacket>;
+  findCompanyById: (id: number) => Promise<ICompany | undefined>;
   findCompanyInfo: (id: number) => Promise<ICompanyInfo | undefined>;
+  findCompanyHistory: (id: number) => Promise<ICompanyHistory | undefined>;
   findCompanyList: ({
     start,
     limit,
@@ -68,9 +74,19 @@ export interface IComapnyDAO {
     start: number;
     limit: number;
   }) => Promise<ICompany[] | undefined>;
+  createCompanyInfo: (
+    companyId: number,
+    data: CreateCompanyInfoDto
+  ) => Promise<OkPacket>;
+  createCompanyHistory: (
+    companyId: number,
+    data: CreateCompanyHistoryDto
+  ) => Promise<OkPacket>;
 }
 
 export interface ICompanyController {
-  //   createUserByLocal: (req: Request, res: Response) => Promise<Response>;
+  createCompany: (req: Request, res: Response) => Promise<Response>;
   findCompanyList: (req: Request, res: Response) => Promise<Response>;
+  createCompanyInfo: (req: Request, res: Response) => Promise<Response>;
+  createCompanyHistory: (req: Request, res: Response) => Promise<Response>;
 }

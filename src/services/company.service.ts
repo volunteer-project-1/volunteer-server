@@ -12,7 +12,10 @@ import { generateHashPassword } from "../utils";
 export class CompanyService implements ICompanyService {
   constructor(private companyDAO: CompanyDAO) {}
 
-  async createCompany({ email, password }: CreateCompanyByLocalDto) {
+  async createCompany({
+    email,
+    password,
+  }: Omit<CreateCompanyByLocalDto, "passwordConfirm">) {
     const { hash: hasedPassword, salt } = await generateHashPassword(password);
 
     const input = {
@@ -23,12 +26,20 @@ export class CompanyService implements ICompanyService {
     return this.companyDAO.createCompany(input);
   }
 
+  findCompanyById(id: number) {
+    return this.companyDAO.findCompanyById(id);
+  }
+
   findCompanyList(data: { start: number; limit: number }) {
     return this.companyDAO.findCompanyList(data);
   }
 
   findCompanyInfo(id: number) {
     return this.companyDAO.findCompanyInfo(id);
+  }
+
+  findCompanyHistory(id: number) {
+    return this.companyDAO.findCompanyHistory(id);
   }
 
   createCompanyInfo(id: number, data: CreateCompanyInfoDto) {
