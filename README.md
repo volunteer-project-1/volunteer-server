@@ -1,3 +1,56 @@
+# SEE ME
+
+대한민국의 장애인들만을 위한 채용 플랫폼 서버입니다.
+Rest API 서버로써 `Next.js`와 함께 개발되었습니다.
+
+[클라이언트 Repo](https://github.com/volunteer-project-1/volunteer_client)
+
+# 프로젝트 전체적인 구조
+
+![프레젠테이션1](https://user-images.githubusercontent.com/50390565/166633875-60970dba-76e5-417c-851e-151d1639075a.jpg)
+
+# 프로젝트의 주요 관심사
+
+공통사항
+
+- 코드의 지속적인 리팩토링
+
+* Controller와 Service 테스트 100%
+
+# 브랜치 관리 전략
+
+Git Flow를 사용하여 브랜치를 관리합니다.  
+모든 브랜치는 PR을 진행 후 `main`으로 merge를 진행합니다.
+
+- main : 개발이 끝난 부분에 대해서 Merge를 진행합니다.
+
+* v tag : main 브랜치에서 배포시 사용합니다.
+* feature : 기능 개발을 진행할 때 사용합니다.
+* fix : 배포를 진행한 후 발생한 버그를 수정할 때 사용합니다.
+
+# 테스트
+
+- Jest를 활용하여 Prod DB와 같은 환경의 Test DB에서 테스트를 진행
+
+* GitHub Actions의 CI를 적용하여 테스트 자동화
+
+# 사용 기술 및 환경
+
+ExpressJS, MySQL, Redis, Docker, Filebeat + ELK, AWS Cloud
+
+# CI
+
+`v tag`를 제외한 브랜치의 Commit 푸쉬와 PR 시마다 자동 Build 및 Test 적용
+
+# CD
+
+AWS EC2에 scp를 이용한 파일 전송 후 pm2로 재실행 하여 배포합니다.  
+추후 EKS 전환을 대비하여 Docker 이미지를 제작하여 `GitHub Container Registry`에 배포합니다.
+
+# DB ERD
+
+![seeme_erd](https://user-images.githubusercontent.com/50390565/166513564-f0bd5d3c-444b-4093-a114-fab2e59df619.png)
+
 # 실행 방법
 
 > 도커 컴포즈 방법을 추천드립니다.
@@ -50,81 +103,4 @@ mock 함수를 사용 하지않고 실제 db환경을 사용
 ```
 $ cd mysql && docker-compose up --build
 $ nf -e .env.test run npm run test
-```
-
-# API
-
-## API 테스트
-
-```
-GET "/health" return { status: "ok" }
-
-<!-- Deprecated -->
-POST "/health2" return `request.body`
-```
-
-## API .v1
-
-- auth
-
-```
-GET "/api/v1/auth/google"  // 구글 로그인
-
-POST "/api/v1/auth/local" // 로컬 회원가입
-POST "/api/v1/auth/local/signup" // 로컬 로그인
-```
-
-- user
-
-```
-
-GET "/api/v1/user?id=1&limit=5" // 전체 유저 찾기(페이지네이션 id 1부터 5개)
-GET "/api/v1/user/:id" // id를 갖는 유저 찾기
-
-GET "/api/v1/user/profile" // 내 profile 확인
-PATCH "/api/v1/user/profile" // 내 profile 수정
-
-```
-
-- resume
-
-```
-POST "/api/v1/resume" // resume 생성
-GET "/api/v1/resume" // 내 resume 전체 찾기
-GET "/api/v1/resume/public?start=1&limit=5" // public resume 찾기(예. 페이지네이션 start 1 부터 5개 검색)
-
-GET "/api/v1/resume/:id" // resume 찾기 (관련 테이블 다 같이)
-PATCH "/api/v1/resume/:id" // resume 수정
-delete "/api/v1/resume/:id" // resume 삭제 (관련 테이블 다 같이)
-
-PATCH "/api/v1/resume/:id/info" // resume_info 수정
-delete "/api/v1/resume/:id/info" // resume_info 삭제
-
-PATCH "/api/v1/resume/:id/education" // education 수정
-delete "/api/v1/resume/:id/education" // education 삭제
-
-PATCH "/api/v1/resume/:id/career" // career 수정
-delete "/api/v1/resume/:id/career" // career 삭제
-
-PATCH "/api/v1/resume/:id/activity" // activity 수정
-delete "/api/v1/resume/:id/activity" // activity 삭제
-
-PATCH "/api/v1/resume/:id/award" // award 수정
-delete "/api/v1/resume/:id/award" // award 삭제
-
-PATCH "/api/v1/resume/:id/my-video" // my-video 수정
-delete "/api/v1/resume/:id/my-video" // my-video 삭제
-
-PATCH "/api/v1/resume/:id/helper-video" // helper-video 수정
-delete "/api/v1/resume/:id/helper-video" // helper-video 삭제
-
-PATCH "/api/v1/resume/:id/preference" // preference 수정
-delete "/api/v1/resume/:id/preference" // preference 삭제
-
-PATCH "/api/v1/resume/:id/preference-job" // preference-job 수정
-delete "/api/v1/resume/:id/preference-job" // preference-job 삭제
-
-PATCH "/api/v1/resume/:id/preference-location" // preference-location 수정
-delete "/api/v1/resume/:id/preference-location" // preference-location 삭제
-
 ```
