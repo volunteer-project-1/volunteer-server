@@ -32,7 +32,7 @@ export async function startApp() {
   const mysql = Container.get(MySQL);
   await mysql.connect();
 
-  setOffKeepAlive(app);
+  app.use(setOffKeepAlive);
 
   app.use(helmet());
 
