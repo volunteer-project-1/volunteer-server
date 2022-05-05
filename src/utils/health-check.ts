@@ -1,9 +1,9 @@
 import { HealthCheckError, TerminusOptions } from "@godaddy/terminus";
 import Container from "typedi";
-import { MySQL, Redis } from "../db";
+import { MySQL, RedisSession } from "../db";
 import { logger, Emitter } from ".";
 
-const redis = Container.get(Redis);
+const redis = Container.get(RedisSession);
 const mysql = Container.get(MySQL);
 const emitter = Container.get(Emitter).getInstance();
 

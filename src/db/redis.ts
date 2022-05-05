@@ -6,7 +6,9 @@ import { REDIS_URL } from "../config";
 import { logger } from "../utils";
 
 @Service()
-export class Redis {
+export class RedisSession {
+  private retry = 0;
+
   private redisStore: connectRedis.RedisStore | undefined;
 
   private redisClient!: RedisClientType;
@@ -42,8 +44,18 @@ export class Redis {
       .connect()
       .then(() => logger.info("REDIS CONNECTED"))
       .catch(async (err) => {
+        if (this.retry > 3) {
+          logger.error(
+            `REDIS CONNECTED FAILED, OVER ${this.retry} try ,${JSON.stringify(
+              err
+            )}`
+          );
+          process.kill(process.pid, "SIGINT");
+          return;
+        }
         logger.error("REDIS CONNECTED FAILED", JSON.stringify(err));
         logger.info("Retry Redis Connection");
+        this.retry += 1;
         await this.getRedisConnection();
       });
   }
@@ -62,6 +74,5 @@ export class Redis {
       .then(() => {
         logger.info("Redis is Disconnected");
       });
-    // await this.getRedisClient().quit();
   }
 }
