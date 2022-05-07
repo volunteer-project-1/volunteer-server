@@ -15,7 +15,7 @@ Rest API 서버로써 `Next.js`와 함께 개발되었습니다.
 
 - 코드의 지속적인 리팩토링
 
-* Controller와 Service 테스트 100%
+* Controller와 Service 테스트 커버리지 100%
 
 # 브랜치 관리 전략
 
