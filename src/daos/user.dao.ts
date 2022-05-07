@@ -1,12 +1,10 @@
 import { Service } from "typedi";
-import { OkPacket } from "mysql2/promise";
 import {
   IUserDAO,
   IUser,
   IReturnFindMyProfile,
   IUpdateProfile,
 } from "../types";
-import { queryTransactionWrapper } from "../utils";
 import { findOneOrWhole, insert, MySQL, update } from "../db";
 import { USER_METAS_TABLE, USER_PROFILE_TABLE, USER_TABLE } from "../constants";
 import { CreateUserByLocalDto } from "../dtos";
@@ -120,44 +118,44 @@ export class UserDAO implements IUserDAO {
   async createUserBySocial(email: string) {
     const conn = await this.mysql.getConnection();
 
-    const LAST_INSERTED_ID = "@last_inserted_id";
-    const userQuery = `
+    try {
+      await conn.beginTransaction();
+
+      const userQuery = `
         INSERT INTO ${USER_TABLE} (email) VALUES(?);
         `;
+      const [createUser] = await insert(
+        { query: userQuery, values: [email] },
+        conn
+      )();
 
-    const createUserQuery = insert({ query: userQuery, values: [email] }, conn);
-    const setLastInsertedIdQuery = insert(
-      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
-      conn
-    );
+      const userMetaQuery = `
+        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${createUser.insertId});
+        `;
+      const [createUserMeta] = await insert({ query: userMetaQuery }, conn)();
 
-    const userMetaQuery = `
-        INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+      const userProfileQuery = `
+            INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${createUser.insertId});
         `;
 
-    const createUserMetaQuery = insert({ query: userMetaQuery }, conn);
+      const [createUserProfile] = await insert(
+        { query: userProfileQuery },
+        conn
+      )();
 
-    const userProfileQuery = `
-            INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
-            `;
+      await conn.commit();
 
-    const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
-
-    const results = await queryTransactionWrapper(
-      [
-        createUserQuery,
-        setLastInsertedIdQuery,
-        createUserMetaQuery,
-        createUserProfileQuery,
-      ],
-      conn
-    );
-
-    return {
-      user: results[0] as OkPacket,
-      meta: results[2] as OkPacket,
-      profile: results[3] as OkPacket,
-    };
+      return {
+        user: createUser,
+        meta: createUserMeta,
+        profile: createUserProfile,
+      };
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      await conn.release();
+    }
   }
 
   async createUserByLocal({
@@ -167,47 +165,45 @@ export class UserDAO implements IUserDAO {
   }: CreateUserByLocalDto & { salt: string }) {
     const conn = await this.mysql.getConnection();
 
-    const LAST_INSERTED_ID = "@last_inserted_id";
+    try {
+      await conn.beginTransaction();
 
-    const userQuery = `
+      const userQuery = `
         INSERT INTO ${USER_TABLE} (email, password, salt) VALUES(?, ?, ?);
         `;
 
-    const createUserQuery = insert(
-      { query: userQuery, values: [email, password, salt] },
-      conn
-    );
+      const [createUser] = await insert(
+        { query: userQuery, values: [email, password, salt] },
+        conn
+      )();
 
-    const setLastInsertedIdQuery = insert(
-      { query: `SET ${LAST_INSERTED_ID} := Last_insert_id();` },
-      conn
-    );
-
-    const userMetaQuery = `
-          INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+      const userMetaQuery = `
+          INSERT INTO ${USER_METAS_TABLE} (user_id) VALUES (${createUser.insertId});
           `;
 
-    const createUserMetaQuery = insert({ query: userMetaQuery }, conn);
+      const [createUserMeta] = await insert({ query: userMetaQuery }, conn)();
 
-    const userProfileQuery = `
-              INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${LAST_INSERTED_ID});
+      const userProfileQuery = `
+              INSERT INTO ${USER_PROFILE_TABLE} (user_id) VALUES (${createUser.insertId});
               `;
 
-    const createUserProfileQuery = insert({ query: userProfileQuery }, conn);
-    const results = await queryTransactionWrapper(
-      [
-        createUserQuery,
-        setLastInsertedIdQuery,
-        createUserMetaQuery,
-        createUserProfileQuery,
-      ],
-      conn
-    );
+      const [createUserProfile] = await insert(
+        { query: userProfileQuery },
+        conn
+      )();
 
-    return {
-      user: results[0] as OkPacket,
-      meta: results[2] as OkPacket,
-      profile: results[3] as OkPacket,
-    };
+      await conn.commit();
+
+      return {
+        user: createUser,
+        meta: createUserMeta,
+        profile: createUserProfile,
+      };
+    } catch (error) {
+      await conn.rollback();
+      throw error;
+    } finally {
+      await conn.release();
+    }
   }
 }
