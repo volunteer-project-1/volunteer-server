@@ -2,6 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import Container from "typedi";
 import { CompanyController, UserController } from "../../controllers";
+import { BadReqError } from "../../lib";
 import { asyncHandler } from "../../utils";
 
 const authRouter = Router();
@@ -9,9 +10,15 @@ const authRouter = Router();
 const userController = Container.get(UserController);
 const companyController = Container.get(CompanyController);
 
-authRouter.route("/local").post(passport.authenticate("local"), (_, res) => {
+authRouter.route("/local").post(passport.authenticate("user"), (_, res) => {
   return res.status(200).send("Logged in.");
 });
+
+authRouter
+  .route("/local/company")
+  .post(passport.authenticate("company"), (_, res) => {
+    return res.status(200).send("Logged in.");
+  });
 
 authRouter
   .route("/local/signup/user")
@@ -35,5 +42,17 @@ authRouter.route("/google/callback").get(
     // res.redirect(CLIENT_DOMAIN);
   }
 );
+
+authRouter.route("/logout").get(async (req, res) => {
+  await req.session.destroy((err) => {
+    if (err) {
+      throw new BadReqError();
+    }
+  });
+
+  req.logOut();
+
+  res.redirect("/");
+});
 
 export { authRouter };

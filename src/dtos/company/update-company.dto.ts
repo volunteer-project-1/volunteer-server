@@ -9,7 +9,7 @@ import {
   Min,
 } from "class-validator";
 
-export class UpdateCompanyInfoDto {
+export class UpdateCompanyDto {
   @IsOptional()
   @IsString()
   name?: string;

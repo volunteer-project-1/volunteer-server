@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { IUser } from "../types/user";
+// import { ICompany } from "../types";
+// import { IUser } from "../types/user";
+import { UserAndCompany } from "../types";
 
 export {};
 
+// export interface UserAndCompany extends IUser, ICompany {
+//   type?: string;
+// }
 declare global {
   namespace Express {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface AuthInfo {}
-    export interface User extends IUser {
-      // TODO 유저와 컴퍼니를 USER 테이블에서 같이 사용 중
-      type?: string;
-    }
+    export interface User extends UserAndCompany {}
 
     namespace Multer {
       interface File extends Multer.File {

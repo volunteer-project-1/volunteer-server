@@ -4,8 +4,9 @@ import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { CompanyService } from "../..";
-import { CreateCompanyByLocalDto, CreateCompanyInfoDto } from "../../../dtos";
-import { convertDateToTimestamp } from "../../../utils";
+import { CreateCompanyByLocalDto } from "../../../dtos";
+import { newCompanyJobDescriptionFactory } from "../../../factory";
+import { ICreateCompany } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -32,35 +33,31 @@ afterAll(async () => {
   await Container.get(MySQL).closePool();
 });
 
-describe("create-company-info Test", () => {
+describe("create-company-job-description Test", () => {
   const companyService = Container.get(CompanyService);
-  it("If created, return info", async () => {
-    const data = {
+
+  it("If created, return OkPacket", async () => {
+    const data: ICreateCompany = {
       email: "company@gmail.com",
       password: "company",
-    } as CreateCompanyByLocalDto;
+      name: "회사명",
+    };
 
     const company = await companyService.createCompany(data);
 
-    const companyInfoData: CreateCompanyInfoDto = {
-      name: "회사명",
-      introduce: "회사소개 블라블라",
-      founded_at: convertDateToTimestamp(),
-      member: 11,
-      email: "test@gmail.com",
-      phone_number: "010-1234-1234",
-      address: "주소 주소",
-    };
+    const spy = jest.spyOn(companyService, "createJobDescription");
 
-    const spy = jest.spyOn(companyService, "createCompanyInfo");
-    const companyInfo = await companyService.createCompanyInfo(
-      company.insertId,
-      companyInfoData
-    );
+    const jdData = newCompanyJobDescriptionFactory();
+    const { jobDescription, jdSteps, jdDetails, jdWorkCondition, jdWelfares } =
+      await companyService.createJobDescription(company.insertId, jdData);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(company.insertId, companyInfoData);
+    expect(spy).toBeCalledWith(company.insertId, jdData);
 
-    expect(companyInfo.affectedRows).toEqual(1);
+    expect(jobDescription.affectedRows).toBe(1);
+    expect(jdSteps.length).toBe(jdData.jd_steps.length);
+    expect(jdDetails.length).toBe(jdData.jd_details.length);
+    expect(jdWorkCondition.affectedRows).toBe(1);
+    expect(jdWelfares.length).toBe(jdData.jd_welfares.length);
   });
 });

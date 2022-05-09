@@ -7,11 +7,11 @@ import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
 import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
-  CreateCompanyInfoDto,
+  CreateJobDescriptionDto,
+  UpdateCompanyDto,
   UpdateCompanyHistoryDto,
-  UpdateCompanyInfoDto,
 } from "../dtos";
-import { BadReqError, NotFoundError } from "../lib";
+import { BadReqError, NotFoundError, UnauthorizedError } from "../lib";
 
 @Service()
 export class CompanyController implements ICompanyController {
@@ -33,6 +33,46 @@ export class CompanyController implements ICompanyController {
     }
 
     return res.json({ company });
+  };
+
+  findCompanyByEmail = async (
+    { body: { email } }: Request<unknown, unknown, { email?: string }>,
+    res: Response
+  ) => {
+    if (!email) {
+      throw new BadReqError();
+    }
+
+    const company = await this.companyService.findCompanyByEmail(email);
+
+    return res.json({ company });
+  };
+
+  updateCompany = async (
+    { body, user: company }: Request<unknown, unknown, UpdateCompanyDto>,
+    res: Response
+  ) => {
+    if (!company || !Object.keys(body).length) {
+      throw new BadReqError();
+    }
+    await validateDtos(plainToInstance(UpdateCompanyDto, body));
+
+    const updatedCompany = await this.companyService.updateCompany(
+      company.id,
+      body
+    );
+
+    if (updatedCompany.affectedRows === 0) {
+      throw new BadReqError();
+    }
+
+    const found = await this.companyService.findCompanyById(company.id);
+
+    if (!found) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ company: found });
   };
 
   findCompanyList = async (
@@ -64,62 +104,6 @@ export class CompanyController implements ICompanyController {
     }
 
     return res.json({ companys });
-  };
-
-  createCompanyInfo = async (
-    {
-      body,
-      params: { id },
-    }: Request<{ id?: string }, unknown, CreateCompanyInfoDto>,
-    res: Response
-  ) => {
-    assertNonNullish(id);
-    await validateDtos(plainToInstance(CreateCompanyInfoDto, body));
-
-    const createdCompanyInfo = await this.companyService.createCompanyInfo(
-      parseToNumberOrThrow(id),
-      body
-    );
-
-    const companyInfo = await this.companyService.findCompanyInfo(
-      createdCompanyInfo.insertId
-    );
-
-    if (!companyInfo) {
-      throw new NotFoundError();
-    }
-
-    return res.json({ companyInfo });
-  };
-
-  updateCompanyInfo = async (
-    {
-      body,
-      params: { id },
-    }: Request<{ id?: string }, unknown, UpdateCompanyInfoDto>,
-    res: Response
-  ) => {
-    assertNonNullish(id);
-    await validateDtos(plainToInstance(UpdateCompanyInfoDto, body));
-
-    const updatedCompanyInfo = await this.companyService.updateCompanyInfo(
-      parseToNumberOrThrow(id),
-      body
-    );
-
-    if (updatedCompanyInfo.affectedRows === 0) {
-      throw new BadReqError();
-    }
-
-    const companyInfo = await this.companyService.findCompanyInfo(
-      parseToNumberOrThrow(id)
-    );
-
-    if (!companyInfo) {
-      throw new NotFoundError();
-    }
-
-    return res.json({ companyInfo });
   };
 
   createCompanyHistory = async (
@@ -178,5 +162,88 @@ export class CompanyController implements ICompanyController {
     }
 
     return res.json({ companyHistory });
+  };
+
+  createJobDescription = async (
+    {
+      body,
+      params: { id },
+    }: Request<{ id?: string }, unknown, CreateJobDescriptionDto>,
+    res: Response
+  ) => {
+    const parsedId = Number(id);
+    if (!id) {
+      throw new BadReqError();
+    }
+    if (!parsedId) {
+      throw new BadReqError();
+    }
+
+    await validateDtos(new CreateJobDescriptionDto(body));
+
+    const { jobDescription } = await this.companyService.createJobDescription(
+      parsedId,
+      body
+    );
+
+    const jd = await this.companyService.findJobDescriptionById(
+      jobDescription.insertId
+    );
+
+    if (!jd) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ jobDescription: jd });
+  };
+
+  createResumeApplying = async (
+    {
+      query: { resumeId, jdDetailId },
+      user,
+    }: Request<
+      unknown,
+      unknown,
+      unknown,
+      { resumeId?: string; jdDetailId?: string }
+    >,
+    res: Response
+  ) => {
+    const parsedResumeId = Number(resumeId);
+    const parsedJdDetailId = Number(jdDetailId);
+
+    if (!parsedResumeId || !parsedJdDetailId) {
+      throw new BadReqError();
+    }
+
+    if (!user) {
+      throw new UnauthorizedError();
+    }
+
+    const result = await this.companyService.createResumeApplying({
+      userId: user.id,
+      resumeId: parsedResumeId,
+      jdDetailId: parsedJdDetailId,
+    });
+
+    return res.json({ result });
+  };
+
+  findResumeApplyingByUserId = async (
+    { user }: Request<unknown, unknown, unknown>,
+    res: Response
+  ) => {
+    if (!user) {
+      throw new UnauthorizedError();
+    }
+    const resumeApplyings = await this.companyService.findResumeApplying(
+      user.id
+    );
+
+    if (!resumeApplyings) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ resumeApplyings });
   };
 }

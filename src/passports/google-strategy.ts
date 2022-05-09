@@ -4,7 +4,12 @@ import Container from "typedi";
 import { GOOGLE_CONFIG } from "../config";
 import { UserService } from "../services";
 import { NotFoundError } from "../lib";
+import { UserAndCompany } from "../types";
+// import { ICompany, IUser } from "../types";
 
+// export interface UserAndCompany extends IUser, ICompany {
+//   type?: string;
+// }
 export default () => {
   const userService = Container.get(UserService);
   passport.use(
@@ -23,12 +28,15 @@ export default () => {
 
         if (!user) {
           await userService.createUserBySocial(email);
-          const createdUser = await userService.findUserByEmail(email);
+          const foundedUser = await userService.findUserByEmail(email);
+          if (!foundedUser) {
+            throw new NotFoundError();
+          }
 
-          return cb(null, createdUser);
+          return cb(null, { ...foundedUser, type: "user" } as UserAndCompany);
         }
 
-        return cb(null, user);
+        return cb(null, { ...user, type: "user" } as UserAndCompany);
       }
     )
   );

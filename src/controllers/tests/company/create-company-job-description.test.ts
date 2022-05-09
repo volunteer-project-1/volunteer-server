@@ -3,9 +3,9 @@ import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
 import { MySQL } from "../../../db";
-import { CreateCompanyByLocalDto, CreateCompanyInfoDto } from "../../../dtos";
+import { CreateCompanyByLocalDto } from "../../../dtos";
+import { newCompanyJobDescriptionFactory } from "../../../factory";
 import { CompanyService } from "../../../services";
-import { convertDateToTimestamp } from "../../../utils";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -32,62 +32,42 @@ afterAll(async () => {
   await Container.get(MySQL).closePool();
 });
 
-describe("create company info api test", () => {
+describe("create-company-job-description api test", () => {
   const URL = "/api/v1/company";
 
-  const companyService = Container.get(CompanyService);
-
-  it("in valid params, return 400", async () => {
-    const params = "in-valid";
-    const res = await request(await startApp()).post(`${URL}/${params}/info`);
-    //   .send({});
-
+  it("In Valid Params", async () => {
+    const params = "IN-valid";
+    const res = await request(await startApp()).post(
+      `${URL}/${params}/job-description`
+    );
     expect(res.status).toBe(400);
   });
 
-  it("body dto in valid, return 400", async () => {
-    const params = 1;
+  it("In valid body dto, return 400", async () => {
+    const body = {};
     const res = await request(await startApp())
-      .post(`${URL}/${params}/info`)
-      .send({});
+      .post(`${URL}/1/job-description`)
+      .send(body);
 
     expect(res.status).toBe(400);
   });
 
   it("if success, return 200", async () => {
+    const companyService = Container.get(CompanyService);
     const data: CreateCompanyByLocalDto = {
       email: "company@gmail.com",
       password: "comcomcomcom123!A.",
       passwordConfirm: "comcomcomcom123!A.",
-    };
-    const company = await companyService.createCompany(data);
-
-    const body: CreateCompanyInfoDto = {
       name: "회사명",
-      introduce: "회사소개 블라블라",
-      founded_at: convertDateToTimestamp(),
-      member: 11,
-      email: "test@gmail.com",
-      phone_number: "010-1234-1234",
-      address: "주소 주소",
     };
+
+    const body = newCompanyJobDescriptionFactory();
+
+    const company = await companyService.createCompany(data);
     const res = await request(await startApp())
-      .post(`${URL}/${company.insertId}/info`)
+      .post(`${URL}/${company.insertId}/job-description`)
       .send(body);
 
     expect(res.status).toBe(200);
   });
-
-  //   it("if success, return 200", async () => {
-  //     const body: CreateCompanyByLocalDto = {
-  //       email: "company@gmail.com",
-  //       password: "comcomcomcom123!A.",
-  //       passwordConfirm: "comcomcomcom123!A.",
-  //     };
-  //     const res = await request(await startApp())
-  //       .post(`${URL}`)
-  //       .send(body);
-
-  //     expect(res.status).toBe(200);
-  //   });
 });

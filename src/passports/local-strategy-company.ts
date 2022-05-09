@@ -1,37 +1,37 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import Container from "typedi";
-import { UserService } from "../services";
+import { CompanyService } from "../services";
 import { NotFoundError, UnauthorizedError } from "../lib";
 import { verifyPassword } from "../utils";
 
 export default () => {
-  const userService = Container.get(UserService);
+  const companyService = Container.get(CompanyService);
   passport.use(
-    "user",
+    "company",
     new LocalStrategy(
       {
         usernameField: "email",
         passwordField: "password",
       },
       async (email, password, cb) => {
-        const foundUser = await userService.findUserByEmail(email);
+        const foundCompany = await companyService.findCompanyByEmail(email);
 
-        if (!foundUser || !foundUser.password || !foundUser.salt) {
+        if (!foundCompany || !foundCompany.password || !foundCompany.salt) {
           return cb(new NotFoundError("Not Found Email"));
         }
 
         const emailAndPasswordVerified = await verifyPassword(
           password,
-          foundUser.password,
-          foundUser.salt
+          foundCompany.password,
+          foundCompany.salt
         );
 
         if (!emailAndPasswordVerified) {
           return cb(new UnauthorizedError("Wrong Email Or Password"));
         }
 
-        return cb(null, { ...foundUser });
+        return cb(null, { ...foundCompany });
       }
     )
   );

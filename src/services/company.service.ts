@@ -1,31 +1,42 @@
+/* eslint-disable camelcase */
 import { Service } from "typedi";
 import { CompanyDAO } from "../daos";
 import {
-  CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
-  CreateCompanyInfoDto,
+  CreateJobDescriptionDto,
+  UpdateCompanyDto,
   UpdateCompanyHistoryDto,
-  UpdateCompanyInfoDto,
 } from "../dtos";
-import { ICompanyService } from "../types";
+import {
+  ICompanyService,
+  ICreateCompany,
+  ICreateJobDescription,
+} from "../types";
 import { generateHashPassword } from "../utils";
 
 @Service()
 export class CompanyService implements ICompanyService {
   constructor(private companyDAO: CompanyDAO) {}
 
-  async createCompany({
-    email,
-    password,
-  }: Omit<CreateCompanyByLocalDto, "passwordConfirm">) {
+  async createCompany(data: ICreateCompany) {
+    const { email, password, name } = data;
     const { hash: hasedPassword, salt } = await generateHashPassword(password);
 
     const input = {
       email,
       password: hasedPassword,
       salt,
+      name,
     };
     return this.companyDAO.createCompany(input);
+  }
+
+  updateCompany(companyId: number, data: UpdateCompanyDto) {
+    return this.companyDAO.updateCompany(companyId, data);
+  }
+
+  findCompanyByEmail(email: string) {
+    return this.companyDAO.findCompanyByEmail(email);
   }
 
   findCompanyById(id: number) {
@@ -36,20 +47,8 @@ export class CompanyService implements ICompanyService {
     return this.companyDAO.findCompanyList(data);
   }
 
-  findCompanyInfo(id: number) {
-    return this.companyDAO.findCompanyInfo(id);
-  }
-
   findCompanyHistory(id: number) {
     return this.companyDAO.findCompanyHistory(id);
-  }
-
-  createCompanyInfo(id: number, data: CreateCompanyInfoDto) {
-    return this.companyDAO.createCompanyInfo(id, data);
-  }
-
-  updateCompanyInfo(id: number, data: UpdateCompanyInfoDto) {
-    return this.companyDAO.updateCompanyInfo(id, data);
   }
 
   createCompanyHistory(id: number, data: CreateCompanyHistoryDto) {
@@ -58,5 +57,34 @@ export class CompanyService implements ICompanyService {
 
   updateCompanyHistory(id: number, data: UpdateCompanyHistoryDto) {
     return this.companyDAO.updateCompanyHistory(id, data);
+  }
+
+  createJobDescription(id: number, data: CreateJobDescriptionDto) {
+    const { jd_details, jd_work_condition, jd_steps, jd_welfares, ...rest } =
+      data;
+    const parsedData: ICreateJobDescription = {
+      jobDescription: rest,
+      jdDetails: jd_details,
+      jdWorkCondition: jd_work_condition,
+      jdSteps: jd_steps,
+      jdWelfares: jd_welfares,
+    };
+    return this.companyDAO.createJobDescription(id, parsedData);
+  }
+
+  findJobDescriptionById(id: number) {
+    return this.companyDAO.findJobDescriptionById(id);
+  }
+
+  createResumeApplying(data: {
+    userId: number;
+    resumeId: number;
+    jdDetailId: number;
+  }) {
+    return this.companyDAO.createResumeApplying(data);
+  }
+
+  findResumeApplying(userId: number) {
+    return this.companyDAO.findResumeApplyingByUserId(userId);
   }
 }

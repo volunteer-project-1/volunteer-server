@@ -6,7 +6,6 @@ import {
   IsEmail,
 } from "class-validator";
 import { IsNotBlank, Match } from "../../decorators";
-import { ICreateUserByLocal } from "../../types";
 
 export class CreateCompanyByLocalDto {
   @IsNotEmpty()
@@ -27,13 +26,28 @@ export class CreateCompanyByLocalDto {
   )
   password: string;
 
+  @IsNotEmpty()
+  @IsString()
+  name!: string;
+
   @IsString()
   @Match("password")
   passwordConfirm: string;
 
-  constructor({ email, password, passwordConfirm }: ICreateUserByLocal) {
+  constructor({
+    email,
+    password,
+    passwordConfirm,
+    name,
+  }: {
+    email: string;
+    password: string;
+    passwordConfirm: string;
+    name: string;
+  }) {
     this.email = email;
     this.password = password;
     this.passwordConfirm = passwordConfirm;
+    this.name = name;
   }
 }

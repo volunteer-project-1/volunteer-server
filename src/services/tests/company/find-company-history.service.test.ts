@@ -4,8 +4,9 @@ import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { CompanyService } from "../..";
-import { CreateCompanyHistoryDto, CreateCompanyInfoDto } from "../../../dtos";
+import { CreateCompanyHistoryDto } from "../../../dtos";
 import { convertDateToTimestamp } from "../../../utils";
+import { ICreateCompany } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -47,10 +48,12 @@ describe("find-Company-history Test", () => {
   });
 
   it("조회 성공 시, 반환", async () => {
-    const company = await companyService.createCompany({
+    const data: ICreateCompany = {
       email: "company@gmail.com",
-      password: "password",
-    });
+      password: "company",
+      name: "회사명",
+    };
+    const company = await companyService.createCompany(data);
 
     const companyHistoryData: CreateCompanyHistoryDto = {
       content: "연혁 1",

@@ -3,7 +3,12 @@ import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
 import { MySQL } from "../../../db";
-import { CreateCompanyByLocalDto } from "../../../dtos";
+import {
+  newCompanyJobDescriptionFactory,
+  newResumeFactory,
+} from "../../../factory";
+import { CompanyService, ResumeService, UserService } from "../../../services";
+import { ICreateCompany } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -30,43 +35,46 @@ afterAll(async () => {
   await Container.get(MySQL).closePool();
 });
 
-describe("create company api test", () => {
-  const URL = "/api/v1/auth/local/signup/company";
+describe("create-resume-applying api test", () => {
+  const URL = "/api/v1/company/applying";
+  const userService = Container.get(UserService);
+  const resumeService = Container.get(ResumeService);
+  const companyService = Container.get(CompanyService);
 
-  //   const companyService = Container.get(CompanyService);
-
-  it("body dto in valid, return 400", async () => {
+  it("In valid query string, return 400", async () => {
+    const query = { invalid: "asdf" };
     const res = await request(await startApp())
       .post(`${URL}`)
-      .send({});
-
-    expect(res.status).toBe(400);
-  });
-
-  it("if passwordConfirm not valid, return 200", async () => {
-    const body: CreateCompanyByLocalDto = {
-      email: "company@gmail.com",
-      password: "comcomcomcom123!A.",
-      passwordConfirm: "comcomcomcom",
-      name: "회사명",
-    };
-    const res = await request(await startApp())
-      .post(`${URL}`)
-      .send(body);
+      .query(query);
 
     expect(res.status).toBe(400);
   });
 
   it("if success, return 200", async () => {
-    const body: CreateCompanyByLocalDto = {
+    const { user } = await userService.createUserBySocial("user@gmail.com");
+    const data: ICreateCompany = {
       email: "company@gmail.com",
-      password: "comcomcomcom123!A.",
-      passwordConfirm: "comcomcomcom123!A.",
+      password: "company",
       name: "회사명",
+    };
+    const { resume } = await resumeService.createResume(
+      user.insertId,
+      newResumeFactory()
+    );
+
+    const company = await companyService.createCompany(data);
+    const { jdDetails } = await companyService.createJobDescription(
+      company.insertId,
+      newCompanyJobDescriptionFactory()
+    );
+
+    const query = {
+      resumeId: resume.insertId,
+      jdDetailId: jdDetails[0].insertId,
     };
     const res = await request(await startApp())
       .post(`${URL}`)
-      .send(body);
+      .query(query);
 
     expect(res.status).toBe(200);
   });

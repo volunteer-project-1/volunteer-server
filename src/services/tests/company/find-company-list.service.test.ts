@@ -44,17 +44,4 @@ describe("findCompanyList Test", () => {
 
     expect(results).toBe(undefined);
   });
-
-  it("If not found, return undefined", async () => {
-    const data = { start: 1, limit: 5 };
-
-    const spy = jest.spyOn(companyService, "findCompanyList");
-
-    const results = await companyService.findCompanyList(data);
-
-    expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(data);
-
-    expect(results).toBe(undefined);
-  });
 });

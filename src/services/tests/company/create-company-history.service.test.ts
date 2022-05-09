@@ -7,9 +7,9 @@ import { CompanyService } from "../..";
 import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
-  CreateCompanyInfoDto,
 } from "../../../dtos";
 import { convertDateToTimestamp } from "../../../utils";
+import { ICreateCompany } from "../../../types";
 
 beforeAll(async () => {
   await Container.get(MySQL).connect();
@@ -39,10 +39,11 @@ afterAll(async () => {
 describe("create-company-history Test", () => {
   const companyService = Container.get(CompanyService);
   it("If created, return companyHistory", async () => {
-    const data = {
+    const data: ICreateCompany = {
       email: "company@gmail.com",
       password: "company",
-    } as CreateCompanyByLocalDto;
+      name: "회사명",
+    };
 
     const company = await companyService.createCompany(data);
 

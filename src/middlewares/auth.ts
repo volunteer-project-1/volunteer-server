@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { AUTH_TYPE } from "../constants";
 import { UnauthorizedError } from "../lib";
 
 export const isAuthenticate = (
@@ -7,14 +6,10 @@ export const isAuthenticate = (
   _: Response,
   next: NextFunction
 ) => {
-  if (req.isAuthenticated()) {
-    if (req.user.type) {
-      throw new UnauthorizedError("유저 계정만 접근 가능");
-    }
+  if (req.isAuthenticated() && req.user.type === "user") {
     next();
   } else {
     throw new UnauthorizedError("로그인 필요");
-    // res.status(301).redirect(`${URL}/login`)
   }
 };
 
@@ -23,7 +18,7 @@ export const isCompanyAuthenticate = (
   _: Response,
   next: NextFunction
 ) => {
-  if (req.isAuthenticated() && req.user.type === AUTH_TYPE) {
+  if (req.isAuthenticated() && req.user.type === "company") {
     next();
   } else {
     throw new UnauthorizedError("회사 계정만 접근 가능");

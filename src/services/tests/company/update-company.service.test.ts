@@ -4,7 +4,7 @@ import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
 import { MySQL } from "../../../db";
 import { CompanyService } from "../..";
-import { CreateCompanyByLocalDto } from "../../../dtos";
+import { CreateCompanyByLocalDto, UpdateCompanyDto } from "../../../dtos";
 import { BadReqError } from "../../../lib";
 import { ICreateCompany } from "../../../types";
 
@@ -33,29 +33,29 @@ afterAll(async () => {
   await Container.get(MySQL).closePool();
 });
 
-describe("create-company Test", () => {
+describe("update-company Test", () => {
   const companyService = Container.get(CompanyService);
-  it("If duplicated created, return company", async () => {
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
+  //   it("If duplicated created, return company", async () => {
+  //     const data: ICreateCompany = {
+  //       email: "company@gmail.com",
+  //       password: "company",
+  //       name: "회사명",
+  //     };
 
-    const spy = jest.spyOn(companyService, "createCompany");
+  //     const spy = jest.spyOn(companyService, "createCompany");
 
-    await companyService.createCompany(data);
-    try {
-      await companyService.createCompany(data);
-      throw new BadReqError("You Should not reach this");
-    } catch (e) {
-      expect(spy).toBeCalled();
-      expect(spy).toBeCalledWith(data);
+  //     await companyService.createCompany(data);
+  //     try {
+  //       await companyService.createCompany(data);
+  //       throw new BadReqError("You Should not reach this");
+  //     } catch (e) {
+  //       expect(spy).toBeCalled();
+  //       expect(spy).toBeCalledWith(data);
 
-      //   expect(e.message).toEqual(expect.stringContaining("Duplicate"));
-      expect(e).not.toBeInstanceOf(BadReqError);
-    }
-  });
+  //       //   expect(e.message).toEqual(expect.stringContaining("Duplicate"));
+  //       expect(e).not.toBeInstanceOf(BadReqError);
+  //     }
+  //   });
 
   it("If created, return company", async () => {
     const data: ICreateCompany = {
@@ -64,13 +64,22 @@ describe("create-company Test", () => {
       name: "회사명",
     };
 
-    const spy = jest.spyOn(companyService, "createCompany");
-
     const company = await companyService.createCompany(data);
 
-    expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(data);
+    const spy = jest.spyOn(companyService, "updateCompany");
+    const updateData: UpdateCompanyDto = {
+      name: "회사명2",
+      introduce: "회사 소개~",
+    };
 
-    expect(company.affectedRows).toEqual(1);
+    const updatedCompany = await companyService.updateCompany(
+      company.insertId,
+      updateData
+    );
+
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith(company.insertId, updateData);
+
+    expect(updatedCompany.affectedRows).not.toBe(0);
   });
 });

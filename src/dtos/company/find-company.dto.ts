@@ -6,6 +6,9 @@ export class FindCompanyDto implements ICompany {
   id!: number;
 
   @Expose()
+  name!: string;
+
+  @Expose()
   email!: string;
 
   password?: string;
