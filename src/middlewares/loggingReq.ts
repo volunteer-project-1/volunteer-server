@@ -18,7 +18,12 @@ export const loggingReq = (
       if (k.toLocaleLowerCase().indexOf("password") > -1) {
         filteredBody.password = "FILTERED";
       }
+
+      if (k.toLocaleLowerCase().indexOf("passwordconfirm") > -1) {
+        filteredBody.passwordConfirm = "FILTERED";
+      }
     });
+
     logger.info(`Parameters : ${JSON.stringify(filteredBody)}`);
   }
   if (file || files) {

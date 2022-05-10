@@ -359,19 +359,23 @@ export class ResumeDAO implements IResumeDAO {
       pool
     )();
 
-    if (rows.length === 0) {
+    if (!rows.length) {
       return undefined;
     }
 
     return rows as IFindResume[];
   }
 
-  async findMyResumes(id: number): Promise<IFindResume[]> {
+  async findMyResumes(id: number): Promise<IFindResume[] | undefined> {
     const pool = this.mysql.getPool();
 
     const query = `SELECT * FROM ${RESUME_TABLE} WHERE user_id = ? LIMIT 10`;
 
     const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
+
+    if (!rows.length) {
+      return undefined;
+    }
 
     return rows as IFindResume[];
   }

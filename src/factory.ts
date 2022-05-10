@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { CreateJobDescriptionDto } from "./dtos";
 import {
   IActivity,
   IAward,
@@ -238,5 +239,41 @@ export const newPreferenceLocationFactory = ({
   return {
     sido: sido || "부산시",
     sigungu: sigungu || "경상남도",
+  };
+};
+
+export const newCompanyJobDescriptionFactory = (): CreateJobDescriptionDto => {
+  const now = new Date();
+  const tomorrow = now.setDate(now.getDate() + 1);
+  return {
+    started_at: convertDateToTimestamp(now),
+    deadline_at: convertDateToTimestamp(new Date(tomorrow)),
+    category: "카테고리",
+    jd_details: [
+      {
+        title: "제목",
+        num_recruitment: 0,
+        role: "개발자",
+        requirements: "cs 전공지식",
+        priority: "딥러닝",
+      },
+      {
+        title: "제목2",
+        num_recruitment: 10,
+        role: "기획자",
+        requirements: "기획상품",
+        priority: "경력 3년",
+      },
+    ],
+    jd_work_condition: {
+      type: "정규직(수습3개월)",
+      time: "9 to 6",
+      place: "서울시 강남구",
+    },
+    jd_steps: [
+      { step: 1, title: "서류제출" },
+      { step: 2, title: "코테" },
+    ],
+    jd_welfares: [{ title: "커피무제한", content: "우리 회사 커피는 무제한~" }],
   };
 };

@@ -6,10 +6,22 @@ export const isAuthenticate = (
   _: Response,
   next: NextFunction
 ) => {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.user.type === "user") {
     next();
   } else {
     throw new UnauthorizedError("로그인 필요");
+  }
+};
+
+export const isCompanyAuthenticate = (
+  req: Request,
+  _: Response,
+  next: NextFunction
+) => {
+  if (req.isAuthenticated() && req.user.type === "company") {
+    next();
+  } else {
+    throw new UnauthorizedError("회사 계정만 접근 가능");
     // res.status(301).redirect(`${URL}/login`)
   }
 };

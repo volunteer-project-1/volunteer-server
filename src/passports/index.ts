@@ -1,13 +1,23 @@
 import passport from "passport";
-import { IUser } from "../types/user";
+import { UserAndCompany } from "../types";
 import google from "./google-strategy";
 import local from "./local-strategy";
+import localCompany from "./local-strategy-company";
 
+// export interface UserAndCompany extends IUser, ICompany {
+//   type?: string;
+// }
 export default () => {
-  passport.serializeUser((user: IUser, done) => {
-    return done(null, user);
+  passport.serializeUser((user: UserAndCompany, done) => {
+    // console.log("시리얼라이즈", user);
+    if (user.name) {
+      return done(null, { ...user, type: "company" });
+    } else {
+      return done(null, { ...user, type: "user" });
+    }
   });
-  passport.deserializeUser(async (user: IUser, done) => {
+  passport.deserializeUser(async (user: UserAndCompany, done) => {
+    // console.log("디시리얼라이즈", user);
     try {
       return done(null, user); // req.user
     } catch (error) {
@@ -18,5 +28,6 @@ export default () => {
   });
 
   local();
+  localCompany();
   google();
 };

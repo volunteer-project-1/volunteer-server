@@ -22,8 +22,9 @@ jobs:
           DB_PORT: 3306
         ports:
           - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
+        options:
+          --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          # options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_USER=root -e MYSQL_PASSWORD=root -e MYSQL_DATABASE=test --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
     strategy:
       matrix:
         node-version: [16.x]
@@ -49,7 +50,8 @@ jobs:
 
       - name: Set up MySQL
         run: |
-          # mysql --version
+          mysql --version
+          # sudo service mysql stop
           sudo systemctl start mysql.service
 
           mysql -e 'ALTER USER "root"@"localhost" IDENTIFIED WITH mysql_native_password BY "root";' -uroot -proot
@@ -60,7 +62,8 @@ jobs:
           mysql -e 'SHOW DATABASES;' -uroot -proot
 
       - name: Test
-        run: npm run test:ci
+        run: |
+          npm run test:ci
         env:
           NODE_ENV: test
           DB_HOST: 127.0.0.1
