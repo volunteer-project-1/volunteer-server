@@ -49,7 +49,7 @@ AWS EC2에 scp를 이용한 파일 전송 후 pm2로 재실행 하여 배포합�
 
 # DB ERD
 
-![seeme_erd](https://user-images.githubusercontent.com/50390565/166513564-f0bd5d3c-444b-4093-a114-fab2e59df619.png)
+![seeme2png](https://user-images.githubusercontent.com/50390565/167591909-b959fb25-6428-4f80-8efa-c05450afba3d.png)
 
 # 실행 방법
 
