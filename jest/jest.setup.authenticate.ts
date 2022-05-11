@@ -4,7 +4,7 @@ jest.mock("../src/middlewares/auth.ts", () => {
   return {
     __esmodule: true,
     ...orig,
-    isAuthenticate: jest.fn(async (req, _res, next) => {
+    isUserAuthenticate: jest.fn(async (req, _res, next) => {
       const user = { id: 1, email: "ehgks0083@gmail.com", type: "user" };
       req.user = user;
       next();

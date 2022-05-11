@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Container } from "typedi";
 import { UserController } from "../../controllers";
 import { asyncHandler } from "../../utils";
-import { isAuthenticate } from "../../middlewares";
+import { isUserAuthenticate } from "../../middlewares";
 
 const userRouter = Router();
 
@@ -12,8 +12,8 @@ userRouter.route("").get(asyncHandler(userController.findUsers));
 
 userRouter
   .route("/profile")
-  .get(isAuthenticate, asyncHandler(userController.findMyProfile))
-  .patch(isAuthenticate, asyncHandler(userController.updateMyProfile));
+  .get(isUserAuthenticate, asyncHandler(userController.findMyProfile))
+  .patch(isUserAuthenticate, asyncHandler(userController.updateMyProfile));
 
 userRouter.route("/:id").get(asyncHandler(userController.findUserById));
 

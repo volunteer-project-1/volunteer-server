@@ -109,4 +109,5 @@ jobs:
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
             npm ci
-            pm2 restart 0 --update-env
+            pm2 kill
+            nf -e .env run npm run pm2

@@ -36,7 +36,7 @@ const COOKIE_MAX_AGE = 1000 * 60 * 60 * 24 * 14; // 30일
 
 export const SESSION_OPTION = {
   secret: SESSION_SECRET,
-  saveUninitialized: true,
+  saveUninitialized: false,
   resave: false,
   cookie: {
     maxAge: COOKIE_MAX_AGE,
