@@ -20,14 +20,7 @@ function onShutdown() {
 
 async function onHealthCheck() {
   const errors: any[] = [];
-  return Promise.all(
-    [mysql.getPing(), redis.getPing()].map((p) =>
-      p.catch((error) => {
-        errors.push(error);
-        return undefined;
-      })
-    )
-  ).then(() => {
+  return Promise.all([console.log("health Check")]).then(() => {
     if (errors.length) {
       throw new HealthCheckError("healthcheck failed", errors);
     }

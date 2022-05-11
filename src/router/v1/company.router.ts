@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Container from "typedi";
 import { CompanyController } from "../../controllers";
-import { isAuthenticate, isCompanyAuthenticate } from "../../middlewares";
+import { isUserAuthenticate, isCompanyAuthenticate } from "../../middlewares";
 import { asyncHandler } from "../../utils";
 
 const companyRouter = Router();
@@ -34,9 +34,12 @@ companyRouter
 
 companyRouter
   .route("/applying")
-  .post(isAuthenticate, asyncHandler(companyController.createResumeApplying))
+  .post(
+    isUserAuthenticate,
+    asyncHandler(companyController.createResumeApplying)
+  )
   .get(
-    isAuthenticate,
+    isUserAuthenticate,
     asyncHandler(companyController.findResumeApplyingByUserId)
   );
 
