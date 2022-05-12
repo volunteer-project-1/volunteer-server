@@ -18,7 +18,7 @@ const config: Config.InitialOptions = {
   testTimeout: 30000,
   setupFilesAfterEnv: [
     "./jest/jest.setup.logger.ts",
-    "./jest/jest.setup.set-off-keep-alive.ts",
+    // "./jest/jest.setup.set-off-keep-alive.ts",
     "./jest/jest.setup.terminus.ts",
     "./jest/jest.setup.health-check.ts",
     "./jest/jest.setup.redis-mock.ts",
