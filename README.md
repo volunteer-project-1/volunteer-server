@@ -7,7 +7,7 @@ Rest API 서버로써 `Next.js`와 함께 개발되었습니다.
 
 # 프로젝트 전체적인 구조
 
-![프레젠테이션1](https://user-images.githubusercontent.com/50390565/166633875-60970dba-76e5-417c-851e-151d1639075a.jpg)
+![asdf](https://user-images.githubusercontent.com/50390565/167988433-47848b8a-5d00-4aaf-83e3-dda98d3ec58d.jpg)
 
 # 프로젝트의 주요 관심사
 
