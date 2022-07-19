@@ -22,7 +22,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -60,7 +60,7 @@ describe("find-resume-applying Test", () => {
         newCompanyJobDescriptionFactory()
       );
     const { resume } = await resumeService.createResume(
-      user.insertId,
+      user.id,
       newResumeFactory()
     );
 
@@ -69,22 +69,19 @@ describe("find-resume-applying Test", () => {
         company.insertId,
         newCompanyJobDescriptionFactory()
       );
-    const { resume: resume2 } = await resumeService.createResume(
-      user.insertId,
-      {
-        ...newResumeFactory(),
-        resume: { title: "제목2", content: "내용2", is_public: true },
-      }
-    );
+    const { resume: resume2 } = await resumeService.createResume(user.id, {
+      ...newResumeFactory(),
+      resume: { title: "제목2", content: "내용2", is_public: true },
+    });
 
     const resumeApplying = await companyService.createResumeApplying({
-      userId: user.insertId,
+      userId: user.id,
       resumeId: resume.insertId,
       jdDetailId: jdDetails[0].insertId,
     });
 
     const resumeApplying2 = await companyService.createResumeApplying({
-      userId: user.insertId,
+      userId: user.id,
       resumeId: resume2.insertId,
       jdDetailId: jdDetails2[1].insertId,
     });
@@ -107,14 +104,14 @@ describe("find-resume-applying Test", () => {
 
     const spy = jest.spyOn(companyService, "findResumeApplying");
 
-    const founds = await companyService.findResumeApplying(user.insertId);
+    const founds = await companyService.findResumeApplying(user.id);
 
     if (!founds || !founds.length) {
       throw new Error();
     }
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(user.insertId);
+    expect(spy).toBeCalledWith(user.id);
 
     for (const [index, value] of founds.entries()) {
       expect(value).toEqual(expect.objectContaining(arr[index]));

@@ -17,7 +17,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -36,11 +36,11 @@ describe("updatePreference Test", () => {
   const userService = Container.get(UserService);
   const resumeService = Container.get(ResumeService);
   it("If success return changedRows", async () => {
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial("ehgks0083@gmail.com");
+    const { user } = await userService.createUserBySocial(
+      "ehgks0083@gmail.com"
+    );
     const data = newResumeFactory();
-    await resumeService.createResume(insertId, data);
+    await resumeService.createResume(user.id, data);
 
     const spy = jest.spyOn(resumeService, "updatePreference");
 
@@ -48,13 +48,10 @@ describe("updatePreference Test", () => {
       preference: { salary: 4600 },
     };
 
-    const [result] = await resumeService.updatePreference(
-      insertId,
-      updatedData
-    );
+    const [result] = await resumeService.updatePreference(user.id, updatedData);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(insertId, updatedData);
+    expect(spy).toBeCalledWith(user.id, updatedData);
     expect(result.changedRows).toBe(1);
   });
 });

@@ -36,7 +36,7 @@ export class RedisSession {
   }
 
   private async getRedisConnection() {
-    if (process.env.NODE_ENV === "test") {
+    if (process.env.NODE_ENV !== "production") {
       return;
     }
     // eslint-disable-next-line consistent-return

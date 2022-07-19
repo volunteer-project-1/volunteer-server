@@ -16,11 +16,9 @@ beforeEach(async () => {
 
   const userService = Container.get(UserService);
 
-  const {
-    user: { insertId },
-  } = await userService.createUserBySocial(email);
+  const { user } = await userService.createUserBySocial(email);
 
-  userId = insertId;
+  userId = user.id;
 });
 
 afterEach(async () => {
@@ -29,7 +27,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {

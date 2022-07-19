@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { FieldPacket, OkPacket, ResultSetHeader } from "mysql2/promise";
+import { Users, Profiles, UserMetas } from "@prisma/client";
 import { DefaultTime } from ".";
 import { USER_TYPE } from "../constants";
 import { CreateUserByLocalDto } from "../dtos";
@@ -42,63 +42,51 @@ export interface IFindUserById {
   id?: string;
 }
 
-export interface IUpdateProfile {
-  profile: Partial<
-    Omit<IProfile, "id" | "user_id" | "created_at" | "updated_at">
-  >;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IUpdateProfile
+  extends Partial<
+    Omit<Profiles, "id" | "user_id" | "created_at" | "updated_at">
+  > {}
 
 export interface IReturnFindMyProfile
-  extends Omit<IUser, "created_at" | "updated_at"> {
-  profile: Omit<IProfile, "created_at" | "updated_at">;
-  user_meta: Omit<IUserMeta, "created_at" | "updated_at">;
+  extends Omit<Users, "created_at" | "updated_at"> {
+  profiles: Omit<Profiles, "created_at" | "updated_at"> | null;
+  userMetas: Omit<UserMetas, "created_at" | "updated_at"> | null;
 }
 
 //
 
 export interface IUserDAO {
-  findMyProfile: (id: number) => Promise<IReturnFindMyProfile | undefined>;
-  updateMyProfile: (
-    id: number,
-    body: IUpdateProfile
-  ) => Promise<[ResultSetHeader, FieldPacket[]]>;
-  findOneById: (id: number) => Promise<IUser | undefined>;
+  findMyProfile: (id: number) => Promise<IReturnFindMyProfile | null>;
+  updateMyProfile: (id: number, body: IUpdateProfile) => Promise<Profiles>;
+  findOneById: (id: number) => Promise<Users | null>;
   find: ({
     start,
     limit,
   }: {
     start: number;
     limit: number;
-  }) => Promise<IUser[] | undefined>;
+  }) => Promise<Users[]>;
   createUserBySocial: (
     email: string
-  ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
+  ) => Promise<{ user: Users; userMetas: UserMetas; profiles: Profiles }>;
   createUserByLocal: (
     data: CreateUserByLocalDto & { salt: string }
-  ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
+  ) => Promise<{ user: Users; userMetas: UserMetas; profiles: Profiles }>;
 }
 
 export interface IUserService {
-  findMyProfile: (id: number) => Promise<IReturnFindMyProfile | undefined>;
-  updateMyProfile: (
-    id: number,
-    body: IUpdateProfile
-  ) => Promise<[ResultSetHeader, FieldPacket[]]>;
-  findUserById: (id: number) => Promise<IUser | undefined>;
-  findUsers: ({
-    id,
-    limit,
-  }: {
-    id: number;
-    limit: number;
-  }) => Promise<IUser[] | undefined>;
-  findUserByEmail: (email: string) => Promise<IUser | undefined>;
+  findMyProfile: (id: number) => Promise<IReturnFindMyProfile | null>;
+  updateMyProfile: (id: number, body: IUpdateProfile) => Promise<Profiles>;
+  findUserById: (id: number) => Promise<Users | null>;
+  findUsers: ({ id, limit }: { id: number; limit: number }) => Promise<Users[]>;
+  findUserByEmail: (email: string) => Promise<Users | null>;
   createUserBySocial: (
     email: string
-  ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
+  ) => Promise<{ user: Users; userMetas: UserMetas; profiles: Profiles }>;
   createUserByLocal: (
     data: CreateUserByLocalDto
-  ) => Promise<{ user: OkPacket; meta: OkPacket; profile: OkPacket }>;
+  ) => Promise<{ user: Users; userMetas: UserMetas; profiles: Profiles }>;
 }
 
 export interface IUserController {

@@ -15,7 +15,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -32,23 +32,22 @@ afterAll(async () => {
 
 describe("createUserBySocial Test", () => {
   const userService = Container.get(UserService);
-  it("If success return {affectedRows: 1, serverStatus: 3}", async () => {
+  it("If success return {user, userMetas, profiles}", async () => {
     const email = "ehgks0083@gmail.com";
     const spy = jest.spyOn(userService, "createUserBySocial");
 
-    const { user, meta, profile } = await userService.createUserBySocial(email);
-    const TRANSACTION_STATUS = 3;
+    const { user, userMetas, profiles } = await userService.createUserBySocial(
+      email
+    );
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(email);
 
-    expect(user.affectedRows).toEqual(1);
-    expect(user.serverStatus).toEqual(TRANSACTION_STATUS);
+    expect(user.email).toEqual(email);
 
-    expect(meta.affectedRows).toEqual(1);
-    expect(meta.serverStatus).toEqual(TRANSACTION_STATUS);
+    expect(userMetas).not.toBeNull();
+    expect(profiles).not.toBeNull();
 
-    expect(profile.affectedRows).toEqual(1);
-    expect(profile.serverStatus).toEqual(TRANSACTION_STATUS);
+    // expect(profiles).toEqual(1);
   });
 });

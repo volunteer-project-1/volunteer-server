@@ -28,7 +28,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
       SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
           FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+          WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
     `);
 
   for (const row of rows) {
@@ -59,18 +59,16 @@ describe("findResumeById test", () => {
     const userService = Container.get(UserService);
     const resumeService = Container.get(ResumeService);
 
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial(email);
+    const { user } = await userService.createUserBySocial(email);
     await resumeService.createResume(
-      insertId,
+      user.id,
       newResumeFactory({
         resume: { title: "1번 이력서", content: "1번", is_public: true },
       })
     );
 
     await resumeService.createResume(
-      insertId,
+      user.id,
       newResumeFactory({
         resume: { title: "2번 이력서", content: "2번", is_public: true },
       })

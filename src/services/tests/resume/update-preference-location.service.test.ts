@@ -17,7 +17,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -36,11 +36,11 @@ describe("updatePreferenceLocation Test", () => {
   const userService = Container.get(UserService);
   const resumeService = Container.get(ResumeService);
   it("If success return changedRows", async () => {
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial("ehgks0083@gmail.com");
+    const { user } = await userService.createUserBySocial(
+      "ehgks0083@gmail.com"
+    );
     const data = newResumeFactory();
-    await resumeService.createResume(insertId, data);
+    await resumeService.createResume(user.id, data);
 
     const spy = jest.spyOn(resumeService, "updatePreferenceLocation");
 
@@ -49,22 +49,22 @@ describe("updatePreferenceLocation Test", () => {
     };
 
     const [result] = await resumeService.updatePreferenceLocation(
-      insertId,
+      user.id,
       updatedData
     );
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(insertId, updatedData);
+    expect(spy).toBeCalledWith(user.id, updatedData);
     expect(result.affectedRows).toBe(1);
     expect(result.changedRows).toBe(1);
   });
 
   it("If the results are the same as the previous data, return { affectedRows: 1 ,changedRows: 0}", async () => {
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial("ehgks0083@gmail.com");
+    const { user } = await userService.createUserBySocial(
+      "ehgks0083@gmail.com"
+    );
     const data = newResumeFactory();
-    await resumeService.createResume(insertId, data);
+    await resumeService.createResume(user.id, data);
 
     const spy = jest.spyOn(resumeService, "updatePreferenceLocation");
 
@@ -73,12 +73,12 @@ describe("updatePreferenceLocation Test", () => {
     };
 
     const [result] = await resumeService.updatePreferenceLocation(
-      insertId,
+      user.id,
       updatedData
     );
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(insertId, updatedData);
+    expect(spy).toBeCalledWith(user.id, updatedData);
     expect(result.affectedRows).toBe(1);
     expect(result.changedRows).toBe(0);
   });

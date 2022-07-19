@@ -1,6 +1,7 @@
 import { Service } from "typedi";
 import { Request, Response } from "express";
-import { IUserController, IUser, IReturnFindMyProfile } from "../types";
+import { Users } from "@prisma/client";
+import { IUserController, IReturnFindMyProfile } from "../types";
 import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
 import { UserService } from "../services";
 import { UpdateProfileDto } from "../dtos/user/update-my-profile.dto";
@@ -16,9 +17,10 @@ export class UserController implements IUserController {
     res: Response
   ) => {
     await validateDtos(new CreateUserByLocalDto(body));
-    await this.userService.createUserByLocal(body);
+    const { user, userMetas, profiles } =
+      await this.userService.createUserByLocal(body);
 
-    return res.sendStatus(201);
+    return res.json({ user, userMetas, profiles });
   };
 
   findMyProfile = async (
@@ -38,6 +40,7 @@ export class UserController implements IUserController {
     { user, body }: Request<unknown, unknown, UpdateProfileDto>,
     res: Response
   ) => {
+    console.log("body :", body);
     await validateDtos(new UpdateProfileDto(body));
     await this.userService.updateMyProfile(user!.id, body);
 
@@ -46,7 +49,7 @@ export class UserController implements IUserController {
 
   findUserById = async (
     { params: { id } }: Request<ReqParams>,
-    res: Response<{ user: IUser }>
+    res: Response<{ user: Users }>
   ) => {
     assertNonNullish(id);
 
@@ -61,7 +64,7 @@ export class UserController implements IUserController {
     {
       query: { id, limit },
     }: Request<unknown, unknown, unknown, { id?: string; limit?: string }>,
-    res: Response<{ users: IUser[] }>
+    res: Response<{ users: Users[] }>
   ) => {
     assertNonNullish(id);
     assertNonNullish(limit);

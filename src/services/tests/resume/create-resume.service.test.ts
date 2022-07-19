@@ -18,7 +18,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -57,10 +57,10 @@ describe("createResume Test", () => {
 
     const spy = jest.spyOn(resumeService, "createResume");
 
-    const { resume } = await resumeService.createResume(user.insertId, data);
+    const { resume } = await resumeService.createResume(user.id, data);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(user.insertId, data);
+    expect(spy).toBeCalledWith(user.id, data);
 
     expect(resume.insertId).toBe(1);
     expect(resume.affectedRows).toBe(1);
@@ -74,10 +74,10 @@ describe("createResume Test", () => {
 
     const spy = jest.spyOn(resumeService, "createResume");
 
-    const { resume } = await resumeService.createResume(user.insertId, data);
+    const { resume } = await resumeService.createResume(user.id, data);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(user.insertId, data);
+    expect(spy).toBeCalledWith(user.id, data);
 
     expect(resume.insertId).toBe(1);
     expect(resume.affectedRows).toBe(1);

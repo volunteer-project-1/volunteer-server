@@ -28,6 +28,7 @@ export class CreateJobDescriptionDto {
   @ArrayMinSize(1)
   @Type(() => JobDetail)
   jd_details!: JobDetail[];
+  //   jd_details!: JobDetail[];
 
   @IsNotEmptyObject()
   @ValidateNested()

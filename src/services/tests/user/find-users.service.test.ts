@@ -15,7 +15,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -32,7 +32,7 @@ afterAll(async () => {
 
 describe("findUsers Test", () => {
   const userService = Container.get(UserService);
-  it("If Not Found return undefined", async () => {
+  it("If Not Found return empty array", async () => {
     const spy = jest.spyOn(userService, "findUsers");
     const query = { id: 0, limit: 5 };
 
@@ -40,10 +40,10 @@ describe("findUsers Test", () => {
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(query);
-    expect(results).toBe(undefined);
+    expect(results).toEqual([]);
   });
 
-  it("If Not Found return undefined", async () => {
+  it("If Not Found return users array", async () => {
     const email1 = "ehgks00@gmail.com";
     const email2 = "ehgks0083@gmail.com";
     await userService.createUserBySocial(email1);

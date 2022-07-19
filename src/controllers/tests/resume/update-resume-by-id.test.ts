@@ -28,7 +28,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
       SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
           FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+          WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
     `);
 
   for (const row of rows) {
@@ -59,12 +59,10 @@ describe("updateResumeById test", () => {
     const userService = Container.get(UserService);
     const resumeService = Container.get(ResumeService);
 
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial(email);
+    const { user } = await userService.createUserBySocial(email);
     const {
       resume: { insertId: resumeId },
-    } = await resumeService.createResume(insertId, newResumeFactory());
+    } = await resumeService.createResume(user.id, newResumeFactory());
 
     const res = await request(await startApp()).patch(`${URL}/${resumeId}`);
 
@@ -77,12 +75,10 @@ describe("updateResumeById test", () => {
     const userService = Container.get(UserService);
     const resumeService = Container.get(ResumeService);
 
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial(email);
+    const { user } = await userService.createUserBySocial(email);
     const {
       resume: { insertId: resumeId },
-    } = await resumeService.createResume(insertId, newResumeFactory());
+    } = await resumeService.createResume(user.id, newResumeFactory());
 
     const res = await request(await startApp())
       .patch(`${URL}/${resumeId}`)

@@ -1,0 +1,376 @@
+generator client {
+    provider        = "prisma-client-js"
+    binaryTargets   = ["windows", "debian-openssl-1.1.x"]
+    previewFeatures = ["interactiveTransactions"]
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model Activities {
+    id           Int     @id @default(autoincrement()) @db.UnsignedInt
+    organization String? @db.VarChar(100)
+    description  String? @db.VarChar(100)
+    resumeId     Int     @map("resume_id") @db.UnsignedInt
+    resumes      Resumes @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "activities_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("activities")
+}
+
+model Awards {
+    id        Int       @id @default(autoincrement()) @db.UnsignedInt
+    name      String?   @db.VarChar(20)
+    institute String?   @db.VarChar(100)
+    startedAt DateTime? @map("started_at")
+    finishedA DateTime? @map("finished_at")
+    resumeId  Int       @map("resume_id") @db.UnsignedInt
+    resumes   Resumes   @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "awards_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("awards")
+}
+
+model Careers {
+    id         Int       @id @default(autoincrement()) @db.UnsignedInt
+    company    String?   @db.VarChar(100)
+    department String?   @db.VarChar(100)
+    position   String?   @db.VarChar(20)
+    task       String?   @db.VarChar(255)
+    joinedAt   DateTime? @map("joined_at")
+    quitedAt   DateTime? @map("quited_at")
+    isInOffice Boolean?  @map("is_in_office")
+    resumeId   Int       @map("resume_id") @db.UnsignedInt
+    resumes    Resumes   @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "careers_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("careers")
+}
+
+model Certificates {
+    id            Int       @id @default(autoincrement()) @db.UnsignedInt
+    name          String?   @db.VarChar(30)
+    institute     String?   @db.VarChar(100)
+    acquisitionAt DateTime? @map("acquisition_at")
+    resumeId      Int       @map("resume_id") @db.UnsignedInt
+    resumes       Resumes   @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "certificates_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("certificates")
+}
+
+model CompanyHistories {
+    id        Int      @id @default(autoincrement()) @db.UnsignedInt
+    content   String   @db.VarChar(600)
+    historyAt DateTime @default(now()) @map("history_at")
+    companyId Int      @unique(map: "company_id") @map("company_id") @db.UnsignedInt
+    companys  Companys @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "company_histories_ibfk_1")
+
+    @@map("company_histories")
+}
+
+model Companys {
+    id               Int               @id @default(autoincrement()) @db.UnsignedInt
+    email            String            @unique(map: "email") @db.VarChar(40)
+    password         String            @db.VarChar(1000)
+    salt             String            @db.VarChar(1000)
+    name             String            @db.VarChar(20)
+    introduce        String?           @db.VarChar(5000)
+    foundedAt        DateTime?         @map("founded_at")
+    member           Int               @default(1) @db.SmallInt
+    accInvestment    Int               @default(0) @map("acc_investment") @db.SmallInt
+    homepage         String?           @db.VarChar(255)
+    phoneNumber      String?           @map("phone_number") @db.VarChar(20)
+    address          String?           @db.VarChar(255)
+    industryType     String?           @map("industry_type") @db.VarChar(20)
+    createdAt        DateTime          @default(now()) @map("created_at")
+    updatedAt        DateTime          @default(now()) @map("updated_at")
+    deletedAt        DateTime?         @map("deleted_at")
+    companyHistories CompanyHistories?
+    jobDescriptions  JobDescriptions[]
+
+    @@map("companys")
+}
+
+model Educations {
+    id             Int       @id @default(autoincrement()) @db.UnsignedInt
+    type           String?   @db.VarChar(20)
+    schoolName     String?   @map("school_name") @db.VarChar(100)
+    graduationYear DateTime? @map("graduation_year")
+    admissionYear  DateTime? @map("admission_year")
+    isGraduated    Boolean?  @map("is_graduated")
+    major          String?   @db.VarChar(10)
+    credit         Decimal?  @db.Decimal(3, 2)
+    totalCredit    Decimal?  @map("total_credit") @db.Decimal(3, 2)
+    resumeId       Int       @map("resume_id") @db.UnsignedInt
+    resumes        Resumes   @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "educations_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("educations")
+}
+
+model HelperVideos {
+    id       Int     @id @default(autoincrement()) @db.UnsignedInt
+    url      String? @db.VarChar(255)
+    resumeId Int     @map("resume_id") @db.UnsignedInt
+    resumes  Resumes @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "helper_videos_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("helper_videos")
+}
+
+model Introductions {
+    id       Int     @id @default(autoincrement()) @db.UnsignedInt
+    title    String? @db.VarChar(30)
+    content  String? @db.VarChar(800)
+    resumeId Int     @map("resume_id") @db.UnsignedInt
+    resumes  Resumes @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "introductions_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("introductions")
+}
+
+model JdDetails {
+    id               Int               @id @default(autoincrement()) @db.UnsignedInt
+    title            String            @db.VarChar(100)
+    numRecruitment   Int               @default(0) @map("num_recruitment") @db.UnsignedInt
+    role             String            @db.VarChar(500)
+    requirements     String            @db.VarChar(1000)
+    priority         String            @db.VarChar(1000)
+    jobDescriptionId Int               @map("job_description_id") @db.UnsignedInt
+    jobDescriptions  JobDescriptions   @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "jd_details_ibfk_1")
+    resumeApplyings  ResumeApplyings[]
+
+    @@index([jobDescriptionId], map: "job_description_id")
+    @@map("jd_details")
+}
+
+model JdSteps {
+    id               Int             @id @default(autoincrement()) @db.UnsignedInt
+    step             Int             @default(1) @db.UnsignedInt
+    title            String          @db.VarChar(100)
+    jobDescriptionId Int             @map("job_description_id") @db.UnsignedInt
+    jobDescriptions  JobDescriptions @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "jd_steps_ibfk_1")
+
+    @@index([jobDescriptionId], map: "job_description_id")
+    @@map("jd_steps")
+}
+
+model JdWelfares {
+    id               Int             @id @default(autoincrement()) @db.UnsignedInt
+    title            String          @db.VarChar(50)
+    content          String          @db.VarChar(150)
+    jobDescriptionId Int             @map("job_description_id") @db.UnsignedInt
+    jobDescriptions  JobDescriptions @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "jd_welfares_ibfk_1")
+
+    @@index([jobDescriptionId], map: "job_description_id")
+    @@map("jd_welfares")
+}
+
+model JdWorkConditions {
+    id               Int             @id @default(autoincrement()) @db.UnsignedInt
+    type             String          @db.VarChar(500)
+    time             String          @db.VarChar(500)
+    place            String          @db.VarChar(500)
+    jobDescriptionId Int             @map("job_description_id") @db.UnsignedInt
+    jobDescriptions  JobDescriptions @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "jd_work_conditions_ibfk_1")
+
+    @@index([jobDescriptionId], map: "job_description_id")
+    @@map("jd_work_conditions")
+}
+
+model JobDescriptions {
+    id              Int                @id @default(autoincrement()) @db.UnsignedInt
+    startedAt       DateTime           @default(now()) @map("started_at")
+    deadlineAt      DateTime           @map("deadline_at")
+    category        String             @db.VarChar(50)
+    companyId       Int                @map("company_id") @db.UnsignedInt
+    companys        Companys           @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "job_descriptions_ibfk_1")
+    jdDetails       JdDetails[]
+    jdSteps         JdSteps[]
+    jdWelfares      JdWelfares[]
+    jdWorkCondition JdWorkConditions[]
+
+    @@index([companyId], map: "company_id")
+    @@map("job_descriptions")
+}
+
+model Migrations {
+    id    Int      @id @default(autoincrement())
+    name  String   @db.VarChar(255)
+    runOn DateTime @map("run_on") @db.DateTime(0)
+
+    @@map("migrations")
+}
+
+model MyVideos {
+    id       Int     @id @default(autoincrement()) @db.UnsignedInt
+    url      String? @db.VarChar(255)
+    resumeId Int     @map("resume_id") @db.UnsignedInt
+    resumes  Resumes @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "my_videos_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("my_videos")
+}
+
+model Portfolios {
+    id       Int     @id @default(autoincrement()) @db.UnsignedInt
+    url      String? @db.VarChar(255)
+    resumeId Int     @map("resume_id") @db.UnsignedInt
+    resumes  Resumes @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "portfolios_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("portfolios")
+}
+
+model PreferenceJobs {
+    id           Int         @id @default(autoincrement()) @db.UnsignedInt
+    name         String?     @db.VarChar(100)
+    preferenceId Int         @map("preference_id") @db.UnsignedInt
+    preferences  Preferences @relation(fields: [preferenceId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "preference_jobs_ibfk_1")
+
+    @@index([preferenceId], map: "preference_id")
+    @@map("preference_jobs")
+}
+
+model PreferenceLocations {
+    id           Int         @id @default(autoincrement()) @db.UnsignedInt
+    sido         String?     @db.VarChar(20)
+    sigungu      String?     @db.VarChar(20)
+    preferenceId Int         @map("preference_id") @db.UnsignedInt
+    preferences  Preferences @relation(fields: [preferenceId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "preference_locations_ibfk_1")
+
+    @@index([preferenceId], map: "preference_id")
+    @@map("preference_locations")
+}
+
+model Preferences {
+    id                 Int                   @id @default(autoincrement()) @db.UnsignedInt
+    employType         String?               @map("employ_type") @db.VarChar(20)
+    salary             Int?                  @default(0) @db.SmallInt
+    resumeId           Int                   @map("resume_id") @db.UnsignedInt
+    resumes            Resumes               @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "preferences_ibfk_1")
+    preferenceJobs     PreferenceJobs[]
+    preferenceLocation PreferenceLocations[]
+
+    @@index([resumeId], map: "resume_id")
+    @@map("preferences")
+}
+
+model Profiles {
+    id       Int       @id @default(autoincrement()) @db.UnsignedInt
+    name     String?   @db.VarChar(20)
+    address  String?   @db.VarChar(255)
+    birthday DateTime?
+    userId   Int       @unique @map("user_id") @db.UnsignedInt
+    users    Users     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "profiles_ibfk_1")
+
+    @@index([userId], map: "user_id")
+    @@map("profiles")
+}
+
+model ResumeApplyings {
+    id         Int       @id @default(autoincrement()) @db.UnsignedInt
+    userId     Int       @map("user_id") @db.UnsignedInt
+    resumeId   Int       @map("resume_id") @db.UnsignedInt
+    jdDetailId Int       @map("jd_detail_id") @db.UnsignedInt
+    createdAt  DateTime  @default(now()) @map("created_at")
+    deletedAt  DateTime? @map("deleted_at")
+    jdDetails  JdDetails @relation(fields: [jdDetailId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resume_applyings_ibfk_3")
+    resumes    Resumes   @relation(fields: [resumeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resume_applyings_ibfk_2")
+    users      Users     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resume_applyings_ibfk_1")
+
+    @@index([jdDetailId], map: "jd_detail_id")
+    @@index([resumeId], map: "resume_id")
+    @@index([userId], map: "user_id")
+    @@map("resume_applyings")
+}
+
+model ResumeInfos {
+    id              Int      @id @default(autoincrement()) @db.UnsignedInt
+    name            String?  @db.VarChar(20)
+    birthday        DateTime @db.Timestamp(3)
+    phoneNumber     String?  @map("phone_number") @db.VarChar(20)
+    email           String?  @db.VarChar(20)
+    sido            String?  @db.VarChar(20)
+    sigungu         String?  @db.VarChar(20)
+    disabilityLevel Int?     @map("disability_level")
+    disabilityType  String?  @map("disability_type") @db.VarChar(20)
+    sex             String?  @db.VarChar(5)
+    avatar          String?  @db.VarChar(255)
+    resumeId        Int      @map("resume_id") @db.UnsignedInt
+    resumes         Resumes  @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "resume_infos_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("resume_infos")
+}
+
+model Resumes {
+    id             Int               @id @default(autoincrement()) @db.UnsignedInt
+    title          String            @unique(map: "title") @db.VarChar(100)
+    content        String?           @db.VarChar(255)
+    isPublic       Boolean?          @default(true) @map("is_public")
+    createdAt      DateTime          @default(now()) @map("created_at")
+    updatedAt      DateTime          @default(now()) @map("updated_at")
+    userId         Int               @map("user_id") @db.UnsignedInt
+    users          Users             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "resumes_ibfk_1")
+    activities     Activities[]
+    awards         Awards[]
+    careers        Careers[]
+    certificates   Certificates[]
+    educations     Educations[]
+    helperVideos   HelperVideos[]
+    introductions  Introductions[]
+    myVideos       MyVideos[]
+    portfolios     Portfolios[]
+    preferences    Preferences[]
+    resumeApplying ResumeApplyings[]
+    resumeInfos    ResumeInfos[]
+    trainings      Trainings[]
+
+    @@index([userId], map: "user_id")
+    @@map("resumes")
+}
+
+model Trainings {
+    id         Int       @id @default(autoincrement()) @db.UnsignedInt
+    name       String?   @db.VarChar(30)
+    institute  String?   @db.VarChar(100)
+    startedAt  DateTime? @map("started_at")
+    finishedAt DateTime? @map("finished_at")
+    content    String?   @db.VarChar(300)
+    resumeId   Int       @map("resume_id") @db.UnsignedInt
+    resumes    Resumes   @relation(fields: [resumeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "trainings_ibfk_1")
+
+    @@index([resumeId], map: "resume_id")
+    @@map("trainings")
+}
+
+model UserMetas {
+    id         Int      @id @default(autoincrement()) @db.UnsignedInt
+    isVerified Boolean? @default(false) @map("is_verified")
+    type       String?  @default("seeker") @db.VarChar(10)
+    userId     Int      @unique @map("user_id") @db.UnsignedInt
+    users      Users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_metas_ibfk_1")
+
+    @@index([userId], map: "user_id")
+    @@map("user_metas")
+}
+
+model Users {
+    id             Int               @id @default(autoincrement()) @db.UnsignedInt
+    email          String            @unique(map: "email") @db.VarChar(40)
+    password       String?           @db.VarChar(1000)
+    salt           String?           @db.VarChar(1000)
+    createdAt      DateTime          @default(now()) @map("created_at")
+    updatedAt      DateTime          @default(now()) @map("updated_at")
+    deletedAt      DateTime?         @map("deleted_at")
+    profiles       Profiles?
+    resumeApplying ResumeApplyings[]
+    resumes        Resumes[]
+    userMetas      UserMetas?
+
+    @@map("users")
+}

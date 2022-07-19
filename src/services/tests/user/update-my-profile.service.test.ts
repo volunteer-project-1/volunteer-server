@@ -16,7 +16,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -38,17 +38,25 @@ describe("updateMyProfile Test", () => {
     await userService.createUserBySocial(email);
 
     const id = 1;
-    const birthday = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const birthday = new Date();
+    // const birthday = new Date().toISOString().slice(0, 19).replace("T", " ");
     const data: IUpdateProfile = {
-      profile: { name: "Lee", address: "강서구", birthday },
+      name: "Lee",
+      address: "강서구",
+      birthday,
     };
 
     const spy = jest.spyOn(userService, "updateMyProfile");
 
-    const [result] = await userService.updateMyProfile(id, data);
+    const result = await userService.updateMyProfile(id, data);
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(id, data);
-    expect(result.affectedRows).toBe(1);
+    expect(result).toEqual(
+      expect.objectContaining({
+        ...data,
+        birthday: data.birthday?.toISOString(),
+      })
+    );
   });
 });

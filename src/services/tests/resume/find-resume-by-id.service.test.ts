@@ -18,7 +18,7 @@ afterEach(async () => {
   const [rows] = await conn!.query<RowDataPacket[]>(`
     SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
+        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
   `);
 
   for (const row of rows) {
@@ -56,7 +56,7 @@ describe("findResumeById Test", () => {
       myVideo: { url: "url.link.com" },
     };
 
-    await resumeService.createResume(user.insertId, data);
+    await resumeService.createResume(user.id, data);
 
     const spy = jest.spyOn(resumeService, "findResumeById");
 
@@ -77,7 +77,7 @@ describe("findResumeById Test", () => {
       "ehgks0083@gmail.com"
     );
     const data = newResumeFactory();
-    await resumeService.createResume(user.insertId, data);
+    await resumeService.createResume(user.id, data);
 
     const spy = jest.spyOn(resumeService, "findResumeById");
 
