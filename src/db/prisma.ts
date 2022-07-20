@@ -37,7 +37,31 @@ export class Prisma {
     });
   }
 
-  get client() {
+  get client(): PrismaClient<
+    {
+      log: (
+        | {
+            emit: "event";
+            level: "query";
+          }
+        | {
+            emit: "stdout";
+            level: "error";
+          }
+        | {
+            emit: "stdout";
+            level: "info";
+          }
+        | {
+            emit: "stdout";
+            level: "warn";
+          }
+      )[];
+    },
+    "query",
+    false
+  > {
+    // this.prisma.$queryRawUnsafe
     return this.prisma;
   }
 
