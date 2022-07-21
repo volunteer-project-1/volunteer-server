@@ -8,7 +8,6 @@ import {
   CreateCompanyHistoryDto,
 } from "../../../dtos";
 import { CompanyService } from "../../../services";
-import { convertDateToTimestamp } from "../../../utils";
 
 let prisma: Prisma;
 beforeAll(async () => {
@@ -88,7 +87,7 @@ describe("create company history api test", () => {
 
     const body: CreateCompanyHistoryDto = {
       content: "VC 투자 10억",
-      history_at: convertDateToTimestamp(),
+      historyAt: new Date(),
     };
     const res = await request(await startApp())
       .post(`${URL}/${company.id}/history`)

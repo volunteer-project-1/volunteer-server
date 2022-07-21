@@ -1,9 +1,9 @@
 import request from "supertest";
 import Container from "typedi";
-import { PrismaPromise } from "@prisma/client";
+import { Companys, PrismaPromise } from "@prisma/client";
 import { startApp } from "../../../app";
 import { Prisma } from "../../../db";
-import { ICompany } from "../../../types";
+// import { ICompany } from "../../../types";
 import { CompanyService } from "../../../services";
 
 let prisma: Prisma;
@@ -83,7 +83,7 @@ describe("findCompanyList test", () => {
     const QUERY = { start: 1, limit: 4 };
     jest
       .spyOn(companyService, "findCompanyList")
-      .mockResolvedValue([] as ICompany[]);
+      .mockResolvedValue([{ id: 1 }] as Companys[]);
 
     const res = await request(await startApp())
       .get(`${URL}`)

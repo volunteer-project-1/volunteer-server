@@ -60,14 +60,13 @@ export class CompanyService implements ICompanyService {
   }
 
   createJobDescription(id: number, data: CreateJobDescriptionDto) {
-    const { jd_details, jd_work_condition, jd_steps, jd_welfares, ...rest } =
-      data;
+    const { jdDetails, jdWorkCondition, jdSteps, jdWelfares, ...rest } = data;
     const parsedData: ICreateJobDescription = {
       jobDescription: rest,
-      jdDetails: jd_details,
-      jdWorkCondition: jd_work_condition,
-      jdSteps: jd_steps,
-      jdWelfares: jd_welfares,
+      jdDetails,
+      jdWorkCondition,
+      jdSteps,
+      jdWelfares,
     };
     return this.companyDAO.createJobDescription(id, parsedData);
   }

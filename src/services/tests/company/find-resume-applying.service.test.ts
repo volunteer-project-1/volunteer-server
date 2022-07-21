@@ -95,27 +95,27 @@ describe("find-resume-applying Test", () => {
     const resumeApplying = await companyService.createResumeApplying({
       userId: user.id,
       resumeId: resume.insertId,
-      jdDetailId: jdDetails[0].insertId,
+      jdDetailId: jdDetails[0].id,
     });
 
     const resumeApplying2 = await companyService.createResumeApplying({
       userId: user.id,
       resumeId: resume2.insertId,
-      jdDetailId: jdDetails2[1].insertId,
+      jdDetailId: jdDetails2[1].id,
     });
 
     const r1 = {
-      resume_applying_id: resumeApplying.insertId,
-      resume_id: resume.insertId,
-      detail_id: jdDetails[0].insertId,
-      job_description_id: jobDescription.insertId,
+      id: resumeApplying.id,
+      resumeId: resume.insertId,
+      jdDetailId: jdDetails[0].id,
+      jobDescriptionId: jobDescription.id,
     };
 
     const r2 = {
-      resume_applying_id: resumeApplying2.insertId,
-      resume_id: resume2.insertId,
-      detail_id: jdDetails2[1].insertId,
-      job_description_id: jobDescription2.insertId,
+      id: resumeApplying2.id,
+      resumeId: resume2.insertId,
+      jdDetailId: jdDetails2[1].id,
+      jobDescriptionId: jobDescription2.id,
     };
 
     const arr = [r2, r1];

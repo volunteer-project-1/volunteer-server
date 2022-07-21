@@ -6,23 +6,23 @@ export class FindJobDescriptionDto {
   id!: number;
 
   @Expose()
-  started_at!: string;
+  startedAt!: string;
 
   @Expose()
-  deadline_at!: string;
+  deadlineAt!: string;
 
   @Expose()
   category!: string;
 
   @Expose()
-  jd_details!: (JobDetail & { id: number })[];
+  jdDetails!: (JobDetail & { id: number })[];
 
   @Expose()
-  jd_work_condition!: WorkCondition & { id: number };
+  jdWorkCondition!: WorkCondition & { id: number };
 
   @Expose()
-  jd_steps!: (JdStep & { id: number })[];
+  jdSteps!: (JdStep & { id: number })[];
 
   @Expose()
-  jd_welfares!: (Welfare & { id: number })[];
+  jdWelfares!: (Welfare & { id: number })[];
 }

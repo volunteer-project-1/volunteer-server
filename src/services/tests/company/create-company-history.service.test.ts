@@ -5,7 +5,6 @@ import { PrismaPromise } from "@prisma/client";
 import { Prisma } from "../../../db";
 import { CompanyService } from "../..";
 import { CreateCompanyHistoryDto } from "../../../dtos";
-import { convertDateToTimestamp } from "../../../utils";
 import { ICreateCompany } from "../../../types";
 
 let prisma: Prisma;
@@ -64,7 +63,7 @@ describe("create-company-history Test", () => {
 
     const companyHistoryData: CreateCompanyHistoryDto = {
       content: "블라블라 VC 투자",
-      history_at: convertDateToTimestamp(),
+      historyAt: new Date(),
     };
 
     const spy = jest.spyOn(companyService, "createCompanyHistory");
@@ -76,6 +75,6 @@ describe("create-company-history Test", () => {
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(company.id, companyHistoryData);
 
-    expect(companyHistory.affectedRows).toEqual(1);
+    expect(companyHistory).toEqual(expect.objectContaining(companyHistoryData));
   });
 });

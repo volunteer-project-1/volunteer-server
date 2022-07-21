@@ -1,14 +1,10 @@
-import { PrismaPromise } from "@prisma/client";
+import { PrismaPromise, ResumeApplyings } from "@prisma/client";
 import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
 import { Prisma } from "../../../db";
-import {
-  newCompanyJobDescriptionFactory,
-  newResumeFactory,
-} from "../../../factory";
-import { CompanyService, ResumeService, UserService } from "../../../services";
-import { ICreateCompany } from "../../../types";
+
+import { CompanyService } from "../../../services";
 
 let prisma: Prisma;
 beforeAll(async () => {
@@ -55,8 +51,6 @@ afterAll(async () => {
 
 describe("create-resume-applying api test", () => {
   const URL = "/api/v1/company/applying";
-  const userService = Container.get(UserService);
-  const resumeService = Container.get(ResumeService);
   const companyService = Container.get(CompanyService);
 
   it("In valid query string, return 400", async () => {
@@ -69,27 +63,13 @@ describe("create-resume-applying api test", () => {
   });
 
   it("if success, return 200", async () => {
-    const { user } = await userService.createUserBySocial("user@gmail.com");
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
-    const { resume } = await resumeService.createResume(
-      user.id,
-      newResumeFactory()
-    );
-
-    const company = await companyService.createCompany(data);
-    const { jdDetails } = await companyService.createJobDescription(
-      company.id,
-      newCompanyJobDescriptionFactory()
-    );
-
     const query = {
-      resumeId: resume.insertId,
-      jdDetailId: jdDetails[0].insertId,
+      resumeId: 1,
+      jdDetailId: 1,
     };
+    jest
+      .spyOn(companyService, "createResumeApplying")
+      .mockResolvedValue({} as ResumeApplyings);
     const res = await request(await startApp())
       .post(`${URL}`)
       .query(query);

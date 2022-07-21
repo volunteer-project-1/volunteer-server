@@ -54,7 +54,7 @@ afterAll(async () => {
 describe("find-company-job-description Test", () => {
   const companyService = Container.get(CompanyService);
 
-  it("jobDescription 조회 실패시 undefined 반환", async () => {
+  it("jobDescription 조회 실패시 null 반환", async () => {
     const spy = jest.spyOn(companyService, "findJobDescriptionById");
     const IN_VALID_JD_ID = 123;
 
@@ -62,7 +62,7 @@ describe("find-company-job-description Test", () => {
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(IN_VALID_JD_ID);
-    expect(found).toBe(undefined);
+    expect(found).toBeNull();
   });
 
   it("If created, return FindJobDescriptionDto", async () => {
@@ -81,34 +81,34 @@ describe("find-company-job-description Test", () => {
     const spy = jest.spyOn(companyService, "findJobDescriptionById");
 
     const found = await companyService.findJobDescriptionById(
-      jobDescription.insertId
+      jobDescription.id
     );
     if (!found) {
       throw new Error();
     }
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(jobDescription.insertId);
+    expect(spy).toBeCalledWith(jobDescription.id);
 
-    expect(found.jd_work_condition).toEqual(
-      expect.objectContaining(jdData.jd_work_condition)
+    expect(found.jdWorkCondition[0]).toEqual(
+      expect.objectContaining(jdData.jdWorkCondition)
     );
 
-    expect(found.jd_details).toEqual(
+    expect(found.jdDetails).toEqual(
       expect.arrayContaining(
-        jdData.jd_details.map((detail) => expect.objectContaining(detail))
+        jdData.jdDetails.map((detail) => expect.objectContaining(detail))
       )
     );
 
-    expect(found.jd_steps).toEqual(
+    expect(found.jdSteps).toEqual(
       expect.arrayContaining(
-        jdData.jd_steps.map((step) => expect.objectContaining(step))
+        jdData.jdSteps.map((step) => expect.objectContaining(step))
       )
     );
 
-    expect(found.jd_welfares).toEqual(
+    expect(found.jdWelfares).toEqual(
       expect.arrayContaining(
-        jdData.jd_welfares.map((welfare) => expect.objectContaining(welfare))
+        jdData.jdWelfares.map((welfare) => expect.objectContaining(welfare))
       )
     );
   });

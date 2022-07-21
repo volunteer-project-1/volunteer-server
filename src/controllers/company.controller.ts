@@ -62,7 +62,7 @@ export class CompanyController implements ICompanyController {
       body
     );
 
-    if (updatedCompany.affectedRows === 0) {
+    if (!updatedCompany) {
       throw new BadReqError();
     }
 
@@ -99,7 +99,7 @@ export class CompanyController implements ICompanyController {
 
     const companys = await this.companyService.findCompanyList(parsedQuery);
 
-    if (!companys) {
+    if (!Object.keys(companys).length) {
       return res.status(204).send();
     }
 
@@ -123,7 +123,7 @@ export class CompanyController implements ICompanyController {
       );
 
     const companyHistory = await this.companyService.findCompanyHistory(
-      createdCompanyHistory.insertId
+      createdCompanyHistory.id
     );
 
     if (!companyHistory) {
@@ -149,7 +149,7 @@ export class CompanyController implements ICompanyController {
         body
       );
 
-    if (updatedCompanyHistory.affectedRows === 0) {
+    if (!updatedCompanyHistory) {
       throw new BadReqError();
     }
 
@@ -187,7 +187,7 @@ export class CompanyController implements ICompanyController {
     );
 
     const jd = await this.companyService.findJobDescriptionById(
-      jobDescription.insertId
+      jobDescription.id
     );
 
     if (!jd) {

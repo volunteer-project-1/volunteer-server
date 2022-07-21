@@ -1,13 +1,21 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { CompanyHistories, Companys } from "@prisma/client";
+import {
+  CompanyHistories,
+  Companys,
+  JdDetails,
+  JdSteps,
+  JdWelfares,
+  JdWorkConditions,
+  JobDescriptions,
+  ResumeApplyings,
+  Resumes,
+} from "@prisma/client";
 import { Request, Response } from "express";
-import { OkPacket, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { DefaultTime } from ".";
 import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
   CreateJobDescriptionDto,
-  FindJobDescriptionDto,
   UpdateCompanyDto,
   UpdateCompanyHistoryDto,
 } from "../dtos";
@@ -40,19 +48,19 @@ export interface ICompanyHistory {
 
 export interface IJobDescription {
   id: number;
-  started_at: string;
-  deadline_at: string;
+  startedAt: string;
+  deadlineAt: string;
   category: string;
-  company_id: string;
+  companyId: number;
 }
 export interface IJobDetail {
   id: number;
   title: string;
-  num_recruitment: number;
+  numRecruitment: number;
   role: string;
   requirements: string;
   priority: string;
-  job_description_id: string;
+  jobDescriptionId: number;
 }
 
 export interface IWorkCondition {
@@ -85,11 +93,11 @@ export interface ICreateCompany {
 }
 
 export interface ICreateJobDescription {
-  jobDescription: Omit<IJobDescription, "id" | "company_id">;
-  jdDetails: Omit<IJobDetail, "id" | "job_description_id">[];
-  jdWorkCondition: Omit<IWorkCondition, "id" | "job_description_id">;
-  jdSteps: Omit<IJdStep, "id" | "job_description_id">[];
-  jdWelfares: Omit<IWelfare, "id" | "job_description_id">[];
+  jobDescription: Omit<JobDescriptions, "id" | "companyId">;
+  jdDetails: Omit<JdDetails, "id" | "jobDescriptionId">[];
+  jdWorkCondition: Omit<JdWorkConditions, "id" | "jobDescriptionId">;
+  jdSteps: Omit<JdSteps, "id" | "jobDescriptionId">[];
+  jdWelfares: Omit<JdWelfares, "id" | "jobDescriptionId">[];
 }
 
 export interface ICompanyService {
@@ -108,33 +116,37 @@ export interface ICompanyService {
   createCompanyHistory: (
     id: number,
     data: CreateCompanyHistoryDto
-  ) => Promise<OkPacket>;
+  ) => Promise<CompanyHistories>;
   updateCompanyHistory: (
     id: number,
     data: UpdateCompanyHistoryDto
-  ) => Promise<ResultSetHeader>;
+  ) => Promise<CompanyHistories>;
   createJobDescription: (
     id: number,
     data: CreateJobDescriptionDto
   ) => Promise<{
-    jobDescription: OkPacket;
-    jdDetails: OkPacket[];
-    jdWorkCondition: OkPacket;
-    jdSteps: OkPacket[];
-    jdWelfares: OkPacket[];
+    jobDescription: JobDescriptions;
   }>;
-  findJobDescriptionById: (
-    id: number
-  ) => Promise<FindJobDescriptionDto | undefined>;
+  findJobDescriptionById: (id: number) => Promise<
+    | (JobDescriptions & {
+        jdDetails: JdDetails[];
+        jdSteps: JdSteps[];
+        jdWelfares: JdWelfares[];
+        jdWorkCondition: JdWorkConditions[];
+      })
+    | null
+  >;
   createResumeApplying: (data: {
     userId: number;
     resumeId: number;
     jdDetailId: number;
-  }) => Promise<OkPacket>;
+  }) => Promise<{ userId: number; resumeId: number; jdDetailId: number }>;
   findResumeApplying: (
     resumeId: number,
     jobDescriptionId: number
-  ) => Promise<RowDataPacket[] | undefined>;
+  ) => Promise<
+    (ResumeApplyings & { jdDetails: JdDetails; resumes: Resumes })[]
+  >;
 }
 
 export interface IComapnyDAO {
@@ -156,37 +168,52 @@ export interface IComapnyDAO {
   createCompanyHistory: (
     companyId: number,
     data: CreateCompanyHistoryDto
-  ) => Promise<OkPacket>;
+  ) => Promise<CompanyHistories>;
 
   updateCompanyHistory: (
     id: number,
     data: UpdateCompanyHistoryDto
-  ) => Promise<ResultSetHeader>;
+  ) => Promise<CompanyHistories>;
 
   createJobDescription: (
     id: number,
     data: ICreateJobDescription
   ) => Promise<{
-    jobDescription: OkPacket;
-    jdDetails: OkPacket[];
-    jdWorkCondition: OkPacket;
-    jdSteps: OkPacket[];
-    jdWelfares: OkPacket[];
+    jobDescription: JobDescriptions;
+    // jdDetails: JdDetails[];
+    // jdWorkCondition: JdWorkConditions;
+    // jdSteps: JdSteps[];
+    // jdWelfares: JdWelfares[];
   }>;
 
-  findJobDescriptionById: (
-    id: number
-  ) => Promise<FindJobDescriptionDto | undefined>;
+  //   JobDescriptions & {
+  //     jdDetails: JdDetails[];
+  //     jdSteps: JdSteps[];
+  //     jdWelfares: JdWelfares[];
+  //     jdWorkCondition: JdWorkConditions[];
+  // }) | null
+
+  findJobDescriptionById: (id: number) => Promise<
+    | (JobDescriptions & {
+        jdDetails: JdDetails[];
+        jdSteps: JdSteps[];
+        jdWelfares: JdWelfares[];
+        jdWorkCondition: JdWorkConditions[];
+      })
+    | null
+  >;
 
   createResumeApplying: (data: {
     userId: number;
     resumeId: number;
     jdDetailId: number;
-  }) => Promise<OkPacket>;
+  }) => Promise<{ userId: number; resumeId: number; jdDetailId: number }>;
 
   findResumeApplyingByUserId: (
     userId: number
-  ) => Promise<RowDataPacket[] | undefined>;
+  ) => Promise<
+    (ResumeApplyings & { jdDetails: JdDetails; resumes: Resumes })[]
+  >;
 }
 
 export interface ICompanyController {

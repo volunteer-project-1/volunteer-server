@@ -3,12 +3,8 @@ import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
 import { Prisma } from "../../../db";
-import {
-  newCompanyJobDescriptionFactory,
-  newResumeFactory,
-} from "../../../factory";
-import { CompanyService, ResumeService, UserService } from "../../../services";
-import { ICreateCompany } from "../../../types";
+import { CompanyService, UserService } from "../../../services";
+// import { ICreateCompany } from "../../../types";
 
 let prisma: Prisma;
 beforeAll(async () => {
@@ -56,7 +52,7 @@ afterAll(async () => {
 describe("find-resume-applying-by-user-id api test", () => {
   const URL = "/api/v1/company/applying";
   const userService = Container.get(UserService);
-  const resumeService = Container.get(ResumeService);
+  //   const resumeService = Container.get(ResumeService);
   const companyService = Container.get(CompanyService);
 
   it("No resumeApplying, return 404", async () => {
@@ -67,27 +63,31 @@ describe("find-resume-applying-by-user-id api test", () => {
 
   it("if success, return 200", async () => {
     const { user } = await userService.createUserBySocial("user@gmail.com");
-    const { resume } = await resumeService.createResume(
-      user.id,
-      newResumeFactory()
-    );
+    // const { resume } = await resumeService.createResume(
+    //   user.id,
+    //   newResumeFactory()
+    // );
 
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
-    const company = await companyService.createCompany(data);
+    // const data: ICreateCompany = {
+    //   email: "company@gmail.com",
+    //   password: "company",
+    //   name: "회사명",
+    // };
+    // const company = await companyService.createCompany(data);
 
-    const { jdDetails } = await companyService.createJobDescription(
-      company.id,
-      newCompanyJobDescriptionFactory()
-    );
+    // const sdf = await companyService.createJobDescription(
+    //   company.id,
+    //   newCompanyJobDescriptionFactory()
+    // );
+
+    jest
+      .spyOn(companyService, "createJobDescription")
+      .mockResolvedValue({} as any);
 
     await companyService.createResumeApplying({
       userId: user.id,
-      resumeId: resume.insertId,
-      jdDetailId: jdDetails[0].insertId,
+      resumeId: 1,
+      jdDetailId: 1,
     });
 
     const res = await request(await startApp()).get(`${URL}`);

@@ -48,16 +48,22 @@ describe("create-company-job-description Test", () => {
     const spy = jest.spyOn(companyService, "createJobDescription");
 
     const jdData = newCompanyJobDescriptionFactory();
-    const { jobDescription, jdSteps, jdDetails, jdWorkCondition, jdWelfares } =
-      await companyService.createJobDescription(company.id, jdData);
+    const { jobDescription } = await companyService.createJobDescription(
+      company.id,
+      jdData
+    );
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(company.id, jdData);
 
-    expect(jobDescription.affectedRows).toBe(1);
-    expect(jdSteps.length).toBe(jdData.jd_steps.length);
-    expect(jdDetails.length).toBe(jdData.jd_details.length);
-    expect(jdWorkCondition.affectedRows).toBe(1);
-    expect(jdWelfares.length).toBe(jdData.jd_welfares.length);
+    expect(jobDescription).toEqual(
+      expect.objectContaining({
+        category: jdData.category,
+        companyId: company.id,
+        deadlineAt: jdData.deadlineAt,
+        startedAt: jdData.startedAt,
+        id: jobDescription.id,
+      })
+    );
   });
 });
