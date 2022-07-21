@@ -49,10 +49,10 @@ describe("create-company-job-description Test", () => {
 
     const jdData = newCompanyJobDescriptionFactory();
     const { jobDescription, jdSteps, jdDetails, jdWorkCondition, jdWelfares } =
-      await companyService.createJobDescription(company.insertId, jdData);
+      await companyService.createJobDescription(company.id, jdData);
 
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(company.insertId, jdData);
+    expect(spy).toBeCalledWith(company.id, jdData);
 
     expect(jobDescription.affectedRows).toBe(1);
     expect(jdSteps.length).toBe(jdData.jd_steps.length);

@@ -8,28 +8,20 @@ import {
   JD_WELFARE_TABLE,
   JD_WORK_CONDITION_TABLE,
   RESUME_APPLYING_TABLE,
-  COMPANY_TABLE,
   RESUME_TABLE,
 } from "../constants";
-import { findOneOrWhole, insert, MySQL, update } from "../db";
+import { findOneOrWhole, insert, MySQL, Prisma, update } from "../db";
 import {
   CreateCompanyHistoryDto,
-  FindCompanyDto,
-  FindCompanyHistoryDto,
   FindJobDescriptionDto,
   UpdateCompanyDto,
   UpdateCompanyHistoryDto,
 } from "../dtos";
-import {
-  ICompany,
-  IComapnyDAO,
-  ICreateCompany,
-  ICreateJobDescription,
-} from "../types";
+import { IComapnyDAO, ICreateCompany, ICreateJobDescription } from "../types";
 
 @Service()
 export class CompanyDAO implements IComapnyDAO {
-  constructor(private readonly mysql: MySQL) {}
+  constructor(private readonly mysql: MySQL, private readonly prisma: Prisma) {}
 
   async createCompany({
     email,
@@ -37,138 +29,41 @@ export class CompanyDAO implements IComapnyDAO {
     salt,
     name,
   }: ICreateCompany & { salt: string }) {
-    const conn = await this.mysql.getConnection();
-
-    const companyQuery = `
-        INSERT 
-        INTO 
-            ${COMPANY_TABLE} 
-            (email, password, salt, name) 
-        VALUES
-            (?, ?, ?, ?);
-    `;
-
-    const [result] = await insert(
-      { query: companyQuery, values: [email, password, salt, name] },
-      conn
-    )();
-
-    return result;
+    return this.prisma.client.companys.create({
+      data: {
+        email,
+        password,
+        salt,
+        name,
+      },
+    });
   }
 
   async updateCompany(companyId: number, data: UpdateCompanyDto) {
-    const conn = await this.mysql.getConnection();
-
-    const query = `
-        UPDATE 
-            ${COMPANY_TABLE} 
-        SET ? 
-        WHERE id = ?
-    `;
-
-    // UPDATE ${COMPANY_TABLE}
-    //     SET ?
-    //     WHERE id = ?
-
-    const [result] = await update({ query, values: [data, companyId] }, conn)();
-
-    return result;
+    return this.prisma.client.companys.update({
+      where: { id: companyId },
+      data: { ...data },
+    });
   }
 
   async findCompanyByEmail(email: string) {
-    const conn = await this.mysql.getConnection();
-    const query = `
-        SELECT 
-            id,
-            password,
-            salt,
-            name,
-            email,
-            created_at,
-            updated_at
-        FROM 
-            ${COMPANY_TABLE} 
-        WHERE 
-            email = ? 
-        LIMIT 1`;
-
-    const [rows] = await findOneOrWhole({ query, values: [email] }, conn)();
-
-    if (!rows.length) {
-      return undefined;
-    }
-    return plainToInstance(FindCompanyDto, rows[0]);
+    return this.prisma.client.companys.findUnique({ where: { email } });
   }
 
   async findCompanyById(id: number) {
-    const conn = await this.mysql.getConnection();
-    const query = `
-        SELECT 
-            id,
-            name,
-            email,
-            created_at,
-            updated_at
-        FROM 
-            ${COMPANY_TABLE} 
-        WHERE 
-            id = ? 
-        LIMIT 1`;
-
-    const [rows] = await findOneOrWhole({ query, values: [id] }, conn)();
-
-    if (!rows.length) {
-      return undefined;
-    }
-    return plainToInstance(FindCompanyDto, rows[0]);
+    return this.prisma.client.companys.findUnique({ where: { id } });
   }
 
   async findCompanyHistory(id: number) {
-    const conn = await this.mysql.getConnection();
-    const query = `
-    SELECT * 
-    FROM ${COMPANY_HISTORY_TABLE} 
-    WHERE id = ? 
-    LIMIT 1`;
-
-    const [rows] = await findOneOrWhole({ query, values: [id] }, conn)();
-
-    if (!rows.length) {
-      return undefined;
-    }
-    return plainToInstance(FindCompanyHistoryDto, rows[0]);
+    return this.prisma.client.companyHistories.findUnique({ where: { id } });
   }
 
-  async findCompanyList({
-    start,
-    limit,
-  }: {
-    start: number;
-    limit: number;
-  }): Promise<ICompany[] | undefined> {
-    const pool = this.mysql.getPool();
-
-    const query = `
-    SELECT 
-        C.* 
-    FROM 
-        ${COMPANY_TABLE} AS C 
-    WHERE 
-        C.id >= ? 
-    ORDER BY 
-        C.id 
-    LIMIT ?`;
-
-    const [rows] = await findOneOrWhole(
-      { query, values: [start, limit] },
-      pool
-    )();
-
-    if (!rows.length) {
-      return undefined;
-    }
-
-    return rows as ICompany[];
+  async findCompanyList({ start, limit }: { start: number; limit: number }) {
+    return this.prisma.client.companys.findMany({
+      where: { id: { gte: start } },
+      skip: limit,
+      orderBy: { id: "asc" },
+    });
   }
 
   async createCompanyHistory(companyId: number, data: CreateCompanyHistoryDto) {

@@ -25,7 +25,7 @@ export class CompanyController implements ICompanyController {
     const createdCompany = await this.companyService.createCompany(body);
 
     const company = await this.companyService.findCompanyById(
-      createdCompany.insertId
+      createdCompany.id
     );
 
     if (!company) {

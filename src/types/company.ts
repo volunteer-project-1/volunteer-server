@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
+import { CompanyHistories, Companys } from "@prisma/client";
 import { Request, Response } from "express";
 import { OkPacket, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { DefaultTime } from ".";
@@ -6,7 +7,6 @@ import {
   CreateCompanyByLocalDto,
   CreateCompanyHistoryDto,
   CreateJobDescriptionDto,
-  FindCompanyDto,
   FindJobDescriptionDto,
   UpdateCompanyDto,
   UpdateCompanyHistoryDto,
@@ -96,15 +96,15 @@ export interface ICompanyService {
   findCompanyList: (data: {
     start: number;
     limit: number;
-  }) => Promise<ICompany[] | undefined>;
+  }) => Promise<Companys[]>;
 
-  findCompanyById: (id: number) => Promise<ICompany | undefined>;
-  findCompanyHistory: (id: number) => Promise<ICompanyHistory | undefined>;
-  createCompany: (data: CreateCompanyByLocalDto) => Promise<OkPacket>;
+  findCompanyById: (id: number) => Promise<Companys | null>;
+  findCompanyHistory: (id: number) => Promise<CompanyHistories | null>;
+  createCompany: (data: CreateCompanyByLocalDto) => Promise<Companys>;
   updateCompany: (
     companyId: number,
     data: UpdateCompanyDto
-  ) => Promise<ResultSetHeader>;
+  ) => Promise<Companys>;
   createCompanyHistory: (
     id: number,
     data: CreateCompanyHistoryDto
@@ -138,20 +138,20 @@ export interface ICompanyService {
 }
 
 export interface IComapnyDAO {
-  createCompany: (data: ICreateCompany & { salt: string }) => Promise<OkPacket>;
+  createCompany: (data: ICreateCompany & { salt: string }) => Promise<Companys>;
   updateCompany: (
     companyId: number,
     data: UpdateCompanyDto
-  ) => Promise<ResultSetHeader>;
-  findCompanyById: (id: number) => Promise<FindCompanyDto | undefined>;
-  findCompanyHistory: (id: number) => Promise<ICompanyHistory | undefined>;
+  ) => Promise<Companys>;
+  findCompanyById: (id: number) => Promise<Companys | null>;
+  findCompanyHistory: (id: number) => Promise<CompanyHistories | null>;
   findCompanyList: ({
     start,
     limit,
   }: {
     start: number;
     limit: number;
-  }) => Promise<ICompany[] | undefined>;
+  }) => Promise<Companys[]>;
 
   createCompanyHistory: (
     companyId: number,

@@ -1,35 +1,53 @@
-import { RowDataPacket } from "mysql2/promise";
+import { PrismaPromise } from "@prisma/client";
 import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
-import { MySQL } from "../../../db";
+import { Prisma } from "../../../db";
 import { UpdateCompanyDto } from "../../../dtos";
 import { CompanyService } from "../../../services";
 import { ICreateCompany } from "../../../types";
 
+let prisma: Prisma;
 beforeAll(async () => {
-  await Container.get(MySQL).connect();
+  prisma = Container.get(Prisma);
+  await prisma.client.$connect();
 });
 
 afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
-    `);
+  const transactions: PrismaPromise<any>[] = [];
+  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
 
-  for (const row of rows) {
-    await conn!.query(row.q);
+  const tablenames = await prisma.client.$queryRawUnsafe<
+    Array<{ TABLE_NAME: string }>
+  >(
+    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
+  );
+
+  for (const { TABLE_NAME } of tablenames) {
+    if (TABLE_NAME !== "_prisma_migrations") {
+      try {
+        transactions.push(
+          prisma.client.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`)
+        );
+      } catch (error) {
+        console.log({ error });
+      }
+    }
   }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
+
+  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
+
+  try {
+    await prisma.client.$transaction(transactions);
+  } catch (error) {
+    console.log({ error });
+  }
+
   jest.clearAllMocks();
 });
 
 afterAll(async () => {
-  await Container.get(MySQL).closePool();
+  await prisma.client.$disconnect();
 });
 
 describe("update company api test", () => {
