@@ -18,7 +18,7 @@ import {
   setOffKeepAlive,
 } from "./middlewares";
 import passportConfig from "./passports";
-import { MySQL, RedisSession } from "./db";
+import { RedisSession } from "./db";
 import { HTTP_STATUS_CODE } from "./constants";
 import { logger } from "./utils";
 
@@ -28,9 +28,6 @@ export async function startApp() {
   const redis = Container.get(RedisSession);
   await redis.initialize(session);
   const RedisStore = redis.getRedisStore();
-
-  const mysql = Container.get(MySQL);
-  await mysql.connect();
 
   app.use(setOffKeepAlive);
 

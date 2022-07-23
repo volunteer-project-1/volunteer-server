@@ -1,5 +1,5 @@
 import { Service } from "typedi";
-import { Prisma } from "../db";
+import Prisma from "../db/prisma";
 import {
   CreateCompanyHistoryDto,
   UpdateCompanyDto,
@@ -9,7 +9,12 @@ import { IComapnyDAO, ICreateCompany, ICreateJobDescription } from "../types";
 
 @Service()
 export class CompanyDAO implements IComapnyDAO {
-  constructor(private readonly prisma: Prisma) {}
+  private readonly prisma;
+
+  constructor() {
+    // constructor(private readonly prisma: typeof Prisma) {
+    this.prisma = Prisma;
+  }
 
   async createCompany({
     email,
@@ -17,7 +22,7 @@ export class CompanyDAO implements IComapnyDAO {
     salt,
     name,
   }: ICreateCompany & { salt: string }) {
-    return this.prisma.client.companys.create({
+    return this.prisma.companys.create({
       data: {
         email,
         password,
@@ -28,26 +33,26 @@ export class CompanyDAO implements IComapnyDAO {
   }
 
   async updateCompany(companyId: number, data: UpdateCompanyDto) {
-    return this.prisma.client.companys.update({
+    return this.prisma.companys.update({
       where: { id: companyId },
       data: { ...data },
     });
   }
 
   async findCompanyByEmail(email: string) {
-    return this.prisma.client.companys.findUnique({ where: { email } });
+    return this.prisma.companys.findUnique({ where: { email } });
   }
 
   async findCompanyById(id: number) {
-    return this.prisma.client.companys.findUnique({ where: { id } });
+    return this.prisma.companys.findUnique({ where: { id } });
   }
 
   async findCompanyHistory(id: number) {
-    return this.prisma.client.companyHistories.findUnique({ where: { id } });
+    return this.prisma.companyHistories.findUnique({ where: { id } });
   }
 
   async findCompanyList({ start, limit }: { start: number; limit: number }) {
-    return this.prisma.client.companys.findMany({
+    return this.prisma.companys.findMany({
       where: { id: { gte: start } },
       skip: limit,
       orderBy: { id: "asc" },
@@ -55,13 +60,13 @@ export class CompanyDAO implements IComapnyDAO {
   }
 
   async createCompanyHistory(companyId: number, data: CreateCompanyHistoryDto) {
-    return this.prisma.client.companyHistories.create({
+    return this.prisma.companyHistories.create({
       data: { ...data, companyId },
     });
   }
 
   async updateCompanyHistory(id: number, data: UpdateCompanyHistoryDto) {
-    return this.prisma.client.companyHistories.update({
+    return this.prisma.companyHistories.update({
       where: { id },
       data: { ...data },
     });
@@ -78,13 +83,10 @@ export class CompanyDAO implements IComapnyDAO {
     }: ICreateJobDescription
   ) {
     // eslint-disable-next-line no-return-await
-    return await this.prisma.client.$transaction(async (prisma) => {
+    return await this.prisma.$transaction(async (prisma) => {
       const jd = await prisma.jobDescriptions.create({
         data: { companyId: id, ...jobDescription },
       });
-      //   const details = await prisma.jdDetails.createMany({
-      //     data: [...jdDetails.map((e) => ({ jobDescriptionId: jd.id, ...e }))],
-      //   });
 
       const details = await Promise.all(
         jdDetails
@@ -98,31 +100,13 @@ export class CompanyDAO implements IComapnyDAO {
         data: { jobDescriptionId: jd.id, ...jdWorkCondition },
       });
 
-      //   await prisma.jdSteps.createMany({
-      //     data: [
-      //       ...jdSteps.map((e) => ({
-      //         jobDescriptionId: jd.id,
-      //         ...e,
-      //       })),
-      //     ],
-      //   });
-
-      const steps = await Promise.race(
+      const steps = await Promise.all(
         jdSteps
           .map((e) => ({ jobDescriptionId: jd.id, ...e }))
           .map((jdStep) => prisma.jdSteps.create({ data: { ...jdStep } }))
       );
 
-      //   await prisma.jdWelfares.createMany({
-      //     data: [
-      //       ...jdWelfares.map((e) => ({
-      //         jobDescriptionId: jd.id,
-      //         ...e,
-      //       })),
-      //     ],
-      //   });
-
-      const welfares = await Promise.race(
+      const welfares = await Promise.all(
         jdWelfares
           .map((e) => ({ jobDescriptionId: jd.id, ...e }))
           .map((jdWelfare) =>
@@ -141,7 +125,7 @@ export class CompanyDAO implements IComapnyDAO {
   }
 
   async findJobDescriptionById(id: number) {
-    return this.prisma.client.jobDescriptions.findUnique({
+    return this.prisma.jobDescriptions.findUnique({
       where: { id },
       include: {
         jdDetails: true,
@@ -155,66 +139,25 @@ export class CompanyDAO implements IComapnyDAO {
   async createResumeApplying({
     userId,
     resumeId,
-    jdDetailId,
+    jobDescriptionId,
   }: {
     userId: number;
     resumeId: number;
-    jdDetailId: number;
+    jobDescriptionId: number;
   }) {
-    return this.prisma.client.resumeApplyings.create({
-      data: { userId, resumeId, jdDetailId },
+    return this.prisma.resumeApplyings.create({
+      data: { userId, resumeId, jobDescriptionId },
     });
   }
 
   async findResumeApplyingByUserId(userId: number) {
-    return this.prisma.client.resumeApplyings.findMany({
+    return this.prisma.resumeApplyings.findMany({
       where: { userId },
       include: {
-        jdDetails: { include: { jobDescriptions: true } },
+        jobDescriptions: { include: { jdDetails: true } },
         resumes: true,
       },
+      orderBy: { createdAt: "desc" },
     });
-
-    // const conn = await this.mysql.getConnection();
-
-    // const subQuery = `
-    //     SELECT
-    //         ra.id resume_applying_id,
-    //         detail.job_description_id job_description_id,
-    //         detail.id detail_id,
-    //         detail.role role,
-    //         resume.id resume_id,
-    //         resume.title resume_title,
-    //         ra.created_at created_at
-    //     FROM
-    //         ${RESUME_APPLYING_TABLE} AS ra
-    //     JOIN ${JD_DETAIL_TABLE} AS detail
-    //         ON detail.id = ra.jd_detail_id
-    //     JOIN ${RESUME_TABLE} AS resume
-    //         ON resume.id = ra.resume_id
-    //     WHERE
-    //         ra.user_id = ?
-    //     GROUP BY resume_applying_id
-    //     ORDER BY ra.created_at desc
-    // `;
-
-    // const query = `
-    //     SELECT
-    //         jobd.id job_description_id,
-    //         q.*
-    //     FROM
-    //         ${JOB_DESCRIPTION_TABLE} jobd
-    //     JOIN (${subQuery}) AS q
-    //         ON q.job_description_id = jobd.id
-    //     GROUP BY q.resume_applying_id
-
-    // `;
-    // const [rows] = await findOneOrWhole({ query, values: [userId] }, conn)();
-
-    // if (!rows.length) {
-    //   return undefined;
-    // }
-
-    // return rows;
   }
 }

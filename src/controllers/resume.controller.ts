@@ -1,10 +1,9 @@
-/* eslint-disable camelcase */
 import { Response, Request } from "express";
 import { Service } from "typedi";
 import { ResumeService } from "../services";
 import { IResumeController } from "../types";
 import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
-import { MulterS3, NotFoundError } from "../lib";
+import { MulterS3 } from "../lib";
 import {
   CreateResumeDto,
   UpdateResumeDto,
@@ -64,7 +63,7 @@ export class ResumeController implements IResumeController {
     };
     const resumes = await this.resumeService.findPublicResumes(parsedQuery);
 
-    if (!resumes) {
+    if (!resumes.length) {
       return res.status(204).send();
     }
 
@@ -74,7 +73,7 @@ export class ResumeController implements IResumeController {
   findMyResumes = async ({ user }: Request, res: Response) => {
     const resumes = await this.resumeService.findMyResumes(user!.id);
 
-    if (!resumes) {
+    if (!resumes.length) {
       return res.status(204).send();
     }
 
@@ -103,16 +102,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateResumeDto(body));
 
-    const [result] = await this.resumeService.updateResume(
+    const resume = await this.resumeService.updateResume(
       parseToNumberOrThrow(id),
       body
     );
 
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-
-    return res.sendStatus(204);
+    return res.json({ resume });
   };
 
   updateResumeInfo = async (
@@ -123,15 +118,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateResumeInfoDto(body));
 
-    const [result] = await this.resumeService.updateResumeInfo(
+    const resumeInfo = await this.resumeService.updateResumeInfo(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
 
-    return res.sendStatus(204);
+    return res.json({ resumeInfo });
   };
 
   updateEducation = async (
@@ -142,14 +134,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateEducationDto(body));
 
-    const [result] = await this.resumeService.updateEducation(
+    const education = await this.resumeService.updateEducation(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ education });
   };
 
   updateCareer = async (
@@ -160,14 +150,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateCareerDto(body));
 
-    const [result] = await this.resumeService.updateCareer(
+    const career = await this.resumeService.updateCareer(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ career });
   };
 
   updateActivity = async (
@@ -177,14 +165,12 @@ export class ResumeController implements IResumeController {
     assertNonNullish(id);
 
     await validateDtos(new UpdateActivityDto(body));
-    const [result] = await this.resumeService.updateActivity(
+    const activity = await this.resumeService.updateActivity(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ activity });
   };
 
   updateAward = async (
@@ -195,14 +181,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateAwardDto(body));
 
-    const [result] = await this.resumeService.updateAward(
+    const award = await this.resumeService.updateAward(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ award });
   };
 
   updateMyVideo = async (
@@ -213,14 +197,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateMyVideoDto(body));
 
-    const [result] = await this.resumeService.updateMyVideo(
+    const myVideo = await this.resumeService.updateMyVideo(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ myVideo });
   };
 
   updateHelperVideo = async (
@@ -231,14 +213,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateHelperVideoDto(body));
 
-    const [result] = await this.resumeService.updateHelperVideo(
+    const helperVideo = await this.resumeService.updateHelperVideo(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ helperVideo });
   };
 
   updatePreference = async (
@@ -249,14 +229,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdatePreferenceDto(body));
 
-    const [result] = await this.resumeService.updatePreference(
+    const preference = await this.resumeService.updatePreference(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ preference });
   };
 
   updatePreferenceJob = async (
@@ -270,14 +248,12 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdatePreferenceJobDto(body));
 
-    const [result] = await this.resumeService.updatePreferenceJob(
+    const preferenceJob = await this.resumeService.updatePreferenceJob(
       parseToNumberOrThrow(id),
       body
     );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+
+    return res.json({ preferenceJob });
   };
 
   updatePreferenceLocation = async (
@@ -291,14 +267,13 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdatePreferenceLocationDto(body));
 
-    const [result] = await this.resumeService.updatePreferenceLocation(
-      parseToNumberOrThrow(id),
-      body
-    );
-    if (result.affectedRows === 0) {
-      throw new NotFoundError();
-    }
-    return res.sendStatus(204);
+    const preferenceLocation =
+      await this.resumeService.updatePreferenceLocation(
+        parseToNumberOrThrow(id),
+        body
+      );
+
+    return res.json({ preferenceLocation });
   };
 
   deleteResume = async (
@@ -307,113 +282,113 @@ export class ResumeController implements IResumeController {
   ) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteResume(
+    const resume = await this.resumeService.deleteResume(
       parseToNumberOrThrow(id)
     );
 
-    assertNonNullish(affectedRows);
+    // assertNonNullish(resume);
 
-    return res.sendStatus(204);
+    return res.json({ resume });
   };
 
   deleteResumeInfo = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteResumeInfo(
+    const resumeInfo = await this.resumeService.deleteResumeInfo(
       parseToNumberOrThrow(id)
     );
 
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ resumeInfo });
   };
 
   deleteEducation = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteEducation(
+    const education = await this.resumeService.deleteEducation(
       parseToNumberOrThrow(id)
     );
 
-    assertNonNullish(affectedRows);
-    return res.sendStatus(204);
+    // assertNonNullish(affectedRows);
+    return res.json({ education });
   };
 
   deleteCareer = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteCareer(
+    const career = await this.resumeService.deleteCareer(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ career });
   };
 
   deleteActivity = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteActivity(
+    const activity = await this.resumeService.deleteActivity(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ activity });
   };
 
   deleteAward = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteAward(
+    const award = await this.resumeService.deleteAward(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ award });
   };
 
   deleteMyVideo = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteMyVideo(
+    const myVideo = await this.resumeService.deleteMyVideo(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ myVideo });
   };
 
   deleteHelperVideo = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deleteHelperVideo(
+    const helperVideo = await this.resumeService.deleteHelperVideo(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ helperVideo });
   };
 
   deletePreference = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deletePreference(
+    const preference = await this.resumeService.deletePreference(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ preference });
   };
 
   deletePreferenceJob = async ({ params: { id } }: Request, res: Response) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] = await this.resumeService.deletePreferenceJob(
+    const preferenceJob = await this.resumeService.deletePreferenceJob(
       parseToNumberOrThrow(id)
     );
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ preferenceJob });
   };
 
   deletePreferenceLocation = async (
@@ -422,13 +397,13 @@ export class ResumeController implements IResumeController {
   ) => {
     assertNonNullish(id);
 
-    const [{ affectedRows }] =
+    const preferenceLocation =
       await this.resumeService.deletePreferenceLocation(
         parseToNumberOrThrow(id)
       );
 
-    assertNonNullish(affectedRows);
+    // assertNonNullish(affectedRows);
 
-    return res.sendStatus(204);
+    return res.json({ preferenceLocation });
   };
 }

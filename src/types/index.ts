@@ -2,8 +2,8 @@
 import { Users, Companys } from "@prisma/client";
 
 export interface DefaultTime {
-  created_at?: Date;
-  updated_at?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 type UserAndCompanyTyped = Users & Companys;

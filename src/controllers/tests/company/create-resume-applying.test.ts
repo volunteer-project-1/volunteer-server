@@ -1,22 +1,25 @@
-import { PrismaPromise, ResumeApplyings } from "@prisma/client";
+import { PrismaPromise } from "@prisma/client";
 import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
-import { Prisma } from "../../../db";
+import Prisma from "../../../db/prisma";
+import {
+  newCompanyJobDescriptionFactory,
+  newResumeAllFactory,
+} from "../../../factory";
+import { CompanyService, ResumeService, UserService } from "../../../services";
 
-import { CompanyService } from "../../../services";
-
-let prisma: Prisma;
+let prisma: typeof Prisma;
 beforeAll(async () => {
-  prisma = Container.get(Prisma);
-  await prisma.client.$connect();
+  prisma = Prisma;
+  await prisma.$connect();
 });
 
 afterEach(async () => {
   const transactions: PrismaPromise<any>[] = [];
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
 
-  const tablenames = await prisma.client.$queryRawUnsafe<
+  const tablenames = await prisma.$queryRawUnsafe<
     Array<{ TABLE_NAME: string }>
   >(
     `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
@@ -25,19 +28,17 @@ afterEach(async () => {
   for (const { TABLE_NAME } of tablenames) {
     if (TABLE_NAME !== "_prisma_migrations") {
       try {
-        transactions.push(
-          prisma.client.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`)
-        );
+        transactions.push(prisma.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`));
       } catch (error) {
         console.log({ error });
       }
     }
   }
 
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
 
   try {
-    await prisma.client.$transaction(transactions);
+    await prisma.$transaction(transactions);
   } catch (error) {
     console.log({ error });
   }
@@ -46,12 +47,14 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await prisma.client.$disconnect();
+  await prisma.$disconnect();
 });
 
 describe("create-resume-applying api test", () => {
   const URL = "/api/v1/company/applying";
+  const resumeService = Container.get(ResumeService);
   const companyService = Container.get(CompanyService);
+  const userService = Container.get(UserService);
 
   it("In valid query string, return 400", async () => {
     const query = { invalid: "asdf" };
@@ -63,13 +66,30 @@ describe("create-resume-applying api test", () => {
   });
 
   it("if success, return 200", async () => {
+    const { user } = await userService.createUserBySocial(
+      "ehgks0083@gmail.com"
+    );
+    const { resume } = await resumeService.createResume(
+      user.id,
+      newResumeAllFactory()
+    );
+
+    const company = await companyService.createCompany({
+      email: "company@gmail.com",
+      password: "asdfa",
+      name: "compnay",
+    });
+
+    const { jobDescription } = await companyService.createJobDescription(
+      company.id,
+      newCompanyJobDescriptionFactory()
+    );
+
     const query = {
-      resumeId: 1,
-      jdDetailId: 1,
+      resumeId: resume.id,
+      jobDescriptionId: jobDescription.id,
     };
-    jest
-      .spyOn(companyService, "createResumeApplying")
-      .mockResolvedValue({} as ResumeApplyings);
+
     const res = await request(await startApp())
       .post(`${URL}`)
       .query(query);

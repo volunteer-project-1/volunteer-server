@@ -130,22 +130,29 @@ export interface ICompanyService {
   findJobDescriptionById: (id: number) => Promise<
     | (JobDescriptions & {
         jdDetails: JdDetails[];
+        jdWorkCondition: JdWorkConditions | null;
         jdSteps: JdSteps[];
         jdWelfares: JdWelfares[];
-        jdWorkCondition: JdWorkConditions[];
       })
     | null
   >;
   createResumeApplying: (data: {
     userId: number;
     resumeId: number;
-    jdDetailId: number;
-  }) => Promise<{ userId: number; resumeId: number; jdDetailId: number }>;
+    jobDescriptionId: number;
+  }) => Promise<ResumeApplyings>;
   findResumeApplying: (
     resumeId: number,
     jobDescriptionId: number
   ) => Promise<
-    (ResumeApplyings & { jdDetails: JdDetails; resumes: Resumes })[]
+    (ResumeApplyings & {
+      jobDescriptions:
+        | (JobDescriptions & {
+            jdDetails: JdDetails[];
+          })
+        | null;
+      resumes: Resumes;
+    })[]
   >;
 }
 
@@ -186,19 +193,12 @@ export interface IComapnyDAO {
     // jdWelfares: JdWelfares[];
   }>;
 
-  //   JobDescriptions & {
-  //     jdDetails: JdDetails[];
-  //     jdSteps: JdSteps[];
-  //     jdWelfares: JdWelfares[];
-  //     jdWorkCondition: JdWorkConditions[];
-  // }) | null
-
   findJobDescriptionById: (id: number) => Promise<
     | (JobDescriptions & {
         jdDetails: JdDetails[];
+        jdWorkCondition: JdWorkConditions | null;
         jdSteps: JdSteps[];
         jdWelfares: JdWelfares[];
-        jdWorkCondition: JdWorkConditions[];
       })
     | null
   >;
@@ -206,13 +206,18 @@ export interface IComapnyDAO {
   createResumeApplying: (data: {
     userId: number;
     resumeId: number;
-    jdDetailId: number;
-  }) => Promise<{ userId: number; resumeId: number; jdDetailId: number }>;
+    jobDescriptionId: number;
+  }) => Promise<ResumeApplyings>;
 
-  findResumeApplyingByUserId: (
-    userId: number
-  ) => Promise<
-    (ResumeApplyings & { jdDetails: JdDetails; resumes: Resumes })[]
+  findResumeApplyingByUserId: (userId: number) => Promise<
+    (ResumeApplyings & {
+      jobDescriptions:
+        | (JobDescriptions & {
+            jdDetails: JdDetails[];
+          })
+        | null;
+      resumes: Resumes;
+    })[]
   >;
 }
 

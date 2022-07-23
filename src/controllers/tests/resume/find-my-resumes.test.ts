@@ -1,46 +1,50 @@
-import { RowDataPacket } from "mysql2/promise";
 import request from "supertest";
 import Container from "typedi";
+import { PrismaPromise } from "@prisma/client";
 import { startApp } from "../../../app";
-import { MySQL } from "../../../db";
-import { newResumeFactory } from "../../../factory";
+import { newResumeAllFactory } from "../../../factory";
 import { ResumeService, UserService } from "../../../services";
+import Prisma from "../../../db/prisma";
 
+let prisma: typeof Prisma;
 beforeAll(async () => {
-  await Container.get(MySQL).connect();
+  prisma = Prisma;
+  await prisma.$connect();
 });
 
-// beforeEach(async () => {
-//   const email = "ehgks0083@gmail.com";
-
-//   const userService = Container.get(UserService);
-//   const resumeService = Container.get(ResumeService);
-
-//   const {
-//     user: { insertId },
-//   } = await userService.createUser(email);
-//   await resumeService.createResume(insertId, newResumeFactory());
-// });
-
 afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
-    `);
+  const transactions: PrismaPromise<any>[] = [];
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
 
-  for (const row of rows) {
-    await conn!.query(row.q);
+  const tablenames = await prisma.$queryRawUnsafe<
+    Array<{ TABLE_NAME: string }>
+  >(
+    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
+  );
+
+  for (const { TABLE_NAME } of tablenames) {
+    if (TABLE_NAME !== "_prisma_migrations") {
+      try {
+        transactions.push(prisma.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`));
+      } catch (error) {
+        console.log({ error });
+      }
+    }
   }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
+
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
+
+  try {
+    await prisma.$transaction(transactions);
+  } catch (error) {
+    console.log({ error });
+  }
+
   jest.clearAllMocks();
 });
 
 afterAll(async () => {
-  await Container.get(MySQL).closePool();
+  await prisma.$disconnect();
 });
 
 describe("findResumeById test", () => {
@@ -49,7 +53,7 @@ describe("findResumeById test", () => {
   it("GET '/', If Resume Not Founded, return 204", async () => {
     const res = await request(await startApp()).get(`${URL}`);
 
-    // expect(res.body).toBe({ message: "이력서 없음" });
+    // expect(res.body).toBe("");
     expect(res.status).toBe(204);
   });
 
@@ -62,15 +66,15 @@ describe("findResumeById test", () => {
     const { user } = await userService.createUserBySocial(email);
     await resumeService.createResume(
       user.id,
-      newResumeFactory({
-        resume: { title: "1번 이력서", content: "1번", is_public: true },
+      newResumeAllFactory({
+        resume: { title: "1번 이력서", content: "1번", isPublic: true },
       })
     );
 
     await resumeService.createResume(
       user.id,
-      newResumeFactory({
-        resume: { title: "2번 이력서", content: "2번", is_public: true },
+      newResumeAllFactory({
+        resume: { title: "2번 이력서", content: "2번", isPublic: true },
       })
     );
 

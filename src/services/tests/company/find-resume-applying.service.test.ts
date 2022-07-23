@@ -1,135 +1,136 @@
+/* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+  JdDetails,
+  JobDescriptions,
+  PrismaClient,
+  ResumeApplyings,
+  Resumes,
+} from "@prisma/client";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import "reflect-metadata";
 import { Container } from "typedi";
-import { PrismaPromise } from "@prisma/client";
-import { Prisma } from "../../../db";
 import { CompanyService } from "../..";
-import { ResumeService } from "../../resume.service";
-import {
-  newCompanyJobDescriptionFactory,
-  newResumeFactory,
-} from "../../../factory";
-import { UserService } from "../../user.service";
-import { ICreateCompany } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-let prisma: Prisma;
-beforeAll(async () => {
-  prisma = Container.get(Prisma);
-  await prisma.client.$connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const transactions: PrismaPromise<any>[] = [];
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
-
-  const tablenames = await prisma.client.$queryRawUnsafe<
-    Array<{ TABLE_NAME: string }>
-  >(
-    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
-  );
-
-  for (const { TABLE_NAME } of tablenames) {
-    if (TABLE_NAME !== "_prisma_migrations") {
-      try {
-        transactions.push(
-          prisma.client.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`)
-        );
-      } catch (error) {
-        console.log({ error });
-      }
-    }
-  }
-
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
-
-  try {
-    await prisma.client.$transaction(transactions);
-  } catch (error) {
-    console.log({ error });
-  }
-
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await prisma.client.$disconnect();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("find-resume-applying Test", () => {
-  const userService = Container.get(UserService);
   const companyService = Container.get(CompanyService);
-  const resumeService = Container.get(ResumeService);
 
-  it("조회 성공 시, 반환", async () => {
-    const userEmail = "user@gmail.com";
-    const { user } = await userService.createUserBySocial(userEmail);
+  //   (ResumeApplyings & {
+  //     jobDescriptions: JobDescriptions & {
+  //         jdDetails: JdDetails[];
+  //     };
+  //     resumes: Resumes;
+  // })[]
 
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
+  it("조회 성공 시, Return ResumeApplyings", async () => {
+    const userId = 1;
+
+    const jobDescriptions_1: JobDescriptions = {
+      id: 1,
+      startedAt: new Date(),
+      deadlineAt: new Date(),
+      category: "데브옵스",
+      companyId: 1,
     };
 
-    const company = await companyService.createCompany(data);
+    const jobDescriptions_2: JobDescriptions = {
+      id: 2,
+      startedAt: new Date(),
+      deadlineAt: new Date(),
+      category: "프론트",
+      companyId: 1,
+    };
 
-    const { jdDetails, jobDescription } =
-      await companyService.createJobDescription(
-        company.id,
-        newCompanyJobDescriptionFactory()
-      );
-    const { resume } = await resumeService.createResume(
-      user.id,
-      newResumeFactory()
-    );
+    const resumeApplying_1: ResumeApplyings = {
+      id: 1,
+      userId: 1,
+      resumeId: 1,
+      jobDescriptionId: jobDescriptions_1.id,
+      createdAt: new Date(),
+      deletedAt: null,
+    };
+    const resumeApplying_2: ResumeApplyings = {
+      id: 2,
+      userId: 1,
+      resumeId: 1,
+      jobDescriptionId: jobDescriptions_2.id,
+      createdAt: new Date(),
+      deletedAt: null,
+    };
 
-    const { jdDetails: jdDetails2, jobDescription: jobDescription2 } =
-      await companyService.createJobDescription(
-        company.id,
-        newCompanyJobDescriptionFactory()
-      );
-    const { resume: resume2 } = await resumeService.createResume(user.id, {
-      ...newResumeFactory(),
-      resume: { title: "제목2", content: "내용2", is_public: true },
-    });
+    const jdDetails_1: JdDetails = {
+      id: 1,
+      title: "",
+      numRecruitment: 0,
+      role: "개발",
+      requirements: "cloud",
+      priority: "aws",
+      jobDescriptionId: jobDescriptions_1.id,
+    };
 
-    const resumeApplying = await companyService.createResumeApplying({
-      userId: user.id,
-      resumeId: resume.insertId,
-      jdDetailId: jdDetails[0].id,
-    });
+    const jdDetails_2: JdDetails = {
+      id: 1,
+      title: "",
+      numRecruitment: 0,
+      role: "개발",
+      requirements: "js",
+      priority: "react",
+      jobDescriptionId: jobDescriptions_2.id,
+    };
 
-    const resumeApplying2 = await companyService.createResumeApplying({
-      userId: user.id,
-      resumeId: resume2.insertId,
-      jdDetailId: jdDetails2[1].id,
-    });
+    const resume: Resumes = {
+      id: 1,
+      title: "이력서1",
+      content: null,
+      isPublic: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId,
+    };
 
     const r1 = {
-      id: resumeApplying.id,
-      resumeId: resume.insertId,
-      jdDetailId: jdDetails[0].id,
-      jobDescriptionId: jobDescription.id,
+      ...resumeApplying_1,
+      jobDescriptions: { ...jobDescriptions_1, jdDetails: [jdDetails_1] },
+      resumes: resume,
     };
 
     const r2 = {
-      id: resumeApplying2.id,
-      resumeId: resume2.insertId,
-      jdDetailId: jdDetails2[1].id,
-      jobDescriptionId: jobDescription2.id,
+      ...resumeApplying_2,
+      jobDescriptions: { ...jobDescriptions_1, jdDetails: [jdDetails_2] },
+      resumes: resume,
     };
 
     const arr = [r2, r1];
 
+    const mock = prismaMock.resumeApplyings.findMany.mockResolvedValue(arr);
+
     const spy = jest.spyOn(companyService, "findResumeApplying");
 
-    const founds = await companyService.findResumeApplying(user.id);
+    const founds = await companyService.findResumeApplying(userId);
 
     if (!founds || !founds.length) {
       throw new Error();
     }
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(user.id);
+    expect(spy).toBeCalledWith(userId);
 
     for (const [index, value] of founds.entries()) {
       expect(value).toEqual(expect.objectContaining(arr[index]));

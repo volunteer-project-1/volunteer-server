@@ -1,56 +1,45 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { ResumeService, UserService } from "../..";
-import { newResumeFactory } from "../../../factory";
+import { newEducationFactory } from "../../../factory";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("deleteEducation Test", () => {
-  const userService = Container.get(UserService);
   const resumeService = Container.get(ResumeService);
   it("If success return affectedRows", async () => {
-    const { user } = await userService.createUserBySocial(
-      "ehgks0083@gmail.com"
-    );
-    const data = newResumeFactory();
-    await resumeService.createResume(user.id, data);
-
-    //
     const educationId = 1;
 
     const spy = jest.spyOn(resumeService, "deleteEducation");
 
-    const [result] = await resumeService.deleteEducation(educationId);
+    const deletedData = newEducationFactory();
 
+    const mock = prismaMock.educations.delete.mockResolvedValue(
+      deletedData as any
+    );
+
+    const result = await resumeService.deleteEducation(educationId);
+
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(educationId);
 
-    expect(result.affectedRows).toBe(1);
+    expect(result).toBe(deletedData);
   });
 });

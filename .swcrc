@@ -1,10 +1,18 @@
 {
   "jsc": {
-    "target": "es2021",
+    "target": "es2016",
     "parser": {
       "syntax": "typescript",
       "decorators": true,
-      "dynamicImport": true
+    //   "dynamicImport": true,
+      "dynamicImport": false,
+      "privateMethod": false,
+      "functionBind": false,
+      "exportDefaultFrom": false,
+      "exportNamespaceFrom": false,
+      "decoratorsBeforeExport": false,
+      "topLevelAwait": false,
+      "importMeta": false
     },
     "transform": {
       "decoratorMetadata": true,
@@ -15,9 +23,11 @@
     "loose": false
   },
   "module": {
-    "type": "es6",
-    "strict": true,
-    "noInterop": true
+    "type": "commonjs",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
   },
   "exclude": ["./src/**/.*.spec.ts$", "./**/.*.js$"],
   "sourceMaps": true

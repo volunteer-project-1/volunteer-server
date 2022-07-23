@@ -8,202 +8,211 @@ import {
   IsUrl,
   MaxLength,
   IsOptional,
+  IsDateString,
 } from "class-validator";
 import { Type } from "class-transformer";
-import { DisabilityLevel, DisabilityType, Sex } from "../../types";
+import { Prisma } from "@prisma/client";
+// import { DisabilityLevel, DisabilityType, Sex } from "../../types";
 
 export class ResumeDto {
   @IsString()
   title!: string;
 
   @IsString()
-  content!: string;
+  content!: string | null;
 
   @IsBoolean({ always: false })
-  is_public!: boolean;
+  isPublic!: boolean | null;
 }
 
 export class ResumeInfoDto {
   @IsString()
-  name!: string;
+  name!: string | null;
+
+  @IsDateString()
+  birthday!: Date;
 
   @IsString()
-  birthday!: string;
+  phoneNumber!: string | null;
 
   @IsString()
-  phone_number!: string;
+  email!: string | null;
 
   @IsString()
-  email!: string;
+  sido!: string | null;
 
   @IsString()
-  sido!: string;
-
-  @IsString()
-  sigungu!: string;
+  sigungu!: string | null;
 
   @IsNumber()
-  disability_level?: DisabilityLevel;
+  disabilityLevel!: number | null;
 
   @IsString()
-  disability_type?: DisabilityType;
+  disabilityType!: string | null;
 
   @IsString()
-  sex!: Sex;
+  sex!: string | null;
 
   @IsString()
   @IsUrl()
-  avatar?: string;
+  avatar!: string | null;
 }
 
 export class EducationDto {
   @IsString()
-  type!: string;
+  type!: string | null;
 
   @IsString()
-  school_name!: string;
+  schoolName!: string | null;
 
-  @IsString()
-  graduation_year!: string;
+  @IsDateString()
+  graduationYear!: Date | null;
 
-  @IsString()
-  admission_year!: string;
+  @IsDateString()
+  admissionYear!: Date | null;
 
   @IsBoolean()
-  is_graduated!: boolean;
+  isGraduated!: boolean | null;
 
   @IsString()
-  major!: string;
+  major!: string | null;
 
   @IsNumber()
-  credit!: number;
+  credit!: Prisma.Decimal | null;
 
   @IsNumber()
-  total_credit!: number;
+  totalCredit!: Prisma.Decimal | null;
 }
 
 export class CareerDto {
   @IsString()
-  company!: string;
+  company!: string | null;
 
   @IsString()
-  department!: string;
+  department!: string | null;
 
   @IsString()
-  position!: string;
+  position!: string | null;
 
   @IsString()
-  task!: string;
+  task!: string | null;
 
-  @IsString()
-  joined_at!: string;
+  @IsDateString()
+  joinedAt!: Date | null;
+
+  @IsDateString()
+  quitedAt!: Date | null;
+
+  @IsBoolean()
+  isInOffice!: boolean | null;
 }
 
 export class ActivityDto {
   @IsString()
-  organization!: string;
+  organization!: string | null;
 
   @IsString()
-  description!: string;
+  description!: string | null;
 }
 
 export class TrainingDto {
   @IsString()
-  name!: string;
+  name!: string | null;
 
   @IsString()
-  institute!: string;
+  institute!: string | null;
 
   @IsString()
-  content!: string;
+  content!: string | null;
 
-  @IsString()
-  //   @IsDateString()
-  started_at!: string;
+  // @IsString()
+  @IsDateString()
+  startedAt!: Date | null;
 
-  @IsString()
-  //   @IsDateString()
-  finished_at!: string;
+  // @IsString()
+  @IsDateString()
+  finishedAt!: Date | null;
 }
 export class CertificateDto {
   @IsString()
-  name!: string;
+  name!: string | null;
 
   @IsString()
-  institute!: string;
+  institute!: string | null;
 
-  @IsString()
-  acquisition_at!: string;
+  @IsDateString()
+  acquisitionAt!: Date | null;
 }
 
 export class AwardDto {
   @IsString()
-  institute!: string;
+  name!: string | null;
 
   @IsString()
-  //   @IsDateString()
-  started_at!: string;
+  institute!: string | null;
 
-  @IsString()
-  //   @IsDateString()
-  finished_at!: string;
+  @IsDateString()
+  startedAt!: Date | null;
+
+  @IsDateString()
+  finishedAt!: Date | null;
 }
 
 export class PortfolioDto {
   @IsString()
   @IsUrl()
-  url!: string;
+  url!: string | null;
 }
 export class IntroductionDto {
   @IsString()
   @MaxLength(20)
-  title!: string;
+  title!: string | null;
 
   @IsString()
   @MaxLength(800)
-  content!: string;
+  content!: string | null;
 }
 export class MyVideoDto {
   @IsString()
   @IsUrl()
-  url!: string;
+  url!: string | null;
 }
 
 export class HelperVideoDto {
   @IsString()
   @IsUrl()
-  url!: string;
+  url!: string | null;
 }
 
 export class PreferenceLocationDto {
   @IsString()
-  sido!: string;
+  sido!: string | null;
 
   @IsString()
-  sigungu!: string;
+  sigungu!: string | null;
 }
 
 export class PreferenceJobDto {
   @IsString()
-  name!: string;
+  name!: string | null;
 }
 
 export class PreferenceDto {
-  @IsNumber()
-  employ_type!: number;
+  @IsString()
+  employType!: string | null;
 
   @IsNumber()
-  salary!: number;
+  salary!: number | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => PreferenceLocationDto)
-  preferenceLocations?: PreferenceLocationDto[];
+  preferenceLocations!: PreferenceLocationDto[] | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => PreferenceJobDto)
-  preferenceJobs?: PreferenceJobDto[];
+  preferenceJobs!: PreferenceJobDto[] | null;
 }

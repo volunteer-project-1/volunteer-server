@@ -1,7 +1,7 @@
 import { Service } from "typedi";
 import { Request, Response } from "express";
 import { Users } from "@prisma/client";
-import { IUserController, IReturnFindMyProfile } from "../types";
+import { IUserController } from "../types";
 import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
 import { UserService } from "../services";
 import { UpdateProfileDto } from "../dtos/user/update-my-profile.dto";
@@ -23,12 +23,7 @@ export class UserController implements IUserController {
     return res.json({ user, userMetas, profiles });
   };
 
-  findMyProfile = async (
-    { user }: Request,
-    res: Response<{
-      user: IReturnFindMyProfile;
-    }>
-  ) => {
+  findMyProfile = async ({ user }: Request, res: Response) => {
     const profile = await this.userService.findMyProfile(user!.id);
 
     assertNonNullish(profile);
@@ -40,11 +35,10 @@ export class UserController implements IUserController {
     { user, body }: Request<unknown, unknown, UpdateProfileDto>,
     res: Response
   ) => {
-    console.log("body :", body);
     await validateDtos(new UpdateProfileDto(body));
-    await this.userService.updateMyProfile(user!.id, body);
+    const profile = await this.userService.updateMyProfile(user!.id, body);
 
-    return res.sendStatus(204);
+    return res.json({ profile });
   };
 
   findUserById = async (

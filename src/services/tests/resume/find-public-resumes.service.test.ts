@@ -1,67 +1,50 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
-import { ResumeService, UserService } from "../..";
-import { newResumeFactory } from "../../../factory";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
+import { ResumeService } from "../..";
+import { newResumeAllFactory } from "../../../factory";
+import Prisma from "../../../db/prisma";
 
-let userId = 0;
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+  };
 });
 
-beforeEach(async () => {
-  const email = "ehgks0083@gmail.com";
-
-  const userService = Container.get(UserService);
-
-  const { user } = await userService.createUserBySocial(email);
-
-  userId = user.id;
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
-});
-
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("findPublicResumes Test", () => {
   const resumeService = Container.get(ResumeService);
 
-  it("if there are not public resumes, return undefined", async () => {
+  it("if there are no public resumes, return empty array", async () => {
     const spy = jest.spyOn(resumeService, "findPublicResumes");
     const pageNation = {
       start: 1,
       limit: 5,
     };
+    const mock = prismaMock.resumes.findMany.mockResolvedValue([]);
     const results = await resumeService.findPublicResumes(pageNation);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(pageNation);
 
-    expect(results).toBe(undefined);
+    expect(results).toEqual([]);
   });
 
   it("if there are public resumes, return resumes", async () => {
-    const data = newResumeFactory();
-    await resumeService.createResume(userId, data);
+    const mockResult = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+    const mock = prismaMock.resumes.findMany.mockResolvedValue(
+      mockResult as any
+    );
 
     const spy = jest.spyOn(resumeService, "findPublicResumes");
     const pageNation = {
@@ -70,13 +53,16 @@ describe("findPublicResumes Test", () => {
     };
     const results = await resumeService.findPublicResumes(pageNation);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(pageNation);
 
+    expect(results!).toBe(mockResult);
     expect(results!.length).toBeLessThan(pageNation.limit + 1);
   });
 
   it("if there are public resumes, return resumes up to 5", async () => {
+    const userId = 1;
     const pageNation = {
       start: 1,
       limit: 5,
@@ -86,19 +72,21 @@ describe("findPublicResumes Test", () => {
       (_, i) => i + 1
     );
 
-    for (const i of addOneToLimitArr) {
-      await resumeService.createResume(
-        userId,
-        newResumeFactory({
-          resume: { title: `${i}`, content: "내용", is_public: true },
-        })
-      );
-    }
+    const mockResult = addOneToLimitArr.map((i) =>
+      newResumeAllFactory({
+        resume: { title: `${i}`, content: "내용", isPublic: true },
+      })
+    );
+
+    const mock = prismaMock.resumes.findMany.mockResolvedValue(
+      mockResult as any
+    );
 
     const spy = jest.spyOn(resumeService, "findPublicResumes");
 
     const results = await resumeService.findPublicResumes(pageNation);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(pageNation);
 

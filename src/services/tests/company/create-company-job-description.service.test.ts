@@ -1,68 +1,61 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { CompanyService } from "../..";
-import { CreateCompanyByLocalDto } from "../../../dtos";
 import { newCompanyJobDescriptionFactory } from "../../../factory";
-import { ICreateCompany } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES
-          WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
-    `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("create-company-job-description Test", () => {
   const companyService = Container.get(CompanyService);
 
   it("If created, return OkPacket", async () => {
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
+    const companyId = 1;
 
-    const company = await companyService.createCompany(data);
+    const jdData = newCompanyJobDescriptionFactory();
+    const { jdDetails, jdWelfares, jdWorkCondition, jdSteps, ...rest } = jdData;
+
+    const mock = prismaMock.$transaction.mockResolvedValue({
+      jobDescription: { ...rest, companyId },
+      jdDetails,
+      jdWorkCondition,
+      jdSteps,
+      jdWelfares,
+    });
 
     const spy = jest.spyOn(companyService, "createJobDescription");
 
-    const jdData = newCompanyJobDescriptionFactory();
     const { jobDescription } = await companyService.createJobDescription(
-      company.id,
+      companyId,
       jdData
     );
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(company.id, jdData);
+    expect(spy).toBeCalledWith(companyId, jdData);
 
     expect(jobDescription).toEqual(
       expect.objectContaining({
+        companyId,
         category: jdData.category,
-        companyId: company.id,
         deadlineAt: jdData.deadlineAt,
         startedAt: jdData.startedAt,
-        id: jobDescription.id,
       })
     );
   });

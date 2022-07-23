@@ -57,7 +57,11 @@ export interface IReturnFindMyProfile
 //
 
 export interface IUserDAO {
-  findMyProfile: (id: number) => Promise<IReturnFindMyProfile | null>;
+  findMyProfile: (
+    id: number
+  ) => Promise<
+    (Users & { profiles: Profiles | null; userMetas: UserMetas | null }) | null
+  >;
   updateMyProfile: (id: number, body: IUpdateProfile) => Promise<Profiles>;
   findOneById: (id: number) => Promise<Users | null>;
   find: ({
@@ -76,7 +80,11 @@ export interface IUserDAO {
 }
 
 export interface IUserService {
-  findMyProfile: (id: number) => Promise<IReturnFindMyProfile | null>;
+  findMyProfile: (
+    id: number
+  ) => Promise<
+    (Users & { profiles: Profiles | null; userMetas: UserMetas | null }) | null
+  >;
   updateMyProfile: (id: number, body: IUpdateProfile) => Promise<Profiles>;
   findUserById: (id: number) => Promise<Users | null>;
   findUsers: ({ id, limit }: { id: number; limit: number }) => Promise<Users[]>;
@@ -91,10 +99,7 @@ export interface IUserService {
 
 export interface IUserController {
   createUserByLocal: (req: Request, res: Response) => Promise<Response>;
-  findMyProfile: (
-    req: Request,
-    res: Response<{ user: IReturnFindMyProfile }>
-  ) => Promise<Response>;
+  findMyProfile: (req: Request, res: Response) => Promise<Response>;
   updateMyProfile: (req: Request, res: Response) => Promise<Response>;
   findUserById: (req: Request, res: Response) => Promise<Response>;
   findUsers: (req: Request, res: Response) => Promise<Response>;

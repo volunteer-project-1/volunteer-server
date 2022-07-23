@@ -13,8 +13,11 @@ services:
     env_file:
       - .env
     volumes:
-      - ./awsconfig.storj.json:/app/awsconfig.storj.json
-      - ./dist:/app/dist
+      # - ./awsconfig.storj.json:/app/awsconfig.storj.json
+      # - ./dist:/app/dist
+      - log-data:/app/logs
+volumes:
+  log-data:
   # nginx:
   #   container_name: seeme_nginx
   #   image: nginx

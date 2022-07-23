@@ -1,55 +1,25 @@
-/* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container } from "typedi";
-import { PrismaPromise } from "@prisma/client";
-import { Prisma } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { CompanyService } from "../..";
 import { newCompanyJobDescriptionFactory } from "../../../factory";
-import { ICreateCompany } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-let prisma: Prisma;
-beforeAll(async () => {
-  prisma = Container.get(Prisma);
-  await prisma.client.$connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const transactions: PrismaPromise<any>[] = [];
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
-
-  const tablenames = await prisma.client.$queryRawUnsafe<
-    Array<{ TABLE_NAME: string }>
-  >(
-    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
-  );
-
-  for (const { TABLE_NAME } of tablenames) {
-    if (TABLE_NAME !== "_prisma_migrations") {
-      try {
-        transactions.push(
-          prisma.client.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`)
-        );
-      } catch (error) {
-        console.log({ error });
-      }
-    }
-  }
-
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
-
-  try {
-    await prisma.client.$transaction(transactions);
-  } catch (error) {
-    console.log({ error });
-  }
-
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await prisma.client.$disconnect();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("find-company-job-description Test", () => {
   const companyService = Container.get(CompanyService);
@@ -58,39 +28,35 @@ describe("find-company-job-description Test", () => {
     const spy = jest.spyOn(companyService, "findJobDescriptionById");
     const IN_VALID_JD_ID = 123;
 
+    const mock = prismaMock.jobDescriptions.findUnique.mockResolvedValue(null);
+
     const found = await companyService.findJobDescriptionById(IN_VALID_JD_ID);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(IN_VALID_JD_ID);
     expect(found).toBeNull();
   });
 
   it("If created, return FindJobDescriptionDto", async () => {
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
-    const company = await companyService.createCompany(data);
-
     const jdData = newCompanyJobDescriptionFactory();
-    const { jobDescription } = await companyService.createJobDescription(
-      company.id,
-      jdData
-    );
+    const jobDescriptionId = 1;
+
+    const mock = prismaMock.jobDescriptions.findUnique.mockResolvedValue({
+      ...jdData,
+    } as any);
     const spy = jest.spyOn(companyService, "findJobDescriptionById");
 
-    const found = await companyService.findJobDescriptionById(
-      jobDescription.id
-    );
+    const found = await companyService.findJobDescriptionById(jobDescriptionId);
     if (!found) {
-      throw new Error();
+      throw new Error("Should not reach this");
     }
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(jobDescription.id);
+    expect(spy).toBeCalledWith(jobDescriptionId);
 
-    expect(found.jdWorkCondition[0]).toEqual(
+    expect(found.jdWorkCondition).toEqual(
       expect.objectContaining(jdData.jdWorkCondition)
     );
 

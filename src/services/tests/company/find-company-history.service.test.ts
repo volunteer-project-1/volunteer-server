@@ -1,96 +1,62 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { CompanyHistories, PrismaClient } from "@prisma/client";
 import "reflect-metadata";
 import { Container } from "typedi";
-import { PrismaPromise } from "@prisma/client";
-import { Prisma } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import { CompanyService } from "../..";
 import { CreateCompanyHistoryDto } from "../../../dtos";
-import { convertDateToTimestamp } from "../../../utils";
-import { ICreateCompany } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-let prisma: Prisma;
-beforeAll(async () => {
-  prisma = Container.get(Prisma);
-  await prisma.client.$connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const transactions: PrismaPromise<any>[] = [];
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
-
-  const tablenames = await prisma.client.$queryRawUnsafe<
-    Array<{ TABLE_NAME: string }>
-  >(
-    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
-  );
-
-  for (const { TABLE_NAME } of tablenames) {
-    if (TABLE_NAME !== "_prisma_migrations") {
-      try {
-        transactions.push(
-          prisma.client.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`)
-        );
-      } catch (error) {
-        console.log({ error });
-      }
-    }
-  }
-
-  transactions.push(prisma.client.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
-
-  try {
-    await prisma.client.$transaction(transactions);
-  } catch (error) {
-    console.log({ error });
-  }
-
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await prisma.client.$disconnect();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("find-Company-history Test", () => {
   const companyService = Container.get(CompanyService);
 
-  it("If not found, return undefined", async () => {
+  it("If not found, return null", async () => {
+    const mock = prismaMock.companyHistories.findUnique.mockResolvedValue(null);
+
     const spy = jest.spyOn(companyService, "findCompanyHistory");
 
     const results = await companyService.findCompanyHistory(1);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(1);
 
     expect(results).toBeNull();
   });
 
-  it("조회 성공 시, 반환", async () => {
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
-    const company = await companyService.createCompany(data);
-
+  it("조회 성공 시, return companyHistory", async () => {
+    const companyHistoryId = 1;
     const companyHistoryData: CreateCompanyHistoryDto = {
       content: "연혁 1",
-      history_at: convertDateToTimestamp(),
+      historyAt: new Date(),
     };
 
-    const companyHistory = await companyService.createCompanyHistory(
-      company.id,
-      companyHistoryData
+    const mock = prismaMock.companyHistories.findUnique.mockResolvedValue(
+      companyHistoryData as CompanyHistories
     );
 
     const spy = jest.spyOn(companyService, "findCompanyHistory");
 
-    const result = await companyService.findCompanyHistory(
-      companyHistory.insertId
-    );
+    const result = await companyService.findCompanyHistory(companyHistoryId);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(companyHistory.insertId);
+    expect(spy).toBeCalledWith(companyHistoryId);
 
     expect(result).not.toBeNull();
   });

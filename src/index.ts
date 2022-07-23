@@ -1,14 +1,13 @@
-// import https from "https";
 import http from "http";
-// import fs from "fs";
-// import path from "path";
 import { createTerminus } from "@godaddy/terminus";
 import { startApp } from "./app";
 import { PORT } from "./config";
-// import { PORT, HTTPS_PORT } from "./config";
 import { logger } from "./utils";
 import { terminusOption } from "./utils/health-check";
-
+// import https from "https";
+// import fs from "fs";
+// import path from "path";
+// import { PORT, HTTPS_PORT } from "./config";
 startApp().then((app) => {
   //   const option = {
   //     key: fs.readFileSync(path.join(__dirname, "../src/localhost-key.pem")),
@@ -36,18 +35,4 @@ startApp().then((app) => {
             ################################################
                 `);
   });
-
-  // terminus 가 close 해줄듯?
-  //   server.close(() => {
-  //     console.log("server closed");
-  //     process.exit(0);
-  //   });
-
-  //   app.listen(PORT, () => {
-  //     logger.info(`
-  //             ################################################
-  //             🛡️  Server listening on port: ${PORT} 🛡️
-  //             ################################################
-  //             `);
-  //   });
 });

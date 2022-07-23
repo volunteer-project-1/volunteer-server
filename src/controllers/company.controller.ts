@@ -199,20 +199,20 @@ export class CompanyController implements ICompanyController {
 
   createResumeApplying = async (
     {
-      query: { resumeId, jdDetailId },
+      query: { resumeId, jobDescriptionId },
       user,
     }: Request<
       unknown,
       unknown,
       unknown,
-      { resumeId?: string; jdDetailId?: string }
+      { resumeId?: string; jobDescriptionId?: string }
     >,
     res: Response
   ) => {
     const parsedResumeId = Number(resumeId);
-    const parsedJdDetailId = Number(jdDetailId);
+    const parsedJobDescriptionId = Number(jobDescriptionId);
 
-    if (!parsedResumeId || !parsedJdDetailId) {
+    if (!parsedResumeId || !parsedJobDescriptionId) {
       throw new BadReqError();
     }
 
@@ -223,7 +223,7 @@ export class CompanyController implements ICompanyController {
     const result = await this.companyService.createResumeApplying({
       userId: user.id,
       resumeId: parsedResumeId,
-      jdDetailId: parsedJdDetailId,
+      jobDescriptionId: parsedJobDescriptionId,
     });
 
     return res.json({ result });
@@ -240,7 +240,7 @@ export class CompanyController implements ICompanyController {
       user.id
     );
 
-    if (!resumeApplyings) {
+    if (!resumeApplyings.length) {
       throw new NotFoundError();
     }
 

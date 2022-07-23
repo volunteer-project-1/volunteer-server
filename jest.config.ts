@@ -12,7 +12,8 @@ const config: Config.InitialOptions = {
   moduleFileExtensions: ["js", "ts", "json"],
   transform: {
     // "^.+\\.ts$": ["@swc/jest", { ...swcConfig }],
-    "^.+\\.ts$": "ts-jest",
+    "^.+\\.ts$": "@swc/jest",
+    // "^.+\\.ts$": "ts-jest",
   },
   testRegex: "\\.test\\.ts$",
   globals: {
@@ -32,6 +33,7 @@ const config: Config.InitialOptions = {
     "./jest/jest.setup.aws-sdk.ts",
     "./jest/jest.setup.multer.ts",
     "./jest/jest.setup.authenticate.ts",
+    // "./jest/singletone.ts",
   ],
 };
 export default config;

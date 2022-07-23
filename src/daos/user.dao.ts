@@ -1,15 +1,20 @@
+/* eslint-disable no-return-await */
 import { Service } from "typedi";
 import { Users } from "@prisma/client";
-import { IUserDAO, IReturnFindMyProfile, IUpdateProfile } from "../types";
-import { Prisma } from "../db";
+import { IUserDAO, IUpdateProfile } from "../types";
+import Prisma from "../db/prisma";
 import { CreateUserByLocalDto } from "../dtos";
 
 @Service()
 export class UserDAO implements IUserDAO {
-  constructor(private readonly prisma: Prisma) {}
+  private readonly prisma;
 
-  async findMyProfile(id: number): Promise<IReturnFindMyProfile | null> {
-    const user = await this.prisma.client.users.findUnique({
+  constructor() {
+    this.prisma = Prisma;
+  }
+
+  async findMyProfile(id: number) {
+    return await this.prisma.users.findUnique({
       where: {
         id,
       },
@@ -18,28 +23,23 @@ export class UserDAO implements IUserDAO {
         profiles: true,
       },
     });
-
-    return Prisma.convertBigIntToInt(user);
   }
 
   async updateMyProfile(id: number, profile: IUpdateProfile) {
-    const updatedUser = await this.prisma.client.profiles.update({
+    return await this.prisma.profiles.update({
       where: {
-        userId: id,
+        id,
       },
       data: {
         ...profile,
       },
     });
-
-    return Prisma.convertBigIntToInt(updatedUser);
   }
 
   async findOneById(id: number): Promise<Users | null> {
-    const user = await this.prisma.client.users.findUnique({
+    return await this.prisma.users.findUnique({
       where: { id },
     });
-    return Prisma.convertBigIntToInt(user);
   }
 
   async find({
@@ -49,7 +49,7 @@ export class UserDAO implements IUserDAO {
     start: number;
     limit: number;
   }): Promise<Users[]> {
-    const users = await this.prisma.client.users.findMany({
+    return await this.prisma.users.findMany({
       where: {
         id: {
           gte: start,
@@ -60,22 +60,19 @@ export class UserDAO implements IUserDAO {
       },
       take: limit,
     });
-
-    return Prisma.convertBigIntToIntArray(users);
   }
 
   async findByEmail(email: string): Promise<Users | null> {
-    const user = await this.prisma.client.users.findUnique({
+    return await this.prisma.users.findUnique({
       where: {
         email,
       },
     });
-    return Prisma.convertBigIntToInt(user);
   }
 
   async createUserBySocial(email: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-return-await
-    return await this.prisma.client.$transaction(async (prisma) => {
+    return await this.prisma.$transaction(async (prisma) => {
       const user = await prisma.users.create({
         data: {
           email,
@@ -95,9 +92,9 @@ export class UserDAO implements IUserDAO {
       });
 
       return {
-        user: Prisma.convertBigIntToInt(user),
-        userMetas: Prisma.convertBigIntToInt(userMetas),
-        profiles: Prisma.convertBigIntToInt(profiles),
+        user,
+        userMetas,
+        profiles,
       };
     });
   }
@@ -108,7 +105,7 @@ export class UserDAO implements IUserDAO {
     salt,
   }: CreateUserByLocalDto & { salt: string }) {
     // eslint-disable-next-line no-return-await
-    return await this.prisma.client.$transaction(async (prisma) => {
+    return await this.prisma.$transaction(async (prisma) => {
       const user = await prisma.users.create({
         data: {
           email,
@@ -130,9 +127,9 @@ export class UserDAO implements IUserDAO {
       });
 
       return {
-        user: Prisma.convertBigIntToInt(user),
-        userMetas: Prisma.convertBigIntToInt(userMetas),
-        profiles: Prisma.convertBigIntToInt(profiles),
+        user,
+        userMetas,
+        profiles,
       };
     });
   }

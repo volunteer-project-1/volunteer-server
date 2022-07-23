@@ -30,9 +30,14 @@ Git Flow를 사용하여 브랜치를 관리합니다.
 
 # 테스트
 
-- Jest를 활용하여 Prod DB와 같은 환경의 Test DB에서 테스트를 진행
+- E2E Testing
 
-* GitHub Actions의 CI를 적용하여 테스트 자동화
+* - Prod DB와 같은 환경의 Test DB에서 테스트를 진행
+
+* Unit Testing
+* - DB를 Mock하여 테스트 진행
+
+- GitHub Actions의 CI를 적용하여 테스트 자동화
 
 # 사용 기술 및 환경
 
@@ -84,23 +89,38 @@ $ docker run -d -it -p 3000:3000 --env-file .env --name seeme_server seeme npm r
 
 ```
 $ docker-compose up --build
+// or
+$ docker-compose -f ./docker-compose.prod.yml up --build
 ```
-
-# db-migrate
-
-```
-$ nf -e .env run npm run migrate
-```
-
-> 위 명령어 실행 시 `migrations` 폴더 아래의 모든 파일 실행  
-> 특정 파일 실행을 원하면 파일명 입력
 
 # 테스팅
 
-mock 함수를 사용 하지않고 실제 db환경을 사용
+unit testing && e2e testing
 도커로 테스트 환경 구축
 
 ```
 $ cd mysql && docker-compose up --build
-$ nf -e .env.test run npm run test
+$ npm run test // 다른 환경 변수 사용 하고 싶으면 `nf -e .env.test run npm run test`
+```
+
+# prisma
+
+prisma v4 사용.
+
+- `prisma.shcema`에 정의된 스키마의 타입 생성
+
+```
+$ npm run db:generate
+```
+
+- `prisma.shcema` 변경 사항 마이그레이션 `.sql` 파일 생성
+
+```
+$ npm run db:migrate
+```
+
+- `prisma.shcema` 변경 사항을 DB에 직접 마이그레이션
+
+```
+$ npm run db:push
 ```

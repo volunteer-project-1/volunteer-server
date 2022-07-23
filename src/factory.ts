@@ -1,21 +1,27 @@
+/* eslint-disable no-use-before-define */
 /* eslint-disable camelcase */
-import { CreateJobDescriptionDto } from "./dtos";
 import {
-  IActivity,
-  IAward,
-  ICareers,
-  ICreateResume,
-  IEducation,
-  IHelperVideo,
-  IMyVideo,
-  IPreference,
-  IPreferenceJob,
-  IPreferenceLocation,
-  IResumeInfo,
-} from "./types";
-import { convertDateToTimestamp } from "./utils";
+  Activities,
+  Awards,
+  Careers,
+  Certificates,
+  Educations,
+  HelperVideos,
+  Introductions,
+  MyVideos,
+  Portfolios,
+  PreferenceJobs,
+  PreferenceLocations,
+  Preferences,
+  Prisma,
+  ResumeInfos,
+  Resumes,
+  Trainings,
+} from "@prisma/client";
+import { CreateJobDescriptionDto } from "./dtos";
+import { ICreateResume } from "./types";
 
-export const newResumeFactory = ({
+export const newResumeAllFactory = ({
   resume,
   resumeInfo,
   educations,
@@ -31,124 +37,96 @@ export const newResumeFactory = ({
   preference,
 }: Partial<ICreateResume> = {}): ICreateResume => {
   return {
-    resume: resume || { title: "제목", content: "내용", is_public: true },
-    resumeInfo: resumeInfo || {
-      name: "김도한",
-      birthday: convertDateToTimestamp(),
-      phone_number: "010-1234-5678",
-      email: "ehgks0083@gmail.com",
-      sido: "서울시",
-      sigungu: "강서구",
-      disability_level: 1,
-      disability_type: "호흡기 장애",
-      sex: "남",
-      avatar: "http://thisis.avatar.url.com",
-    },
-    educations: educations || [
-      {
-        type: "고등학교",
-        school_name: "무슨고",
-        graduation_year: convertDateToTimestamp(),
-        admission_year: convertDateToTimestamp(),
-        is_graduated: true,
-        major: "이과",
-        credit: 4.5,
-        total_credit: 4.5,
-      },
-    ],
-    careers: careers || [
-      {
-        company: "회사",
-        department: "부서",
-        position: "직무",
-        task: "업무",
-        joined_at: convertDateToTimestamp(),
-      },
-    ],
-    activities: activities || [{ organization: "조직", description: "설명" }],
-    trainings: trainings || [
-      {
-        name: "교육이수1",
-        institute: "교육이수 기관1",
-        content: "교육내용",
-        started_at: convertDateToTimestamp(),
-        finished_at: convertDateToTimestamp(),
-      },
-    ],
-    certificates: certificates || [
-      {
-        name: "자격증1",
-        institute: "자격증 인증 기관",
-        acquisition_at: convertDateToTimestamp(),
-      },
-    ],
-    awards: awards || [
-      {
-        institute: "학회",
-        started_at: convertDateToTimestamp(),
-        finished_at: convertDateToTimestamp(),
-      },
-    ],
-    portfolio: portfolio || { url: "포트폴리오 링크" },
-    introductions: introductions || [
-      { title: "왜 이 직무를 선택했나요?", content: "좋아서 했습니다" },
-    ],
-    myVideo: myVideo || { url: "내영상링크" },
-    helperVideo: helperVideo || { url: "헬퍼영상링크" },
+    resume: resume || newResumeFactory(),
+    resumeInfo: resumeInfo || newResumeInfoFactory(),
+    educations: educations || [newEducationFactory()],
+    careers: careers || [newCareerFactory()],
+    activities: activities || [newActivityFactory()],
+    trainings: trainings || [newTrainingFactory()],
+    certificates: certificates || [newCertificateFactory()],
+    awards: awards || [newAwardFactory()],
+    portfolio: portfolio || newPortfolioFactory(),
+    introductions: introductions || [newIntroductionFactory()],
+    myVideo: myVideo || newMyVideoFactory(),
+    helperVideo: helperVideo || newHelperVideoFactory(),
     preference: preference || {
-      employ_type: 1,
-      salary: 4000,
-      preferenceJobs: [{ name: "직업선호" }],
-      preferenceLocations: [{ sido: "서울시", sigungu: "강서구" }],
+      ...newPreferenceFactory(),
+      preferenceJobs: [newPreferenceJobFactory()],
+      preferenceLocations: [newPreferenceLocationFactory()],
     },
+  };
+};
+
+export const newResumeFactory = ({
+  title,
+  content,
+  isPublic,
+  createdAt,
+  updatedAt,
+}: Partial<Omit<Resumes, "id" | "userId">> = {}): Omit<
+  Resumes,
+  "id" | "userId"
+> => {
+  return {
+    title: title || "이력서제목1",
+    content: content || "이력서제목1",
+    isPublic: isPublic || true,
+    createdAt: createdAt || new Date(),
+    updatedAt: updatedAt || new Date(),
   };
 };
 
 export const newResumeInfoFactory = ({
   name,
   birthday,
-  phone_number,
+  phoneNumber,
   email,
   sido,
   sigungu,
-  disability_level,
-  disability_type,
+  disabilityLevel,
+  disabilityType,
   sex,
-}: Partial<
-  Omit<IResumeInfo, "id" | "resume_id">
-> = {}): Partial<IResumeInfo> => {
+  avatar,
+}: Partial<Omit<ResumeInfos, "id" | "resumeId">> = {}): Omit<
+  ResumeInfos,
+  "id" | "resumeId"
+> => {
   return {
     name: name || "이름",
-    birthday: birthday || convertDateToTimestamp(),
-    phone_number: phone_number || "010-0000-0000",
+    birthday: birthday || new Date(),
+    phoneNumber: phoneNumber || "010-0000-0000",
     email: email || "ehgks@gmail.com",
     sido: sido || "김포시",
     sigungu: sigungu || "경기도",
-    disability_level: disability_level || 1,
-    disability_type: disability_type || "간 장애",
+    disabilityLevel: disabilityLevel || 1,
+    disabilityType: disabilityType || "간 장애",
     sex: sex || "남",
+    avatar: avatar || "avatar",
   };
 };
 
 export const newEducationFactory = ({
   type,
-  school_name,
-  graduation_year,
-  admission_year,
-  is_graduated,
+  schoolName,
+  graduationYear,
+  admissionYear,
+  isGraduated,
   major,
   credit,
-  total_credit,
-}: Partial<Omit<IEducation, "id" | "resume_id">> = {}): Partial<IEducation> => {
+  totalCredit,
+}: Partial<Omit<Educations, "id" | "resumeId">> = {}): Omit<
+  Educations,
+  "id" | "resumeId"
+> => {
   return {
     type: type || "",
-    school_name: school_name || "학교이름",
-    graduation_year: graduation_year || convertDateToTimestamp(),
-    admission_year: admission_year || convertDateToTimestamp(),
-    is_graduated: is_graduated || true,
+    schoolName: schoolName || "학교이름",
+    graduationYear: graduationYear || new Date(),
+    admissionYear: admissionYear || new Date(),
+    isGraduated: isGraduated || true,
     major: major || "전공",
-    credit: credit || 4.5,
-    total_credit: total_credit || 4.5,
+    credit: credit || new Prisma.Decimal(4.5),
+    totalCredit: totalCredit || new Prisma.Decimal(4.5),
   };
 };
 
@@ -157,42 +135,118 @@ export const newCareerFactory = ({
   department,
   position,
   task,
-  joined_at,
-}: Partial<Omit<ICareers, "id" | "resume_id">> = {}): Partial<ICareers> => {
+  joinedAt,
+  quitedAt,
+  isInOffice,
+}: Partial<Omit<Careers, "id" | "resumeId">> = {}): Omit<
+  Careers,
+  "id" | "resumeId"
+> => {
   return {
     company: company || "회사이름",
     department: department || "부서이름",
     position: position || "직무",
     task: task || "업무이름",
-    joined_at: joined_at || convertDateToTimestamp(),
+    quitedAt: quitedAt || new Date(),
+    isInOffice: isInOffice || true,
+    joinedAt: joinedAt || new Date(),
   };
 };
 
 export const newActivityFactory = ({
   organization,
   description,
-}: Partial<Omit<IActivity, "id" | "resume_id">> = {}): Partial<IActivity> => {
+}: Partial<Omit<Activities, "id" | "resumeId">> = {}): Omit<
+  Activities,
+  "id" | "resumeId"
+> => {
   return {
     organization: organization || "단체이름",
     description: description || "설명",
   };
 };
 
+export const newTrainingFactory = ({
+  name,
+  institute,
+  content,
+  startedAt,
+  finishedAt,
+}: Partial<Omit<Trainings, "id" | "resumeId">> = {}): Omit<
+  Trainings,
+  "id" | "resumeId"
+> => {
+  return {
+    name: name || "교육이수1",
+    institute: institute || "교육이수 기관1",
+    content: content || "교육내용",
+    startedAt: startedAt || new Date(),
+    finishedAt: finishedAt || new Date(),
+  };
+};
+
+export const newCertificateFactory = ({
+  name,
+  institute,
+  acquisitionAt,
+}: Partial<Omit<Certificates, "id" | "resumeId">> = {}): Omit<
+  Certificates,
+  "id" | "resumeId"
+> => {
+  return {
+    name: name || "자격증1",
+    institute: institute || "자격증 인증 기관",
+    acquisitionAt: acquisitionAt || new Date(),
+  };
+};
+
 export const newAwardFactory = ({
   institute,
-  started_at,
-  finished_at,
-}: Partial<Omit<IAward, "id" | "resume_id">> = {}): Partial<IAward> => {
+  startedAt,
+  finishedAt,
+  name,
+}: Partial<Omit<Awards, "id" | "resumeId">> = {}): Omit<
+  Awards,
+  "id" | "resumeId"
+> => {
   return {
+    name: name || "무슨무슨상",
     institute: institute || "학회이름",
-    started_at: started_at || convertDateToTimestamp(),
-    finished_at: finished_at || convertDateToTimestamp(),
+    startedAt: startedAt || new Date(),
+    finishedAt: finishedAt || new Date(),
+  };
+};
+
+export const newPortfolioFactory = ({
+  url,
+}: Partial<Omit<Portfolios, "id" | "resumeId">> = {}): Omit<
+  Portfolios,
+  "id" | "resumeId"
+> => {
+  return {
+    url: url || "포트폴리오url",
+  };
+};
+
+export const newIntroductionFactory = ({
+  title,
+  content,
+}: Partial<Omit<Introductions, "id" | "resumeId">> = {}): Omit<
+  Introductions,
+  "id" | "resumeId"
+> => {
+  return {
+    title: title || "포트폴리오url",
+    content: content || "나는content입니다.",
   };
 };
 
 export const newMyVideoFactory = ({
   url,
-}: Partial<Omit<IMyVideo, "id" | "resume_id">> = {}): Partial<IMyVideo> => {
+}: Partial<Omit<MyVideos, "id" | "resumeId">> = {}): Omit<
+  MyVideos,
+  "id" | "resumeId"
+> => {
   return {
     url: url || "my-video-url",
   };
@@ -200,31 +254,34 @@ export const newMyVideoFactory = ({
 
 export const newHelperVideoFactory = ({
   url,
-}: Partial<
-  Omit<IHelperVideo, "id" | "resume_id">
-> = {}): Partial<IHelperVideo> => {
+}: Partial<Omit<HelperVideos, "id" | "resumeId">> = {}): Omit<
+  HelperVideos,
+  "id" | "resumeId"
+> => {
   return {
     url: url || "my-video-url",
   };
 };
 
 export const newPreferenceFactory = ({
-  employ_type,
+  employType,
   salary,
-}: Partial<
-  Omit<IPreference, "id" | "resume_id">
-> = {}): Partial<IPreference> => {
+}: Partial<Omit<Preferences, "id" | "resumeId">> = {}): Omit<
+  Preferences,
+  "id" | "resumeId"
+> => {
   return {
-    employ_type: employ_type || 1,
+    employType: employType || "1",
     salary: salary || 6000,
   };
 };
 
 export const newPreferenceJobFactory = ({
   name,
-}: Partial<
-  Omit<IPreferenceJob, "id" | "preference_id">
-> = {}): Partial<IPreferenceJob> => {
+}: Partial<Omit<PreferenceJobs, "id" | "preferenceId">> = {}): Omit<
+  PreferenceJobs,
+  "id" | "preferenceId"
+> => {
   return {
     name: name || "선호 직업 이름",
   };
@@ -233,9 +290,10 @@ export const newPreferenceJobFactory = ({
 export const newPreferenceLocationFactory = ({
   sido,
   sigungu,
-}: Partial<
-  Omit<IPreferenceLocation, "id" | "preference_id">
-> = {}): Partial<IPreferenceLocation> => {
+}: Partial<Omit<PreferenceLocations, "id" | "preferenceId">> = {}): Omit<
+  PreferenceLocations,
+  "id" | "preferenceId"
+> => {
   return {
     sido: sido || "부산시",
     sigungu: sigungu || "경상남도",

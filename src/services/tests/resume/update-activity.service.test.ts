@@ -1,57 +1,46 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { ResumeService, UserService } from "../..";
-import { newResumeFactory } from "../../../factory";
+import { newActivityFactory } from "../../../factory";
 import { IUpdateActivity } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = '${process.env.MYSQL_DATABASE}' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
-
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 describe("updateActivity Test", () => {
-  const userService = Container.get(UserService);
   const resumeService = Container.get(ResumeService);
-  it("If success return changedRows", async () => {
-    const { user } = await userService.createUserBySocial(
-      "ehgks0083@gmail.com"
-    );
-    const data = newResumeFactory();
-    await resumeService.createResume(user.id, data);
+  it("If success return updated Activity", async () => {
+    const userId = 1;
 
     const spy = jest.spyOn(resumeService, "updateActivity");
 
     const updatedData: IUpdateActivity = {
-      activity: { organization: "수정된 활동 조직" },
+      activity: { ...newActivityFactory() },
     };
 
-    const [result] = await resumeService.updateActivity(user.id, updatedData);
+    const mock = prismaMock.activities.update.mockResolvedValue(
+      updatedData as any
+    );
 
+    const result = await resumeService.updateActivity(userId, updatedData);
+
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(user.id, updatedData);
-    expect(result.changedRows).toBe(1);
+    expect(spy).toBeCalledWith(userId, updatedData);
+    expect(result).toBe(updatedData);
   });
 });
