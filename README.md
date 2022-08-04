@@ -30,7 +30,7 @@ Git Flow를 사용하여 브랜치를 관리합니다.
 
 # 테스트
 
-- E2E Testing
+- Integration Testing
 
 * - Prod DB와 같은 환경의 Test DB에서 테스트를 진행
 
@@ -55,7 +55,6 @@ AWS EC2에 scp를 이용한 파일 전송 후 pm2로 재실행 하여 배포합�
 # DB ERD
 
 ![test0129](https://user-images.githubusercontent.com/50390565/182368454-a34385e4-7686-47fb-a5f6-4828c7353168.png)
-
 
 # 실행 방법
 
@@ -96,7 +95,7 @@ $ docker-compose -f ./docker-compose.prod.yml up --build
 
 # 테스팅
 
-unit testing && e2e testing
+unit testing && integration testing
 도커로 테스트 환경 구축
 
 ```
