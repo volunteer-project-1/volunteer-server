@@ -18,7 +18,7 @@ export class CreateCompanyByLocalDto {
   @IsNotBlank("password")
   @MinLength(10)
   @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d,.@$!%*?&]{10,}$/,
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&]{10,}/,
     {
       message:
         "Password too weak, Min length 10, at least one capital letter, one lowercase letter, one number and one special character",
