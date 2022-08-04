@@ -48,6 +48,13 @@ export function logDbErrorMiddleware(
     logger.error(colors.blue(JSON.stringify(`${err.code}`)));
 
     res.status(HTTP_STATUS_CODE.INTERNAL_SERVER);
+    if (err.code === "P2002") {
+      // return res.status(HTTP_STATUS_CODE.DUPLICATE);
+      res.status(HTTP_STATUS_CODE.DUPLICATE);
+      res.json({ message: `${err?.meta?.target} is Duplicate` });
+      return;
+    }
+
     if (err.code === "P2025") {
       res.status(HTTP_STATUS_CODE.NOT_FOUND);
     }
