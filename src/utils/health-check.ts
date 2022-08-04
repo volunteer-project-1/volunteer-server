@@ -1,15 +1,14 @@
 import { HealthCheckError, TerminusOptions } from "@godaddy/terminus";
 import Container from "typedi";
-import { MySQL, RedisSession } from "../db";
+import { RedisSession } from "../db";
 import { logger, Emitter } from ".";
 
 const redis = Container.get(RedisSession);
-const mysql = Container.get(MySQL);
 const emitter = Container.get(Emitter).getInstance();
 
 function onSignal() {
   emitter.emit("offKeepAlive");
-  return Promise.all([mysql.closePool(), redis.closeRedis()]);
+  return Promise.all([redis.closeRedis()]);
 }
 
 function onShutdown() {

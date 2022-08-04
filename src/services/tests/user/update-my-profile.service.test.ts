@@ -1,54 +1,48 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { PrismaClient, Profiles } from "@prisma/client";
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import { UserService } from "../..";
 import { IUpdateProfile } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("updateMyProfile Test", () => {
   const userService = Container.get(UserService);
-  it("If success return {affectedRows: 1}", async () => {
-    const email = "ehgks0083@gmail.com";
-    await userService.createUserBySocial(email);
-
+  it("If success return Profile", async () => {
     const id = 1;
-    const birthday = new Date().toISOString().slice(0, 19).replace("T", " ");
     const data: IUpdateProfile = {
-      profile: { name: "Lee", address: "강서구", birthday },
+      name: "Lee",
+      address: "강서구",
+      birthday: new Date(),
     };
+    const mock = prismaMock.profiles.update.mockResolvedValue(data as Profiles);
 
     const spy = jest.spyOn(userService, "updateMyProfile");
 
-    const [result] = await userService.updateMyProfile(id, data);
+    const result = await userService.updateMyProfile(id, data);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(id, data);
-    expect(result.affectedRows).toBe(1);
+    expect(result).toEqual(
+      expect.objectContaining({
+        ...data,
+      })
+    );
   });
 });

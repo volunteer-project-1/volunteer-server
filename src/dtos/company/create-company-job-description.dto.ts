@@ -13,11 +13,11 @@ import { JdStep, JobDetail, Welfare, WorkCondition } from ".";
 export class CreateJobDescriptionDto {
   @IsDefined()
   @IsDateString()
-  started_at!: string;
+  startedAt!: Date;
 
   @IsDefined()
   @IsDateString()
-  deadline_at!: string;
+  deadlineAt!: Date;
 
   @IsDefined()
   @IsString()
@@ -27,48 +27,48 @@ export class CreateJobDescriptionDto {
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => JobDetail)
-  jd_details!: JobDetail[];
+  jdDetails!: JobDetail[];
 
   @IsNotEmptyObject()
   @ValidateNested()
   @Type(() => WorkCondition)
-  jd_work_condition!: WorkCondition;
+  jdWorkCondition!: WorkCondition;
 
   @IsDefined()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => JdStep)
-  jd_steps!: JdStep[];
+  jdSteps!: JdStep[];
 
   @IsDefined()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => Welfare)
-  jd_welfares!: Welfare[];
+  jdWelfares!: Welfare[];
 
   constructor({
-    started_at,
-    deadline_at,
+    startedAt,
+    deadlineAt,
     category,
-    jd_details,
-    jd_work_condition,
-    jd_steps,
-    jd_welfares,
+    jdDetails,
+    jdWorkCondition,
+    jdSteps,
+    jdWelfares,
   }: {
-    started_at: string;
-    deadline_at: string;
+    startedAt: Date;
+    deadlineAt: Date;
     category: string;
-    jd_details: JobDetail[];
-    jd_work_condition: WorkCondition;
-    jd_steps: JdStep[];
-    jd_welfares: Welfare[];
+    jdDetails: JobDetail[];
+    jdWorkCondition: WorkCondition;
+    jdSteps: JdStep[];
+    jdWelfares: Welfare[];
   }) {
-    this.started_at = started_at;
-    this.deadline_at = deadline_at;
+    this.startedAt = startedAt;
+    this.deadlineAt = deadlineAt;
     this.category = category;
-    this.jd_details = jd_details;
-    this.jd_work_condition = jd_work_condition;
-    this.jd_steps = jd_steps;
-    this.jd_welfares = jd_welfares;
+    this.jdDetails = jdDetails;
+    this.jdWorkCondition = jdWorkCondition;
+    this.jdSteps = jdSteps;
+    this.jdWelfares = jdWelfares;
   }
 }

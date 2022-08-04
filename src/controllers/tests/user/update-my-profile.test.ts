@@ -1,67 +1,79 @@
-import { RowDataPacket } from "mysql2/promise";
+import { PrismaPromise } from "@prisma/client";
 import request from "supertest";
 import Container from "typedi";
 import { startApp } from "../../../app";
-import { MySQL } from "../../../db";
+import Prisma from "../../../db/prisma";
 import { UserService } from "../../../services";
 
+let prisma: typeof Prisma;
 beforeAll(async () => {
-  await Container.get(MySQL).connect();
-});
-
-beforeEach(async () => {
-  const email = "ehgks0083@gmail.com";
-
-  const userService = Container.get(UserService);
-  await userService.createUserBySocial(email);
+  prisma = Prisma;
+  await prisma.$connect();
 });
 
 afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-    `);
+  const transactions: PrismaPromise<any>[] = [];
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
 
-  for (const row of rows) {
-    await conn!.query(row.q);
+  const tablenames = await prisma.$queryRawUnsafe<
+    Array<{ TABLE_NAME: string }>
+  >(
+    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
+  );
+
+  for (const { TABLE_NAME } of tablenames) {
+    if (TABLE_NAME !== "_prisma_migrations") {
+      try {
+        transactions.push(prisma.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`));
+      } catch (error) {
+        console.log({ error });
+      }
+    }
   }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  //   await Container.get(Redis).closeRedis();
+
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
+
+  try {
+    await prisma.$transaction(transactions);
+  } catch (error) {
+    console.log({ error });
+  }
+
   jest.clearAllMocks();
 });
 
 afterAll(async () => {
-  await Container.get(MySQL).closePool();
+  await prisma.$disconnect();
 });
 
 describe("updateMyProfile test", () => {
   const URL = "/api/v1/user";
 
   it("PATCH '/profile', If no body, return 400", async () => {
-    // const email = "ehgks0083@gmail.com";
-
-    // const userService = Container.get(UserService);
-    // await userService.createUserBySocial(email);
-
-    const res = await request(await startApp()).patch(`${URL}/profile`);
+    const res = await request(await startApp())
+      .patch(`${URL}/profile`)
+      .send({});
 
     expect(res.status).toBe(400);
   });
 
-  it("PATCH '/profile',If Update Successful, return 204", async () => {
-    // const email = "ehgks0083@gmail.com";
+  it("PATCH '/profile',If Not Found, return 404", async () => {
+    const res = await request(await startApp())
+      .patch(`${URL}/profile`)
+      .send({ name: "DoHan Kim" });
 
-    // const userService = Container.get(UserService);
-    // await userService.createUserBySocial(email);
+    expect(res.status).toBe(404);
+  });
+
+  it("PATCH '/profile',If Update Successful, return 200", async () => {
+    const userService = Container.get(UserService);
+    const email = "ehgks0083@gmail.com";
+    await userService.createUserBySocial(email);
 
     const res = await request(await startApp())
       .patch(`${URL}/profile`)
-      .send({ profile: { name: "DoHan Kim" } });
+      .send({ name: "DoHan Kim" });
 
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
   });
 });

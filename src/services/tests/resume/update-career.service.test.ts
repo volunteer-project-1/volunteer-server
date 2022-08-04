@@ -1,57 +1,46 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { ResumeService, UserService } from "../..";
-import { newResumeFactory } from "../../../factory";
+import { newCareerFactory } from "../../../factory";
 import { IUpdateCareer } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("updateCareer Test", () => {
-  const userService = Container.get(UserService);
   const resumeService = Container.get(ResumeService);
-  it("If success return changedRows", async () => {
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial("ehgks0083@gmail.com");
-    const data = newResumeFactory();
-    await resumeService.createResume(insertId, data);
-
+  it("If success return updated career", async () => {
+    const userId = 1;
     const spy = jest.spyOn(resumeService, "updateCareer");
 
     const updatedData: IUpdateCareer = {
-      career: { company: "수정된 회사" },
+      career: { ...newCareerFactory() },
     };
 
-    const [result] = await resumeService.updateCareer(insertId, updatedData);
+    const mock = prismaMock.careers.update.mockResolvedValue(
+      updatedData as any
+    );
 
+    const result = await resumeService.updateCareer(userId, updatedData);
+
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(insertId, updatedData);
-    expect(result.changedRows).toBe(1);
+    expect(spy).toBeCalledWith(userId, updatedData);
+    expect(result).toBe(updatedData);
   });
 });

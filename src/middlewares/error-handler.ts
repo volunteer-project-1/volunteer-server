@@ -1,6 +1,7 @@
 import { MulterError } from "multer";
 import colors from "colors";
 import { Response, NextFunction, Request } from "express";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { HttpError } from "../lib";
 import { logger } from "../utils";
 import { HTTP_STATUS_CODE } from "../constants";
@@ -11,6 +12,7 @@ export function logMulterErrorMiddleware(
   res: Response,
   next: NextFunction
 ) {
+  // console.log("err:", err);
   if (err instanceof MulterError) {
     logger.error(colors.blue(JSON.stringify(err)));
     res
@@ -42,15 +44,14 @@ export function logDbErrorMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  if (err.sqlMessage || err.sqlState) {
-    logger.error(
-      colors.blue(
-        JSON.stringify(`${err.code}
-        ${err.sqlMessage}`)
-      )
-    );
+  if (err instanceof PrismaClientKnownRequestError) {
+    logger.error(colors.blue(JSON.stringify(`${err.code}`)));
+
     res.status(HTTP_STATUS_CODE.INTERNAL_SERVER);
-    res.json({ name: err.code, message: err.sqlMessage });
+    if (err.code === "P2025") {
+      res.status(HTTP_STATUS_CODE.NOT_FOUND);
+    }
+    res.json({ name: err.code, message: err.message });
   } else {
     next(err);
   }

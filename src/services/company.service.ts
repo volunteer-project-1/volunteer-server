@@ -7,19 +7,14 @@ import {
   UpdateCompanyDto,
   UpdateCompanyHistoryDto,
 } from "../dtos";
-import {
-  ICompanyService,
-  ICreateCompany,
-  ICreateJobDescription,
-} from "../types";
+import { ICompanyService, ICreateCompany } from "../types";
 import { generateHashPassword } from "../utils";
 
 @Service()
 export class CompanyService implements ICompanyService {
   constructor(private companyDAO: CompanyDAO) {}
 
-  async createCompany(data: ICreateCompany) {
-    const { email, password, name } = data;
+  async createCompany({ email, password, name }: ICreateCompany) {
     const { hash: hasedPassword, salt } = await generateHashPassword(password);
 
     const input = {
@@ -59,17 +54,23 @@ export class CompanyService implements ICompanyService {
     return this.companyDAO.updateCompanyHistory(id, data);
   }
 
-  createJobDescription(id: number, data: CreateJobDescriptionDto) {
-    const { jd_details, jd_work_condition, jd_steps, jd_welfares, ...rest } =
-      data;
-    const parsedData: ICreateJobDescription = {
+  createJobDescription(
+    id: number,
+    {
+      jdDetails,
+      jdWorkCondition,
+      jdSteps,
+      jdWelfares,
+      ...rest
+    }: CreateJobDescriptionDto
+  ) {
+    return this.companyDAO.createJobDescription(id, {
       jobDescription: rest,
-      jdDetails: jd_details,
-      jdWorkCondition: jd_work_condition,
-      jdSteps: jd_steps,
-      jdWelfares: jd_welfares,
-    };
-    return this.companyDAO.createJobDescription(id, parsedData);
+      jdDetails,
+      jdWorkCondition,
+      jdSteps,
+      jdWelfares,
+    });
   }
 
   findJobDescriptionById(id: number) {
@@ -79,7 +80,7 @@ export class CompanyService implements ICompanyService {
   createResumeApplying(data: {
     userId: number;
     resumeId: number;
-    jdDetailId: number;
+    jobDescriptionId: number;
   }) {
     return this.companyDAO.createResumeApplying(data);
   }

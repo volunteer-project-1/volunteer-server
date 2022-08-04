@@ -1,13 +1,21 @@
+/* eslint-disable no-return-await */
 import { Service } from "typedi";
-import { MySQL, findOneOrWhole, insert, update } from "../db";
 import {
-  ICreateResume,
-  IFindResume,
-  IFindWholeResume,
-  IResumeDAO,
-  IUpdateResume,
-} from "../types";
+  Activities,
+  Awards,
+  Careers,
+  Certificates,
+  Educations,
+  Introductions,
+  PreferenceJobs,
+  PreferenceLocations,
+  Preferences,
+  Resumes,
+  Trainings,
+} from "@prisma/client";
+import { IResumeDAO, IUpdateResume } from "../types";
 import {
+  CreateResumeDto,
   UpdateActivityDto,
   UpdateAwardDto,
   UpdateCareerDto,
@@ -19,28 +27,16 @@ import {
   UpdatePreferenceLocationDto,
   UpdateResumeInfoDto,
 } from "../dtos";
-import {
-  RESUME_TABLE,
-  RESUME_INFO_TABLE,
-  EDUCATION_TABLE,
-  CAREER_TABLE,
-  ACTIVITY_TABLE,
-  AWARD_TABLE,
-  MY_VIDEO_TABLE,
-  HELPER_VIDEO_TABLE,
-  PREFERNCE_TABLE,
-  PREFERNCE_JOB_TABLE,
-  PREFERNCE_LOCATION_TABLE,
-  USER_METAS_TABLE,
-  TRAINING_TABLE,
-  PORTFOLIO_TABLE,
-  CERTIFICATE_TABLE,
-  INTRODUCTION_TABLE,
-} from "../constants";
+
+import Prisma from "../db/prisma";
 
 @Service()
 export class ResumeDAO implements IResumeDAO {
-  constructor(private readonly mysql: MySQL) {}
+  private readonly prisma;
+
+  constructor() {
+    this.prisma = Prisma;
+  }
 
   async createResume(
     userId: number,
@@ -58,287 +54,155 @@ export class ResumeDAO implements IResumeDAO {
       myVideo,
       helperVideo,
       preference,
-    }: ICreateResume
+    }: CreateResumeDto
   ) {
-    const conn = await this.mysql.getConnection();
+    return await this.prisma.$transaction(async (prisma) => {
+      const resumes = await prisma.resumes.create({
+        data: { ...resume, userId },
+      });
 
-    try {
-      await conn.beginTransaction();
+      const resumeInfos = await prisma.resumeInfos.create({
+        data: { ...resumeInfo, resumeId: resumes.id },
+      });
 
-      const resumeField = Object.keys(resume).concat("user_id");
-      const resumeQuery = `
-        INSERT INTO ${RESUME_TABLE} 
-            (${resumeField}) 
-        VALUES 
-            (?)`;
-
-      const [createdResume] = await insert(
-        {
-          query: resumeQuery,
-          values: [Object.values<any>(resume).concat(userId)],
-        },
-        conn
-      )();
-
-      const resumeInfoFieldNames = Object.keys(resumeInfo).concat("resume_id");
-      const resumeInfosQuery = `
-        INSERT INTO ${RESUME_INFO_TABLE} 
-            (${resumeInfoFieldNames}) 
-        VALUES 
-            (?, ${createdResume.insertId});`;
-
-      const [createdResumeInfo] = await insert(
-        { query: resumeInfosQuery, values: [Object.values<any>(resumeInfo)] },
-        conn
-      )();
-
+      let ed: Educations[] | null = null;
       if (educations) {
-        educations.map(async (education) => {
-          const educationFieldNames =
-            Object.keys(education).concat("resume_id");
-          const educationQuery = `
-            INSERT INTO ${EDUCATION_TABLE} 
-                (${educationFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId});`;
-
-          await insert(
-            {
-              query: educationQuery,
-              values: [Object.values<any>(education)],
-            },
-            conn
-          )();
-        });
+        ed = await Promise.all(
+          educations
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.educations.create({ data: { ...e } }))
+        );
       }
 
+      let ca: Careers[] | null = null;
       if (careers) {
-        careers.map(async (career) => {
-          const carrerFieldNames = Object.keys(career).concat("resume_id");
-          const carrerQuery = `
-            INSERT INTO ${CAREER_TABLE} 
-                (${carrerFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-          await insert(
-            { query: carrerQuery, values: [Object.values(career)] },
-            conn
-          )();
-        });
+        ca = await Promise.all(
+          careers
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.careers.create({ data: { ...e } }))
+        );
       }
-
+      let ac: Activities[] | null = null;
       if (activities) {
-        activities.map(async (activity) => {
-          const activityFieldNames = Object.keys(activity).concat("resume_id");
-          const activityQuery = `
-            INSERT INTO ${ACTIVITY_TABLE} 
-                (${activityFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-          await insert(
-            {
-              query: activityQuery,
-              values: [Object.values(activity)],
-            },
-            conn
-          )();
-        });
+        ac = await Promise.all(
+          activities
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.activities.create({ data: { ...e } }))
+        );
       }
-
+      let tr: Trainings[] | null = null;
       if (trainings) {
-        for (const training of trainings) {
-          const trainingFieldNames = Object.keys(training).concat("resume_id");
-          const trainingQuery = `
-              INSERT INTO ${TRAINING_TABLE} 
-                  (${trainingFieldNames}) 
-              VALUES 
-                  (?, ${createdResume.insertId})`;
-
-          await insert(
-            {
-              query: trainingQuery,
-              values: [Object.values(training)],
-            },
-            conn
-          )();
-        }
+        tr = await Promise.all(
+          trainings
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.trainings.create({ data: { ...e } }))
+        );
       }
+      let ce: Certificates[] | null = null;
       if (certificates) {
-        for (const certificate of certificates) {
-          const certificateFieldNames =
-            Object.keys(certificate).concat("resume_id");
-          const certificateQuery = `
-            INSERT INTO ${CERTIFICATE_TABLE} 
-                (${certificateFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-          await insert(
-            {
-              query: certificateQuery,
-              values: [Object.values(certificate)],
-            },
-            conn
-          )();
-        }
+        ce = await Promise.all(
+          certificates
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.certificates.create({ data: { ...e } }))
+        );
       }
-
+      let aw: Awards[] | null = null;
       if (awards) {
-        for (const award of awards) {
-          const awardFieldNames = Object.keys(award).concat("resume_id");
-          const awardQuery = `
-            INSERT INTO ${AWARD_TABLE} 
-                (${awardFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-          await insert(
-            { query: awardQuery, values: [Object.values(award)] },
-            conn
-          )();
-        }
+        aw = await Promise.all(
+          awards
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.awards.create({ data: { ...e } }))
+        );
       }
 
-      if (portfolio) {
-        const portfolioFieldNames = Object.keys(portfolio).concat("resume_id");
-        const portfolioQuery = `
-            INSERT INTO ${PORTFOLIO_TABLE} 
-                (${portfolioFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-        await insert(
-          {
-            query: portfolioQuery,
-            values: [Object.values(portfolio)],
-          },
-          conn
-        )();
-      }
-
+      let intro: Introductions[] | null = null;
       if (introductions) {
-        for (const introduction of introductions) {
-          const introductionFieldNames =
-            Object.keys(introduction).concat("resume_id");
-
-          const introductionQuery = `
-            INSERT INTO ${INTRODUCTION_TABLE} 
-                (${introductionFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-          await insert(
-            { query: introductionQuery, values: [Object.values(introduction)] },
-            conn
-          )();
-        }
+        intro = await Promise.all(
+          introductions
+            .map((e) => ({ ...e, resumeId: resumes.id }))
+            .map((e) => prisma.introductions.create({ data: { ...e } }))
+        );
       }
 
-      const myVideoFieldNames = Object.keys(myVideo).concat("resume_id");
-      const myVideoQuery = `
-        INSERT INTO ${MY_VIDEO_TABLE} 
-            (${myVideoFieldNames}) 
-        VALUES 
-            (?, ${createdResume.insertId})`;
-
-      await insert(
-        { query: myVideoQuery, values: [Object.values(myVideo)] },
-        conn
-      )();
-
-      if (helperVideo) {
-        const helperVideoFieldNames =
-          Object.keys(helperVideo).concat("resume_id");
-        const helperVideoQuery = `
-            INSERT INTO ${HELPER_VIDEO_TABLE} 
-                (${helperVideoFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
-
-        await insert(
-          { query: helperVideoQuery, values: [Object.values(helperVideo)] },
-          conn
-        )();
-      }
+      let pref: Preferences | null = null;
+      let prefJobs: PreferenceJobs[] | null = null;
+      let prefLocs: PreferenceLocations[] | null = null;
 
       if (preference) {
         const { preferenceJobs, preferenceLocations, ...restPreference } =
           preference;
-        const preferenceFieldNames =
-          Object.keys(restPreference).concat("resume_id");
-        const preferenceQuery = `
-            INSERT INTO ${PREFERNCE_TABLE} 
-                (${preferenceFieldNames}) 
-            VALUES 
-                (?, ${createdResume.insertId})`;
 
-        const [createdPreference] = await insert(
-          { query: preferenceQuery, values: [Object.values(restPreference)] },
-          conn
-        )();
+        pref = await prisma.preferences.create({
+          data: { ...restPreference, resumeId: resumes.id },
+        });
 
         if (preferenceJobs) {
-          for (const preferenceJob of preferenceJobs) {
-            const preferenceJobFieldNames =
-              Object.keys(preferenceJob).concat("preference_id");
-            const preferenceJobQuery = `
-            INSERT INTO ${PREFERNCE_JOB_TABLE} 
-                (${preferenceJobFieldNames}) 
-            VALUES 
-                (?, ${createdPreference.insertId})`;
-            await insert(
-              {
-                query: preferenceJobQuery,
-                values: [Object.values(preferenceJob)],
-              },
-              conn
-            )();
-          }
+          prefJobs = await Promise.all(
+            preferenceJobs
+              .map((pj) => ({ ...pj, preferenceId: pref!.id }))
+              .map((e) => prisma.preferenceJobs.create({ data: { ...e } }))
+          );
         }
         if (preferenceLocations) {
-          for (const preferenceLocation of preferenceLocations) {
-            const preferenceLocationFieldNames =
-              Object.keys(preferenceLocation).concat("preference_id");
-            const preferenceLocationQuery = `
-            INSERT INTO ${PREFERNCE_LOCATION_TABLE} 
-                (${preferenceLocationFieldNames}) 
-            VALUES 
-                (?, ${createdPreference.insertId})`;
-            await insert(
-              {
-                query: preferenceLocationQuery,
-                values: [Object.values(preferenceLocation)],
-              },
-              conn
-            )();
-          }
+          prefLocs = await Promise.all(
+            preferenceLocations
+              .map((plc) => ({ ...plc, preferenceId: pref!.id }))
+              .map((e) => prisma.preferenceLocations.create({ data: { ...e } }))
+          );
         }
       }
 
-      await insert(
-        {
-          query: `
-          UPDATE ${USER_METAS_TABLE} AS m
-            SET 
-                m.is_verified = IF( m.is_verified=0, 1, m.is_verified)
-          WHERE 
-            m.user_id = ?;`,
-          values: [userId],
-        },
-        conn
-      )();
+      const po =
+        portfolio &&
+        (await prisma.portfolios.create({
+          data: {
+            ...portfolio,
+            resumeId: resumes.id,
+          },
+        }));
 
-      await conn.commit();
+      const myV =
+        myVideo &&
+        (await prisma.myVideos.create({
+          data: {
+            ...myVideo,
+            resumeId: resumes.id,
+          },
+        }));
 
-      return { resume: createdResume, resumeInfo: createdResumeInfo };
-    } catch (error) {
-      await conn.rollback();
-      throw error;
-    } finally {
-      await conn.release();
-    }
+      const heV =
+        helperVideo &&
+        (await prisma.helperVideos.create({
+          data: {
+            ...helperVideo,
+            resumeId: resumes.id,
+          },
+        }));
+
+      return {
+        resume: resumes,
+        resumeInfo: resumeInfos,
+        educations: ed,
+        careers: ca,
+        activities: ac,
+        trainings: tr,
+        certificates: ce,
+        awards: aw,
+        portfolio: po || null,
+        introductions: intro,
+        myVideo: myV,
+        helperVideo: heV || null,
+        preference:
+          {
+            id: pref!.id,
+            employType: pref!.employType || null,
+            salary: pref!.salary || null,
+            resumeId: pref!.resumeId,
+            preferenceJobs: prefJobs,
+            preferenceLocations: prefLocs,
+          } || null,
+      };
+    });
   }
 
   async findPublicResumes({
@@ -347,467 +211,167 @@ export class ResumeDAO implements IResumeDAO {
   }: {
     start: number;
     limit: number;
-  }): Promise<IFindResume[] | undefined> {
-    const pool = this.mysql.getPool();
-    const query = `
-        SELECT * 
-        FROM ${RESUME_TABLE} 
-        WHERE id >= ? AND is_public = true ORDER BY id LIMIT ?`;
-
-    const [rows] = await findOneOrWhole(
-      { query, values: [start, limit] },
-      pool
-    )();
-
-    if (!rows.length) {
-      return undefined;
-    }
-
-    return rows as IFindResume[];
+  }): Promise<Resumes[]> {
+    return await this.prisma.resumes.findMany({
+      where: { id: { gte: start }, isPublic: true },
+      orderBy: { id: "asc" },
+      take: limit,
+    });
   }
 
-  async findMyResumes(id: number): Promise<IFindResume[] | undefined> {
-    const pool = this.mysql.getPool();
-
-    const query = `SELECT * FROM ${RESUME_TABLE} WHERE user_id = ? LIMIT 10`;
-
-    const [rows] = await findOneOrWhole({ query, values: [id] }, pool)();
-
-    if (!rows.length) {
-      return undefined;
-    }
-
-    return rows as IFindResume[];
+  async findMyResumes(id: number): Promise<Resumes[]> {
+    return await this.prisma.resumes.findMany({
+      where: { userId: id },
+      take: 10,
+    });
   }
 
-  async findResumeById(resumeId: number): Promise<IFindWholeResume> {
-    const pool = this.mysql.getPool();
-
-    const resumeQuery = `
-    SELECT resume_id, json_object(
-        'id', RI.id, 
-        'name', RI.name, 
-        'birthday', RI.birthday, 
-        'phone_number', RI.phone_number, 
-        'email', RI.email, 
-        'sido', RI.sido, 
-        'sigungu', RI.sigungu, 
-        'disability_level', RI.disability_level, 
-        'disability_type', RI.disability_type, 
-        'sex', RI.sex) AS resume_info
-    FROM ${RESUME_INFO_TABLE} AS RI
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    LIMIT 1
-    `;
-
-    const careerQuery = `
-    SELECT resume_id, json_arrayagg(json_object('id', C.id, 'company', C.company, 'department', C.department)) AS careers
-    FROM ${CAREER_TABLE} AS C
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const educationQuery = `
-    SELECT resume_id, json_arrayagg(json_object('id', E.id, 'type', E.type, 'school_name', E.school_name)) AS educations
-    FROM ${EDUCATION_TABLE} AS E
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const activityQuery = `
-    SELECT resume_id, json_arrayagg(json_object(
-        'id', A.id, 
-        'organization', A.organization, 
-        'description', A.description)) AS activities
-    FROM ${ACTIVITY_TABLE} AS A
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const trainingQuery = `
-    SELECT 
-        resume_id, 
-        json_arrayagg(json_object(
-            'id', TR.id, 
-            'name', TR.name, 
-            'institute', TR.institute, 
-            'started_at', TR.started_at, 
-            'finished_at', TR.finished_at, 
-            'content', TR.content)) AS trainings
-    FROM ${TRAINING_TABLE} AS TR
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const certificateQuery = `
-    SELECT resume_id, json_arrayagg(json_object(
-        'id', CE.id, 
-        'name', CE.name, 
-        'institute', CE.institute, 
-        'acquisition_at', CE.acquisition_at)) AS certificates
-    FROM ${CERTIFICATE_TABLE} AS CE
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const awardQuery = `
-    SELECT resume_id, json_arrayagg(json_object('id', W.id, 'institute', W.institute, 'started_at', W.started_at)) AS awards
-    FROM ${AWARD_TABLE} AS W
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const portfolioQuery = `
-    SELECT resume_id, json_object(
-        'id', PO.id, 
-        'url', PO.url) AS portfolio
-    FROM ${PORTFOLIO_TABLE} AS PO
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    LIMIT 1
-    `;
-
-    const introductionQuery = `
-    SELECT resume_id, json_arrayagg(json_object(
-        'id', INTRO.id, 
-        'title', INTRO.title, 
-        'content', INTRO.content)) AS introductions
-    FROM ${INTRODUCTION_TABLE} AS INTRO
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const myVideoQuery = `
-    SELECT resume_id, json_object('id', MY.id, 'url', MY.url) AS my_video
-    FROM ${MY_VIDEO_TABLE} AS MY
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    LIMIT 1
-    `;
-
-    const helperVideoQuery = `
-    SELECT resume_id, json_object('id', H.id, 'url', H.url) AS helper_video
-    FROM ${HELPER_VIDEO_TABLE} AS H
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    LIMIT 1
-    `;
-
-    const preferenceJobQuery = `
-    SELECT preference_id, json_arrayagg(json_object('name', PJ.name)) AS preference_jobs
-    FROM ${PREFERNCE_JOB_TABLE} AS PJ
-    GROUP BY preference_id`;
-
-    const preferenceLocationQuery = `
-    SELECT preference_id, json_arrayagg(json_object('sido', PL.sido, 'sigungu', PL.sigungu)) AS preference_locations
-    FROM ${PREFERNCE_LOCATION_TABLE} AS PL
-    GROUP BY preference_id`;
-
-    const preferenceQuery = `
-    SELECT resume_id, json_object('id', P.id, 'employ_type', P.employ_type, 'salary', P.salary, 'preference_jobs', pj.preference_jobs, 'preference_locations', pl.preference_locations) AS preference
-    FROM ${PREFERNCE_TABLE} AS P
-        JOIN (${preferenceJobQuery}) AS pj ON pj.preference_id = P.id
-        JOIN (${preferenceLocationQuery}) AS pl ON pl.preference_id = P.id
-    WHERE resume_id = ?
-    GROUP BY resume_id
-    `;
-
-    const query = `
-        SELECT
-            R.id,
-            R.title,
-            R.content,
-            ri.resume_info,
-            e.educations,
-            c.careers,
-            a.activities,
-            w.awards,
-            my.my_video,
-            h.helper_video,
-            p.preference,
-            tr.trainings,
-            ce.certificates,
-            po.portfolio,
-            intro.introductions
-        FROM ${RESUME_TABLE} AS R
-        LEFT JOIN (${resumeQuery}) AS ri ON ri.resume_id = R.id
-        LEFT JOIN (${careerQuery}) AS c ON c.resume_id = R.id
-        LEFT JOIN (${educationQuery}) AS e ON e.resume_id = R.id
-        LEFT JOIN (${activityQuery}) AS a ON a.resume_id = R.id
-        LEFT JOIN (${awardQuery}) AS w ON w.resume_id = R.id
-        LEFT JOIN (${myVideoQuery}) AS my ON my.resume_id = R.id
-        LEFT JOIN (${helperVideoQuery}) AS h ON h.resume_id = R.id
-        LEFT JOIN (${preferenceQuery}) AS p ON p.resume_id = R.id
-        LEFT JOIN (${trainingQuery}) AS tr ON tr.resume_id = R.id
-        LEFT JOIN (${certificateQuery}) AS ce ON ce.resume_id = R.id
-        LEFT JOIN (${portfolioQuery}) AS po ON po.resume_id = R.id
-        LEFT JOIN (${introductionQuery}) AS intro ON intro.resume_id = R.id
-        WHERE R.id = ?;
-    `;
-    const [rows] = await findOneOrWhole(
-      {
-        query,
-        values: [
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-          resumeId,
-        ],
+  async findResumeById(resumeId: number) {
+    return await this.prisma.resumes.findUnique({
+      where: { id: resumeId },
+      include: {
+        resumeInfos: true,
+        careers: true,
+        educations: true,
+        activities: true,
+        trainings: true,
+        certificates: true,
+        awards: true,
+        portfolios: true,
+        introductions: true,
+        myVideos: true,
+        helperVideos: true,
+        preferences: {
+          include: { preferenceJobs: true, preferenceLocation: true },
+        },
       },
-      pool
-    )();
-
-    return rows[0] as IFindWholeResume;
+    });
   }
 
-  updateResume(id: number, { resume }: IUpdateResume) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${RESUME_TABLE}
-        SET ?
-        WHERE id = ?
-    `;
-    return update({ query, values: [resume, id] }, pool)();
+  async updateResume(id: number, { resume }: IUpdateResume) {
+    return await this.prisma.resumes.update({
+      where: { id },
+      data: { ...resume },
+    });
   }
 
-  updateResumeInfo(id: number, { resumeInfo }: UpdateResumeInfoDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${RESUME_INFO_TABLE}
-        SET ?
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [resumeInfo, id] }, pool)();
+  async updateResumeInfo(id: number, { resumeInfo }: UpdateResumeInfoDto) {
+    return await this.prisma.resumeInfos.update({
+      where: { id },
+      data: { ...resumeInfo },
+    });
   }
 
-  updateEducation(id: number, { education }: UpdateEducationDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${EDUCATION_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [education, id] }, pool)();
+  async updateEducation(id: number, { education }: UpdateEducationDto) {
+    return await this.prisma.educations.update({
+      where: { id },
+      data: { ...education },
+    });
   }
 
-  updateCareer(id: number, { career }: UpdateCareerDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${CAREER_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [career, id] }, pool)();
+  async updateCareer(id: number, { career }: UpdateCareerDto) {
+    return await this.prisma.careers.update({
+      where: { id },
+      data: { ...career },
+    });
   }
 
-  updateActivity(id: number, { activity }: UpdateActivityDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${ACTIVITY_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [activity, id] }, pool)();
+  async updateActivity(id: number, { activity }: UpdateActivityDto) {
+    return await this.prisma.activities.update({
+      where: { id },
+      data: { ...activity },
+    });
   }
 
-  updateAward(id: number, { award }: UpdateAwardDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${AWARD_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [award, id] }, pool)();
+  async updateAward(id: number, { award }: UpdateAwardDto) {
+    return await this.prisma.awards.update({
+      where: { id },
+      data: { ...award },
+    });
   }
 
-  updateMyVideo(id: number, { myVideo }: UpdateMyVideoDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${MY_VIDEO_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [myVideo, id] }, pool)();
+  async updateMyVideo(id: number, { myVideo }: UpdateMyVideoDto) {
+    return await this.prisma.myVideos.update({
+      where: { id },
+      data: { ...myVideo },
+    });
   }
 
-  updateHelperVideo(id: number, { helperVideo }: UpdateHelperVideoDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${HELPER_VIDEO_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [helperVideo, id] }, pool)();
+  async updateHelperVideo(id: number, { helperVideo }: UpdateHelperVideoDto) {
+    return await this.prisma.helperVideos.update({
+      where: { id },
+      data: { ...helperVideo },
+    });
   }
 
-  updatePreference(id: number, { preference }: UpdatePreferenceDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${PREFERNCE_TABLE}
-        SET ?
-        WHERE id = ? 
-    `;
-    return update({ query, values: [preference, id] }, pool)();
+  async updatePreference(id: number, { preference }: UpdatePreferenceDto) {
+    return await this.prisma.preferences.update({
+      where: { id },
+      data: { ...preference },
+    });
   }
 
-  updatePreferenceLocation(
+  async updatePreferenceLocation(
     id: number,
     { preferenceLocation }: UpdatePreferenceLocationDto
   ) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${PREFERNCE_LOCATION_TABLE}
-        SET ?
-        WHERE id = ?
-    `;
-    return update(
-      {
-        query,
-        values: [preferenceLocation, id],
-      },
-      pool
-    )();
+    return await this.prisma.preferenceLocations.update({
+      where: { id },
+      data: { ...preferenceLocation },
+    });
   }
 
-  updatePreferenceJob(id: number, { preferenceJob }: UpdatePreferenceJobDto) {
-    const pool = this.mysql.getPool();
-
-    const query = `
-        UPDATE ${PREFERNCE_JOB_TABLE}
-        SET ?
-        WHERE id = ?
-    `;
-    return update({ query, values: [preferenceJob, id] }, pool)();
+  async updatePreferenceJob(
+    id: number,
+    { preferenceJob }: UpdatePreferenceJobDto
+  ) {
+    return await this.prisma.preferenceJobs.update({
+      where: { id },
+      data: { ...preferenceJob },
+    });
   }
 
-  deleteResume(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${RESUME_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteResume(id: number) {
+    return await this.prisma.resumes.delete({ where: { id } });
   }
 
-  deleteResumeInfo(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${RESUME_INFO_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteResumeInfo(id: number) {
+    return await this.prisma.resumeInfos.delete({ where: { id } });
   }
 
-  deleteEducation(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${EDUCATION_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteEducation(id: number) {
+    return await this.prisma.educations.delete({ where: { id } });
   }
 
-  deleteCareer(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${CAREER_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteCareer(id: number) {
+    return await this.prisma.careers.delete({ where: { id } });
   }
 
-  deleteActivity(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${ACTIVITY_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteActivity(id: number) {
+    return await this.prisma.activities.delete({ where: { id } });
   }
 
-  deleteAward(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${AWARD_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteAward(id: number) {
+    return await this.prisma.awards.delete({ where: { id } });
   }
 
-  deleteMyVideo(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${MY_VIDEO_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteMyVideo(id: number) {
+    return await this.prisma.myVideos.delete({ where: { id } });
   }
 
-  deleteHelperVideo(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${HELPER_VIDEO_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deleteHelperVideo(id: number) {
+    return await this.prisma.helperVideos.delete({ where: { id } });
   }
 
-  deletePreference(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${PREFERNCE_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deletePreference(id: number) {
+    return await this.prisma.preferences.delete({ where: { id } });
   }
 
-  deletePreferenceJob(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${PREFERNCE_JOB_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deletePreferenceJob(id: number) {
+    return await this.prisma.preferenceJobs.delete({ where: { id } });
   }
 
-  deletePreferenceLocation(id: number) {
-    const pool = this.mysql.getPool();
-    const query = `
-        DELETE FROM ${PREFERNCE_LOCATION_TABLE}
-        WHERE id = ?
-    `;
-
-    return update({ query, values: [id] }, pool)();
+  async deletePreferenceLocation(id: number) {
+    return await this.prisma.preferenceLocations.delete({ where: { id } });
   }
 }

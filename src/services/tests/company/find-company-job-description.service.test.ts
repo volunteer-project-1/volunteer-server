@@ -1,97 +1,80 @@
-/* eslint-disable camelcase */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { CompanyService } from "../..";
-import { CreateCompanyByLocalDto } from "../../../dtos";
 import { newCompanyJobDescriptionFactory } from "../../../factory";
-import { ICreateCompany } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-    `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("find-company-job-description Test", () => {
   const companyService = Container.get(CompanyService);
 
-  it("jobDescription 조회 실패시 undefined 반환", async () => {
+  it("jobDescription 조회 실패시 null 반환", async () => {
     const spy = jest.spyOn(companyService, "findJobDescriptionById");
     const IN_VALID_JD_ID = 123;
 
+    const mock = prismaMock.jobDescriptions.findUnique.mockResolvedValue(null);
+
     const found = await companyService.findJobDescriptionById(IN_VALID_JD_ID);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(IN_VALID_JD_ID);
-    expect(found).toBe(undefined);
+    expect(found).toBeNull();
   });
 
   it("If created, return FindJobDescriptionDto", async () => {
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
-    const company = await companyService.createCompany(data);
-
     const jdData = newCompanyJobDescriptionFactory();
-    const { jobDescription } = await companyService.createJobDescription(
-      company.insertId,
-      jdData
-    );
+    const jobDescriptionId = 1;
+
+    const mock = prismaMock.jobDescriptions.findUnique.mockResolvedValue({
+      ...jdData,
+    } as any);
     const spy = jest.spyOn(companyService, "findJobDescriptionById");
 
-    const found = await companyService.findJobDescriptionById(
-      jobDescription.insertId
-    );
+    const found = await companyService.findJobDescriptionById(jobDescriptionId);
     if (!found) {
-      throw new Error();
+      throw new Error("Should not reach this");
     }
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(jobDescription.insertId);
+    expect(spy).toBeCalledWith(jobDescriptionId);
 
-    expect(found.jd_work_condition).toEqual(
-      expect.objectContaining(jdData.jd_work_condition)
+    expect(found.jdWorkCondition).toEqual(
+      expect.objectContaining(jdData.jdWorkCondition)
     );
 
-    expect(found.jd_details).toEqual(
+    expect(found.jdDetails).toEqual(
       expect.arrayContaining(
-        jdData.jd_details.map((detail) => expect.objectContaining(detail))
+        jdData.jdDetails.map((detail) => expect.objectContaining(detail))
       )
     );
 
-    expect(found.jd_steps).toEqual(
+    expect(found.jdSteps).toEqual(
       expect.arrayContaining(
-        jdData.jd_steps.map((step) => expect.objectContaining(step))
+        jdData.jdSteps.map((step) => expect.objectContaining(step))
       )
     );
 
-    expect(found.jd_welfares).toEqual(
+    expect(found.jdWelfares).toEqual(
       expect.arrayContaining(
-        jdData.jd_welfares.map((welfare) => expect.objectContaining(welfare))
+        jdData.jdWelfares.map((welfare) => expect.objectContaining(welfare))
       )
     );
   });

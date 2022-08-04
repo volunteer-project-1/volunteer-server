@@ -1,5 +1,4 @@
 import type { CorsOptions } from "cors";
-import type { PoolOptions } from "mysql2/promise";
 import type { _StrategyOptionsBase } from "passport-google-oauth20";
 
 export const isProd = process.env.NODE_ENV === "production";
@@ -10,25 +9,6 @@ export const CLIENT_DOMAIN =
   process.env.CLIENT_DOMAIN || "http://localhost:3000";
 
 export const SESSION_SECRET = process.env.SESSION_SECRET || "secretDevelopment";
-
-export const DB_CONFIG: PoolOptions = isProd
-  ? {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USERNAME,
-      port: Number(process.env.DB_PORT),
-      database: process.env.MYSQL_DATABASE,
-      password: process.env.DB_PASSWORD,
-      connectionLimit: 100,
-    }
-  : {
-      host: process.env.DB_HOST || "localhost",
-      user: process.env.DB_USERNAME || "root",
-      port: Number(process.env.DB_PORT) || 3306,
-      database: process.env.MYSQL_DATABASE || "test",
-      password: process.env.DB_PASSWORD || "root",
-      //   dateStrings: ["DATE"],
-      connectionLimit: 100,
-    };
 
 export const REDIS_URL = process.env.REDIS_URL || "localhost:6379";
 

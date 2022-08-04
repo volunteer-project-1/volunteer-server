@@ -1,66 +1,51 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
+import { CompanyHistories, PrismaClient } from "@prisma/client";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import { CompanyService } from "../..";
-import {
-  CreateCompanyByLocalDto,
-  CreateCompanyHistoryDto,
-} from "../../../dtos";
-import { convertDateToTimestamp } from "../../../utils";
-import { ICreateCompany } from "../../../types";
+import { CreateCompanyHistoryDto } from "../../../dtos";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-    `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("create-company-history Test", () => {
   const companyService = Container.get(CompanyService);
   it("If created, return companyHistory", async () => {
-    const data: ICreateCompany = {
-      email: "company@gmail.com",
-      password: "company",
-      name: "회사명",
-    };
-
-    const company = await companyService.createCompany(data);
-
+    const companyId = 1;
     const companyHistoryData: CreateCompanyHistoryDto = {
       content: "블라블라 VC 투자",
-      history_at: convertDateToTimestamp(),
+      historyAt: new Date(),
     };
 
+    const mock = prismaMock.companyHistories.create.mockResolvedValue(
+      companyHistoryData as CompanyHistories
+    );
+
     const spy = jest.spyOn(companyService, "createCompanyHistory");
+
     const companyHistory = await companyService.createCompanyHistory(
-      company.insertId,
+      companyId,
       companyHistoryData
     );
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(company.insertId, companyHistoryData);
+    expect(spy).toBeCalledWith(companyId, companyHistoryData);
 
-    expect(companyHistory.affectedRows).toEqual(1);
+    expect(companyHistory).toEqual(expect.objectContaining(companyHistoryData));
   });
 });

@@ -1,56 +1,56 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { PrismaClient, Users } from "@prisma/client";
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import { UserService } from "../..";
-import { MySQL } from "../../../db";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("findUserByEmail Test", () => {
   const userService = Container.get(UserService);
   it("If Not Found return undefined", async () => {
     const email = "ehgks0083@gmail.com";
+
+    const mock = prismaMock.users.findUnique.mockResolvedValue(null);
+
     const spy = jest.spyOn(userService, "findUserByEmail");
 
     const result = await userService.findUserByEmail(email);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(email);
-    expect(result).toBe(undefined);
+    expect(result).toBeNull();
   });
 
   it("returns IUser", async () => {
     const email = "ehgks00@gmail.com";
-    await userService.createUserBySocial(email);
+    // await userService.createUserBySocial(email);
+
+    const mock = prismaMock.users.findUnique.mockResolvedValue({
+      email,
+    } as Users);
 
     const spy = jest.spyOn(userService, "findUserByEmail");
 
     const result = await userService.findUserByEmail(email);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(email);
     expect(result).toEqual(expect.objectContaining({ email }));

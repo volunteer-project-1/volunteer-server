@@ -1,54 +1,68 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
+import { PrismaClient } from "@prisma/client";
 import { UserService } from "../..";
-import { MySQL } from "../../../db";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("createUserBySocial Test", () => {
   const userService = Container.get(UserService);
-  it("If success return {affectedRows: 1, serverStatus: 3}", async () => {
+  it("If success return {user, userMetas, profiles}", async () => {
     const email = "ehgks0083@gmail.com";
+
+    const transactionMock = prismaMock.$transaction.mockResolvedValue({
+      user: { email },
+    });
+
     const spy = jest.spyOn(userService, "createUserBySocial");
 
-    const { user, meta, profile } = await userService.createUserBySocial(email);
-    const TRANSACTION_STATUS = 3;
+    const { user } = await userService.createUserBySocial(email);
+
+    expect(transactionMock).toHaveBeenCalled();
 
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(email);
 
-    expect(user.affectedRows).toEqual(1);
-    expect(user.serverStatus).toEqual(TRANSACTION_STATUS);
+    expect(user.email).toEqual(email);
+  });
+  it("If success return {user, userMetas, profiles}", async () => {
+    const email = "ehgks0083@gmail.com";
+    const spy = jest.spyOn(userService, "createUserBySocial");
 
-    expect(meta.affectedRows).toEqual(1);
-    expect(meta.serverStatus).toEqual(TRANSACTION_STATUS);
+    const transactionMock = prismaMock.$transaction.mockResolvedValue({
+      user: { email },
+      userMetas: {},
+      profiles: {},
+    });
 
-    expect(profile.affectedRows).toEqual(1);
-    expect(profile.serverStatus).toEqual(TRANSACTION_STATUS);
+    const { user, userMetas, profiles } = await userService.createUserBySocial(
+      email
+    );
+
+    expect(transactionMock).toHaveBeenCalled();
+
+    expect(spy).toBeCalledTimes(1);
+    expect(spy).toBeCalledWith(email);
+
+    expect(user.email).toEqual(email);
+
+    expect(userMetas).not.toBeNull();
+    expect(profiles).not.toBeNull();
   });
 });

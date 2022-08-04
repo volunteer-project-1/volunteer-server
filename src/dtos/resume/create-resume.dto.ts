@@ -43,48 +43,48 @@ export class CreateResumeDto implements ICreateResume {
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => EducationDto)
-  educations?: EducationDto[];
+  educations!: EducationDto[] | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => CareerDto)
-  careers?: CareerDto[];
+  careers!: CareerDto[] | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => ActivityDto)
-  activities?: ActivityDto[];
+  activities!: ActivityDto[] | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => TrainingDto)
-  trainings?: TrainingDto[];
+  trainings!: TrainingDto[] | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => CertificateDto)
-  certificates?: CertificateDto[];
+  certificates!: CertificateDto[] | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => AwardDto)
-  awards?: AwardDto[];
+  awards!: AwardDto[] | null;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => PortfolioDto)
-  portfolio?: PortfolioDto;
+  portfolio!: PortfolioDto | null;
 
   @IsOptional()
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @Type(() => IntroductionDto)
-  introductions?: IntroductionDto[];
+  introductions!: IntroductionDto[] | null;
 
   @IsNotEmptyObject()
   @ValidateNested()
@@ -94,12 +94,12 @@ export class CreateResumeDto implements ICreateResume {
   @IsOptional()
   @ValidateNested()
   @Type(() => HelperVideoDto)
-  helperVideo?: HelperVideoDto;
+  helperVideo!: HelperVideoDto | null;
 
   @IsOptional()
   @ValidateNested()
   @Type(() => PreferenceDto)
-  preference?: PreferenceDto;
+  preference!: PreferenceDto | null;
 
   constructor({
     resume,
@@ -121,13 +121,31 @@ export class CreateResumeDto implements ICreateResume {
     this.educations = educations;
     this.careers = careers;
     this.activities = activities;
+    // if (activities) {
+
+    // }
     this.trainings = trainings;
+    // if (trainings) {
+    // }
     this.certificates = certificates;
+    // if (certificates) {
+    // }
     this.awards = awards;
+    // if (awards) {
+    // }
     this.portfolio = portfolio;
+    // if (portfolio) {
+    // }
     this.introductions = introductions;
-    this.myVideo = myVideo;
+    // if (introductions) {
+    // }
     this.helperVideo = helperVideo;
+    // if (helperVideo) {
+    // }
     this.preference = preference;
+    // if (preference) {
+    // }
+
+    this.myVideo = myVideo;
   }
 }

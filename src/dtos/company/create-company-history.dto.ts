@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, IsDateString } from "class-validator";
 
 export class CreateCompanyHistoryDto {
   @IsNotEmpty()
@@ -6,6 +6,6 @@ export class CreateCompanyHistoryDto {
   content!: string;
 
   @IsNotEmpty()
-  @IsString()
-  history_at!: string;
+  @IsDateString()
+  historyAt!: Date;
 }

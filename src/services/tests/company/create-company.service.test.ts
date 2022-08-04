@@ -1,42 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
+import { Companys, PrismaClient } from "@prisma/client";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import { CompanyService } from "../..";
-import { CreateCompanyByLocalDto } from "../../../dtos";
 import { BadReqError } from "../../../lib";
 import { ICreateCompany } from "../../../types";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+    // ...orig,
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-    `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("create-company Test", () => {
   const companyService = Container.get(CompanyService);
-  it("If duplicated created, return company", async () => {
-    const data: ICreateCompany = {
+  it("If duplicated created, return error", async () => {
+    const data = {
       email: "company@gmail.com",
       password: "company",
       name: "회사명",
@@ -44,11 +34,20 @@ describe("create-company Test", () => {
 
     const spy = jest.spyOn(companyService, "createCompany");
 
+    const mock = prismaMock.companys.create
+      .mockResolvedValueOnce({
+        ...data,
+        salt: "asdfas",
+      } as Companys)
+      .mockRejectedValue(new Error("Duplicate"));
+
     await companyService.createCompany(data);
+
     try {
       await companyService.createCompany(data);
       throw new BadReqError("You Should not reach this");
     } catch (e) {
+      expect(mock).toHaveBeenCalled();
       expect(spy).toBeCalled();
       expect(spy).toBeCalledWith(data);
 
@@ -64,13 +63,17 @@ describe("create-company Test", () => {
       name: "회사명",
     };
 
+    const mock = prismaMock.companys.create.mockResolvedValue(data as any);
+
     const spy = jest.spyOn(companyService, "createCompany");
 
     const company = await companyService.createCompany(data);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(data);
 
-    expect(company.affectedRows).toEqual(1);
+    const { password, ...rest } = data;
+    expect(company).toEqual(expect.objectContaining(rest));
   });
 });

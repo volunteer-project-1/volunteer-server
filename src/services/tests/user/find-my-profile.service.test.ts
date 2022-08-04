@@ -1,59 +1,59 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { PrismaClient, Profiles, UserMetas, Users } from "@prisma/client";
 import "reflect-metadata";
-import { RowDataPacket } from "mysql2/promise";
 import { Container } from "typedi";
-import { MySQL } from "../../../db";
+import { DeepMockProxy, mockDeep, mockReset } from "jest-mock-extended";
 import { UserService } from "../..";
+import Prisma from "../../../db/prisma";
 
-beforeAll(async () => {
-  await Container.get(MySQL).connect();
+jest.mock("../../../db/prisma", () => {
+  return {
+    __esModule: true,
+    default: mockDeep<PrismaClient>(),
+  };
 });
 
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-    SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-  `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
+beforeEach(() => {
+  // eslint-disable-next-line no-use-before-define
+  mockReset(prismaMock);
 });
 
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
-});
+const prismaMock = Prisma as unknown as DeepMockProxy<PrismaClient>;
 
 describe("findMyProfile Test", () => {
   const userService = Container.get(UserService);
-  it("If not found, return undefined", async () => {
+  it("If not found, return null", async () => {
     const id = 1;
 
     const spy = jest.spyOn(userService, "findMyProfile");
+    const mock = prismaMock.users.findUnique.mockResolvedValue(null);
 
     const result = await userService.findMyProfile(id);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(id);
-    expect(result).toBe(undefined);
+    expect(result).toBeNull();
   });
 
-  it("'findMyProfile' return 'users', 'profile', 'user_meta' (ReturnFindMyProfileDTO) ", async () => {
+  it("'findMyProfile' return 'users', 'profiles', 'userMetas' (ReturnFindMyProfileDTO) ", async () => {
     const email = "ehgks0083@gmail.com";
     const id = 1;
 
-    await userService.createUserBySocial(email);
-
     const spy = jest.spyOn(userService, "findMyProfile");
+    const mock = prismaMock.users.findUnique.mockResolvedValue({
+      id: 1,
+      email,
+      userMetas: { isVerified: false, type: "seeker" },
+      profiles: {},
+    } as Users & {
+      userMetas: UserMetas | null;
+      profiles: Profiles | null;
+    });
 
     const result = await userService.findMyProfile(id);
 
+    expect(mock).toHaveBeenCalled();
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(id);
     expect(result).toEqual(
@@ -62,8 +62,8 @@ describe("findMyProfile Test", () => {
         email,
       })
     );
-    expect(result.user_meta).toEqual(
-      expect.objectContaining({ is_verified: 0, type: "seeker" })
+    expect(result?.userMetas).toEqual(
+      expect.objectContaining({ isVerified: false, type: "seeker" })
     );
   });
 });

@@ -1,46 +1,50 @@
-import { RowDataPacket } from "mysql2/promise";
 import request from "supertest";
 import Container from "typedi";
+import { PrismaPromise } from "@prisma/client";
 import { startApp } from "../../../app";
-import { MySQL } from "../../../db";
-import { newResumeFactory } from "../../../factory";
+import { newResumeAllFactory } from "../../../factory";
 import { ResumeService, UserService } from "../../../services";
+import Prisma from "../../../db/prisma";
 
+let prisma: typeof Prisma;
 beforeAll(async () => {
-  await Container.get(MySQL).connect();
+  prisma = Prisma;
+  await prisma.$connect();
 });
 
-// beforeEach(async () => {
-//   const email = "ehgks0083@gmail.com";
-
-//   const userService = Container.get(UserService);
-//   const resumeService = Container.get(ResumeService);
-
-//   const {
-//     user: { insertId },
-//   } = await userService.createUser(email);
-//   await resumeService.createResume(insertId, newResumeFactory());
-// });
-
 afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-    `);
+  const transactions: PrismaPromise<any>[] = [];
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
 
-  for (const row of rows) {
-    await conn!.query(row.q);
+  const tablenames = await prisma.$queryRawUnsafe<
+    Array<{ TABLE_NAME: string }>
+  >(
+    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
+  );
+
+  for (const { TABLE_NAME } of tablenames) {
+    if (TABLE_NAME !== "_prisma_migrations") {
+      try {
+        transactions.push(prisma.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`));
+      } catch (error) {
+        console.log({ error });
+      }
+    }
   }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
+
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
+
+  try {
+    await prisma.$transaction(transactions);
+  } catch (error) {
+    console.log({ error });
+  }
+
   jest.clearAllMocks();
 });
 
 afterAll(async () => {
-  await Container.get(MySQL).closePool();
+  await prisma.$disconnect();
 });
 
 describe("findResumeById test", () => {
@@ -66,15 +70,14 @@ describe("findResumeById test", () => {
     const userService = Container.get(UserService);
     const resumeService = Container.get(ResumeService);
 
-    const {
-      user: { insertId },
-    } = await userService.createUserBySocial(email);
-    const {
-      resume: { insertId: resumeId },
-    } = await resumeService.createResume(insertId, newResumeFactory());
+    const { user } = await userService.createUserBySocial(email);
+    const { resume } = await resumeService.createResume(
+      user.id,
+      newResumeAllFactory()
+    );
 
     // const resumeId = 1;
-    const res = await request(await startApp()).get(`${URL}/${resumeId}`);
+    const res = await request(await startApp()).get(`${URL}/${resume.id}`);
 
     expect(res.status).toBe(200);
   });

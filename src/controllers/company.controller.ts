@@ -25,7 +25,7 @@ export class CompanyController implements ICompanyController {
     const createdCompany = await this.companyService.createCompany(body);
 
     const company = await this.companyService.findCompanyById(
-      createdCompany.insertId
+      createdCompany.id
     );
 
     if (!company) {
@@ -62,7 +62,7 @@ export class CompanyController implements ICompanyController {
       body
     );
 
-    if (updatedCompany.affectedRows === 0) {
+    if (!updatedCompany) {
       throw new BadReqError();
     }
 
@@ -99,7 +99,7 @@ export class CompanyController implements ICompanyController {
 
     const companys = await this.companyService.findCompanyList(parsedQuery);
 
-    if (!companys) {
+    if (!Object.keys(companys).length) {
       return res.status(204).send();
     }
 
@@ -123,7 +123,7 @@ export class CompanyController implements ICompanyController {
       );
 
     const companyHistory = await this.companyService.findCompanyHistory(
-      createdCompanyHistory.insertId
+      createdCompanyHistory.id
     );
 
     if (!companyHistory) {
@@ -149,7 +149,7 @@ export class CompanyController implements ICompanyController {
         body
       );
 
-    if (updatedCompanyHistory.affectedRows === 0) {
+    if (!updatedCompanyHistory) {
       throw new BadReqError();
     }
 
@@ -187,7 +187,7 @@ export class CompanyController implements ICompanyController {
     );
 
     const jd = await this.companyService.findJobDescriptionById(
-      jobDescription.insertId
+      jobDescription.id
     );
 
     if (!jd) {
@@ -199,20 +199,20 @@ export class CompanyController implements ICompanyController {
 
   createResumeApplying = async (
     {
-      query: { resumeId, jdDetailId },
+      query: { resumeId, jobDescriptionId },
       user,
     }: Request<
       unknown,
       unknown,
       unknown,
-      { resumeId?: string; jdDetailId?: string }
+      { resumeId?: string; jobDescriptionId?: string }
     >,
     res: Response
   ) => {
     const parsedResumeId = Number(resumeId);
-    const parsedJdDetailId = Number(jdDetailId);
+    const parsedJobDescriptionId = Number(jobDescriptionId);
 
-    if (!parsedResumeId || !parsedJdDetailId) {
+    if (!parsedResumeId || !parsedJobDescriptionId) {
       throw new BadReqError();
     }
 
@@ -223,7 +223,7 @@ export class CompanyController implements ICompanyController {
     const result = await this.companyService.createResumeApplying({
       userId: user.id,
       resumeId: parsedResumeId,
-      jdDetailId: parsedJdDetailId,
+      jobDescriptionId: parsedJobDescriptionId,
     });
 
     return res.json({ result });
@@ -240,7 +240,7 @@ export class CompanyController implements ICompanyController {
       user.id
     );
 
-    if (!resumeApplyings) {
+    if (!resumeApplyings.length) {
       throw new NotFoundError();
     }
 

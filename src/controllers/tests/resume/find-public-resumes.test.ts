@@ -1,46 +1,60 @@
-import { RowDataPacket } from "mysql2/promise";
 import request from "supertest";
 import Container from "typedi";
+import { PrismaPromise } from "@prisma/client";
 import { startApp } from "../../../app";
-import { MySQL } from "../../../db";
-import { newResumeFactory } from "../../../factory";
+import { newResumeAllFactory } from "../../../factory";
 import { ResumeService, UserService } from "../../../services";
+import Prisma from "../../../db/prisma";
 
-let userId = 0;
+let prisma: typeof Prisma;
+let userId: number;
 beforeAll(async () => {
-  await Container.get(MySQL).connect();
+  prisma = Prisma;
+  await prisma.$connect();
+});
+
+afterEach(async () => {
+  const transactions: PrismaPromise<any>[] = [];
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0;`);
+
+  const tablenames = await prisma.$queryRawUnsafe<
+    Array<{ TABLE_NAME: string }>
+  >(
+    `SELECT TABLE_NAME from information_schema.TABLES WHERE TABLE_SCHEMA = '${process.env.MYSQL_DATABASE}';`
+  );
+
+  for (const { TABLE_NAME } of tablenames) {
+    if (TABLE_NAME !== "_prisma_migrations") {
+      try {
+        transactions.push(prisma.$executeRawUnsafe(`TRUNCATE ${TABLE_NAME};`));
+      } catch (error) {
+        console.log({ error });
+      }
+    }
+  }
+
+  transactions.push(prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1;`);
+
+  try {
+    await prisma.$transaction(transactions);
+  } catch (error) {
+    console.log({ error });
+  }
+
+  jest.clearAllMocks();
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
 });
 
 beforeEach(async () => {
   const email = "ehgks0083@gmail.com";
   const userService = Container.get(UserService);
 
-  const {
-    user: { insertId },
-  } = await userService.createUserBySocial(email);
+  const { user } = await userService.createUserBySocial(email);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  userId = insertId;
-});
-
-afterEach(async () => {
-  const conn = await Container.get(MySQL).getConnection();
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=0;`);
-  const [rows] = await conn!.query<RowDataPacket[]>(`
-      SELECT Concat('TRUNCATE TABLE ', TABLE_NAME, ';') as q
-          FROM INFORMATION_SCHEMA.TABLES 
-          WHERE table_schema = 'test' AND table_type = 'BASE TABLE';
-    `);
-
-  for (const row of rows) {
-    await conn!.query(row.q);
-  }
-  await conn!.query(`SET FOREIGN_KEY_CHECKS=1;`);
-  conn?.release();
-  jest.clearAllMocks();
-});
-
-afterAll(async () => {
-  await Container.get(MySQL).closePool();
+  userId = user.id;
 });
 
 describe("findResumeById test", () => {
@@ -102,15 +116,15 @@ describe("findResumeById test", () => {
 
     await resumeService.createResume(
       userId,
-      newResumeFactory({
-        resume: { title: "1번 이력서", content: "1번", is_public: true },
+      newResumeAllFactory({
+        resume: { title: "1번 이력서", content: "1번", isPublic: true },
       })
     );
 
     await resumeService.createResume(
       userId,
-      newResumeFactory({
-        resume: { title: "2번 이력서", content: "2번", is_public: true },
+      newResumeAllFactory({
+        resume: { title: "2번 이력서", content: "2번", isPublic: true },
       })
     );
 
