@@ -4,6 +4,7 @@ import {
   UpdateResumeDto,
   CreateResumeDto,
   UpdateActivityDto,
+  CreateActivityDto,
   UpdateAwardDto,
   CreateCareerDto,
   UpdateEducationDto,
@@ -64,6 +65,10 @@ export class ResumeService implements IResumeService {
 
   updateActivity(id: number, data: UpdateActivityDto) {
     return this.resumeDAO.updateActivity(id, data);
+  }
+
+  createActivity(id: number, data: CreateActivityDto) {
+    return this.resumeDAO.createActivity(id, data);
   }
 
   updateAward(id: number, data: UpdateAwardDto) {
