@@ -53,6 +53,9 @@ jobs:
       - name: Run Build
         run: npm run build
 
+      - name: Generate DB Schema
+        run: npx prisma generate
+
       - name: Set env
         run: |
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
@@ -68,7 +71,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - name: Build and push
+      - name: Build and Push
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -79,7 +82,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/${{env.REPOSITORY_NAME}}:latest
             ghcr.io/${{ github.repository_owner }}/${{env.REPOSITORY_NAME}}:${{ env.RELEASE_VERSION }}
 
-      - name: build file upload to ec2
+      - name: Upload build file to ec2
         uses: garygrossgarten/github-action-scp@release
         with:
           local: ./dist
@@ -89,7 +92,17 @@ jobs:
           privateKey: ${{ secrets.SSH_KEY }}
           recursive: true
 
-      - name: copy package upload to ec2
+      - name: Upload prisma to ec2
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: ./prisma
+          remote: /home/ubuntu/volunteer-server/prisma/
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          privateKey: ${{ secrets.SSH_KEY }}
+          recursive: true
+
+      - name: Upload copy package to ec2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -98,7 +111,7 @@ jobs:
           source: "package*.json"
           target: "/home/ubuntu/volunteer-server/"
 
-      - name: ec2 update
+      - name: Update ec2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -108,6 +121,7 @@ jobs:
             cd /home/ubuntu/volunteer-server
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
+            npx prisma migrate deploy
             npm ci
             pm2 kill
             nf -e .env run npm run pm2
