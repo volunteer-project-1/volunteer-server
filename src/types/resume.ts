@@ -198,6 +198,7 @@ export interface IUpdateEducation {
 }
 
 export type ICreateEducation = Omit<Educations, "id" | "resumeId">;
+export type ICreateCareer = Omit<Careers, "id" | "resumeId">;
 
 export interface IUpdateCareer {
   career: Partial<Omit<Careers, "id" | "resumeId">>;

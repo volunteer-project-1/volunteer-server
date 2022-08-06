@@ -5,7 +5,7 @@ import {
   CreateResumeDto,
   UpdateActivityDto,
   UpdateAwardDto,
-  UpdateCareerDto,
+  CreateCareerDto,
   UpdateEducationDto,
   CreateEducationDto,
   UpdateHelperVideoDto,
@@ -14,6 +14,7 @@ import {
   UpdatePreferenceJobDto,
   UpdatePreferenceLocationDto,
   UpdateResumeInfoDto,
+  UpdateCareerDto,
 } from "../dtos";
 import { IResumeService } from "../types";
 
@@ -55,6 +56,10 @@ export class ResumeService implements IResumeService {
 
   updateCareer(id: number, data: UpdateCareerDto) {
     return this.resumeDAO.updateCareer(id, data);
+  }
+
+  createCareer(id: number, data: CreateCareerDto) {
+    return this.resumeDAO.createCareer(id, data);
   }
 
   updateActivity(id: number, data: UpdateActivityDto) {
