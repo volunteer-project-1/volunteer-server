@@ -31,6 +31,9 @@ export default () => {
           return cb(new UnauthorizedError("Wrong Email Or Password"));
         }
 
+        delete foundCompany.password;
+        delete foundCompany.salt;
+        
         return cb(null, { ...foundCompany });
       }
     )
