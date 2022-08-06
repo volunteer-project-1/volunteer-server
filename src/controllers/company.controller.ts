@@ -106,6 +106,44 @@ export class CompanyController implements ICompanyController {
     return res.json({ companys });
   };
 
+  /**
+   * @swagger
+   *  /api/v1/company/my:
+   *    get:
+   *      tags:
+   *      - company-v1
+   *      description: 내 company 정보 받기.
+   *      comsumes:
+   *      - application/json
+   *      responses:
+   *       '200':
+   *         description: 데이터 가져오기 성공
+   *         examples:
+   *             application/json:
+   *                {
+   *                    "company": {
+   *                        "id": 1,
+   *                        "email": "testCompany@gmail.com",
+   *                        "name": "testCompany",
+   *                        "introduce": null,
+   *                        "foundedAt": null,
+   *                        "member": 1,
+   *                        "accInvestment": 0,
+   *                        "homepage": null,
+   *                        "phoneNumber": null,
+   *                        "address": null,
+   *                        "industryType": null,
+   *                        "createdAt": "2022-08-06T01:36:45.285Z",
+   *                        "updatedAt": "2022-08-06T01:36:45.285Z",
+   *                        "deletedAt": null,
+   *                        "type": "company"
+   *                    }
+   *                }
+   */
+  myCompanyProfile = async ({ user: company }: Request, res: Response) => {
+    return res.json({ company });
+  };
+
   createCompanyHistory = async (
     {
       body,

@@ -14,6 +14,10 @@ companyRouter
   .patch(isCompanyAuthenticate, asyncHandler(companyController.updateCompany));
 
 companyRouter
+  .route("/my")
+  .get(isCompanyAuthenticate, asyncHandler(companyController.myCompanyProfile));
+
+companyRouter
   .route("/:id/history")
   .post(
     isCompanyAuthenticate,

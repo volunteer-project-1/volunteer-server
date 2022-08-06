@@ -33,7 +33,7 @@ export default () => {
 
         delete foundCompany.password;
         delete foundCompany.salt;
-        
+
         return cb(null, { ...foundCompany });
       }
     )
