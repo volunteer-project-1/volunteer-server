@@ -6,3 +6,4 @@ export * from "./assert-non-nullish";
 export * from "./parse-to-nuber-or-throw";
 export * from "./event";
 export * from "./health-check";
+export * from "./swagger";
