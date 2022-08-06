@@ -13,4 +13,5 @@ export * from "./update-preference-location.dto";
 export * from "./create-education.dto";
 export * from "./create-career.dto";
 export * from "./create-activity.dto";
+export * from "./create-award.dto";
 export * from "./lib";
