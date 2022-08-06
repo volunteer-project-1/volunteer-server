@@ -8,7 +8,7 @@ import cors from "cors";
 import helmet from "helmet";
 import colors from "colors";
 import routes from "./router";
-import { API_PREFIX, CORS_CONFIG, SESSION_OPTION, isProd } from "./config";
+import { API_PREFIX, CORS_CONFIG, SESSION_OPTION } from "./config";
 import {
   loggingReq,
   logExErrorMiddleware,
@@ -45,9 +45,7 @@ export async function startApp() {
       store: RedisStore,
     })
   );
-  if (!isProd) {
-    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-  }
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(loggingReq);
