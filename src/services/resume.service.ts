@@ -7,6 +7,7 @@ import {
   UpdateAwardDto,
   UpdateCareerDto,
   UpdateEducationDto,
+  CreateEducationDto,
   UpdateHelperVideoDto,
   UpdateMyVideoDto,
   UpdatePreferenceDto,
@@ -46,6 +47,10 @@ export class ResumeService implements IResumeService {
 
   updateEducation(id: number, data: UpdateEducationDto) {
     return this.resumeDAO.updateEducation(id, data);
+  }
+
+  createEducation(id: number, data: CreateEducationDto) {
+    return this.resumeDAO.createEducation(id, data);
   }
 
   updateCareer(id: number, data: UpdateCareerDto) {

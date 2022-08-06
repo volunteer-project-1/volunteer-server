@@ -10,4 +10,5 @@ export * from "./update-helper-video.dto";
 export * from "./update-preference.dto";
 export * from "./update-preference-job.dto";
 export * from "./update-preference-location.dto";
+export * from "./create-education.dto";
 export * from "./lib";

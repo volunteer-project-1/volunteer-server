@@ -8,6 +8,7 @@
     "build": "rm -rf ./dist && swc src -d dist",
     "build:tsc": "rm -rf ./dist && tsc",
     "test": "npx prisma db push --accept-data-loss && jest --detectOpenHandles --forceExit --maxWorkers=50%",
+    "test:unit": "jest --detectOpenHandles --forceExit --maxWorkers=50%",
     "test:ci": "NODE_ENV=test npx prisma db push && jest --detectOpenHandles --forceExit --runInBand",
     "test:coverage": "jest --detectOpenHandles --forceExit --maxWorkers=50% --coverage",
     "dev": "NODE_ENV=development node ./dist/index.js",
