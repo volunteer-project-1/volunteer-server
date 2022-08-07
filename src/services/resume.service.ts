@@ -11,11 +11,15 @@ import {
   UpdateEducationDto,
   CreateEducationDto,
   UpdateHelperVideoDto,
+  CreateHelperVideoDto,
   UpdateMyVideoDto,
   CreateMyVideoDto,
   UpdatePreferenceDto,
+  CreatePreferenceDto,
   UpdatePreferenceJobDto,
+  CreatePreferenceJobDto,
   UpdatePreferenceLocationDto,
+  CreatePreferenceLocationDto,
   UpdateResumeInfoDto,
   UpdateCareerDto,
 } from "../dtos";
@@ -93,16 +97,32 @@ export class ResumeService implements IResumeService {
     return this.resumeDAO.updateHelperVideo(id, data);
   }
 
+  createHelperVideo(id: number, data: CreateHelperVideoDto) {
+    return this.resumeDAO.createHelperVideo(id, data);
+  }
+
   updatePreference(id: number, data: UpdatePreferenceDto) {
     return this.resumeDAO.updatePreference(id, data);
+  }
+
+  createPreference(id: number, data: CreatePreferenceDto) {
+    return this.resumeDAO.createPreference(id, data);
   }
 
   updatePreferenceJob(id: number, data: UpdatePreferenceJobDto) {
     return this.resumeDAO.updatePreferenceJob(id, data);
   }
 
+  createPreferenceJob(id: number, data: CreatePreferenceJobDto) {
+    return this.resumeDAO.createPreferenceJob(id, data);
+  }
+
   updatePreferenceLocation(id: number, data: UpdatePreferenceLocationDto) {
     return this.resumeDAO.updatePreferenceLocation(id, data);
+  }
+
+  createPreferenceLocation(id: number, data: CreatePreferenceLocationDto) {
+    return this.resumeDAO.createPreferenceLocation(id, data);
   }
 
   deleteResume(id: number) {

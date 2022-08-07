@@ -15,4 +15,8 @@ export * from "./create-career.dto";
 export * from "./create-activity.dto";
 export * from "./create-award.dto";
 export * from "./create-my-video.dto";
+export * from "./create-helper-video.dto";
+export * from "./create-preference.dto";
+export * from "./create-preference-job.dto";
+export * from "./create-preference-location.dto";
 export * from "./lib";
