@@ -102,7 +102,7 @@ unit testing && integration testing
 $ cd mysql && docker-compose up --build
 $ npm run test // 다른 환경 변수 사용 하고 싶으면 `nf -e .env.test run npm run test`
 ```
-
+ㅇㅇ
 # prisma
 
 prisma v4 사용.
