@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
 import { Service } from "typedi";
+import { plainToInstance } from "class-transformer";
 import { ResumeService } from "../services";
 import { IResumeController } from "../types";
 import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
@@ -17,6 +18,7 @@ import {
   UpdatePreferenceDto,
   UpdatePreferenceJobDto,
   UpdatePreferenceLocationDto,
+  CreateEducationDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -136,6 +138,23 @@ export class ResumeController implements IResumeController {
 
     const education = await this.resumeService.updateEducation(
       parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ education });
+  };
+
+  createEducation = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateEducationDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateEducationDto, body));
+    // await validateDtos(new CreateEducationDto(body));
+
+    const education = await this.resumeService.createEducation(
+      Number(id),
       body
     );
 

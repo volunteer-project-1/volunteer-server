@@ -54,6 +54,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/education")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createEducation))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateEducation))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteEducation));
 
