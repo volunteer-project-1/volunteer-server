@@ -105,6 +105,10 @@ resumeRouter
 
 resumeRouter
   .route("/:id/preference-location")
+  .post(
+    isUserAuthenticate,
+    asyncHandler(resumeController.createPreferenceLocation)
+  )
   .patch(
     isUserAuthenticate,
     asyncHandler(resumeController.updatePreferenceLocation)
