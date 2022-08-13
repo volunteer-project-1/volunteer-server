@@ -78,6 +78,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/my-video")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createMyVideo))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateMyVideo))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteMyVideo));
 

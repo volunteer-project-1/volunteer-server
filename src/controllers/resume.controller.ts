@@ -22,6 +22,8 @@ import {
   CreateCareerDto,
   CreateActivityDto,
   CreateAwardDto,
+  CreateMyVideoDto,
+  CreateHelperVideoDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -275,6 +277,22 @@ export class ResumeController implements IResumeController {
     return res.json({ myVideo });
   };
 
+  createMyVideo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateMyVideoDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateMyVideoDto, body));
+
+    const myVideo = await this.resumeService.createMyVideo(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ myVideo });
+  };
+
   updateHelperVideo = async (
     { params: { id }, body }: Request<ReqParams, unknown, UpdateHelperVideoDto>,
     res: Response
@@ -289,6 +307,22 @@ export class ResumeController implements IResumeController {
     );
 
     return res.json({ helperVideo });
+  };
+
+  createHelperVideo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateHelperVideoDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateMyVideoDto, body));
+
+    const myVideo = await this.resumeService.createMyVideo(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ myVideo });
   };
 
   updatePreference = async (
