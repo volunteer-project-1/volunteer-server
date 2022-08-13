@@ -315,14 +315,14 @@ export class ResumeController implements IResumeController {
   ) => {
     assertNonNullish(id);
 
-    await validateDtos(plainToInstance(CreateMyVideoDto, body));
+    await validateDtos(plainToInstance(CreateHelperVideoDto, body));
 
-    const myVideo = await this.resumeService.createMyVideo(
+    const helperVideo = await this.resumeService.createHelperVideo(
       parseToNumberOrThrow(id),
       body
     );
 
-    return res.json({ myVideo });
+    return res.json({ helperVideo });
   };
 
   updatePreference = async (

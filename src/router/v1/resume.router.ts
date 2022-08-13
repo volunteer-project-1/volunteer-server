@@ -84,6 +84,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/helper-video")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createHelperVideo))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateHelperVideo))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteHelperVideo));
 
