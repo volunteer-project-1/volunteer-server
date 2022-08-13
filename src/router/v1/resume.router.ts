@@ -60,6 +60,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/career")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createCareer))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateCareer))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteCareer));
 

@@ -19,6 +19,7 @@ import {
   UpdatePreferenceJobDto,
   UpdatePreferenceLocationDto,
   CreateEducationDto,
+  CreateCareerDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -170,6 +171,22 @@ export class ResumeController implements IResumeController {
     await validateDtos(new UpdateCareerDto(body));
 
     const career = await this.resumeService.updateCareer(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ career });
+  };
+
+  createCareer = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateCareerDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateCareerDto, body));
+
+    const career = await this.resumeService.createCareer(
       parseToNumberOrThrow(id),
       body
     );
