@@ -20,6 +20,7 @@ import {
   UpdatePreferenceLocationDto,
   CreateEducationDto,
   CreateCareerDto,
+  CreateActivityDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -202,6 +203,22 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateActivityDto(body));
     const activity = await this.resumeService.updateActivity(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ activity });
+  };
+
+  createActivity = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateActivityDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateActivityDto, body));
+
+    const activity = await this.resumeService.createActivity(
       parseToNumberOrThrow(id),
       body
     );

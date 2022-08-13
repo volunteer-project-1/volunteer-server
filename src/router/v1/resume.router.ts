@@ -66,6 +66,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/activity")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createActivity))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateActivity))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteActivity));
 
