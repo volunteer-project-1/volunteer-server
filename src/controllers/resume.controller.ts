@@ -24,6 +24,7 @@ import {
   CreateAwardDto,
   CreateMyVideoDto,
   CreateHelperVideoDto,
+  CreatePreferenceDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -334,6 +335,22 @@ export class ResumeController implements IResumeController {
     await validateDtos(new UpdatePreferenceDto(body));
 
     const preference = await this.resumeService.updatePreference(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ preference });
+  };
+
+  createPreference = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreatePreferenceDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreatePreferenceDto, body));
+
+    const preference = await this.resumeService.createPreference(
       parseToNumberOrThrow(id),
       body
     );

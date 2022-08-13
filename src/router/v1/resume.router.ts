@@ -90,6 +90,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/preference")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createPreference))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updatePreference))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deletePreference));
 
