@@ -72,6 +72,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/award")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createAward))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateAward))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteAward));
 

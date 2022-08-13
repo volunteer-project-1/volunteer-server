@@ -21,6 +21,7 @@ import {
   CreateEducationDto,
   CreateCareerDto,
   CreateActivityDto,
+  CreateAwardDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -235,6 +236,22 @@ export class ResumeController implements IResumeController {
     await validateDtos(new UpdateAwardDto(body));
 
     const award = await this.resumeService.updateAward(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ award });
+  };
+
+  createAward = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateAwardDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateAwardDto, body));
+
+    const award = await this.resumeService.createAward(
       parseToNumberOrThrow(id),
       body
     );
