@@ -108,6 +108,7 @@ CREATE TABLE `helper_videos` (
     `url` VARCHAR(255) NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
 
+    UNIQUE INDEX `helper_videos_resume_id_key`(`resume_id`),
     INDEX `resume_id`(`resume_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -190,6 +191,7 @@ CREATE TABLE `my_videos` (
     `url` VARCHAR(255) NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
 
+    UNIQUE INDEX `my_videos_resume_id_key`(`resume_id`),
     INDEX `resume_id`(`resume_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -279,6 +281,7 @@ CREATE TABLE `resume_infos` (
     `avatar` VARCHAR(255) NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
 
+    UNIQUE INDEX `resume_infos_resume_id_key`(`resume_id`),
     INDEX `resume_id`(`resume_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

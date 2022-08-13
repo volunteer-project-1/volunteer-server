@@ -50,7 +50,11 @@ authRouter.route("/google/callback").get(
 );
 
 authRouter.route("/logout").get(async (req, res) => {
-  req.logOut();
+  req.logOut((err) => {
+    if (err) {
+      throw new BadReqError();
+    }
+  });
   await req.session.destroy((err) => {
     if (err) {
       throw new BadReqError();
