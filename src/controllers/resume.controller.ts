@@ -25,6 +25,7 @@ import {
   CreateMyVideoDto,
   CreateHelperVideoDto,
   CreatePreferenceDto,
+  CreatePreferenceJobDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -370,6 +371,25 @@ export class ResumeController implements IResumeController {
     await validateDtos(new UpdatePreferenceJobDto(body));
 
     const preferenceJob = await this.resumeService.updatePreferenceJob(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ preferenceJob });
+  };
+
+  createPreferenceJob = async (
+    {
+      params: { id },
+      body,
+    }: Request<ReqParams, unknown, CreatePreferenceJobDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreatePreferenceJobDto, body));
+
+    const preferenceJob = await this.resumeService.createPreferenceJob(
       parseToNumberOrThrow(id),
       body
     );

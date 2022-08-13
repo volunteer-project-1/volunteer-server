@@ -96,6 +96,7 @@ resumeRouter
 
 resumeRouter
   .route("/:id/preference-job")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createPreferenceJob))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updatePreferenceJob))
   .delete(
     isUserAuthenticate,
