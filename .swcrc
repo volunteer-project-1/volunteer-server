@@ -4,7 +4,7 @@
     "parser": {
       "syntax": "typescript",
       "decorators": true,
-    //   "dynamicImport": true,
+      //   "dynamicImport": true,
       "dynamicImport": false,
       "privateMethod": false,
       "functionBind": false,
@@ -29,6 +29,6 @@
     "lazy": false,
     "noInterop": false
   },
-  "exclude": ["./src/**/.*.spec.ts$", "./**/.*.js$"],
+  "exclude": ["./src/**/.*.spec.ts$", ".*.test.ts$", "./**/.*.js$"],
   "sourceMaps": true
 }
