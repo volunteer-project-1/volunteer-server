@@ -2,8 +2,8 @@ import request from "supertest";
 import Container from "typedi";
 import { PrismaPromise } from "@prisma/client";
 import { startApp } from "../../../app";
-import { newResumeAllFactory } from "../../../factory";
-import { UserService } from "../../../services";
+import { newCareerFactory, newResumeAllFactory } from "../../../factory";
+import { ResumeService, UserService } from "../../../services";
 import Prisma from "../../../db/prisma";
 
 beforeEach(async () => {
@@ -53,40 +53,40 @@ afterEach(async () => {
 afterAll(async () => {
   await prisma.$disconnect();
 });
-describe("createResume test", () => {
+describe("create Career test", () => {
   const URL = "/api/v1/resume";
 
-  it("GET '/',If Validate Fail, return 400", async () => {
+  const resumeService = Container.get(ResumeService);
+
+  it("GET '/',If Validate fail, return 400", async () => {
+    const resumeId = 1;
+
     const res = await request(await startApp())
-      .post(URL)
-      .send({ resume: { title: "제목", content: "내용" }, resumeInfo: {} });
+      .post(`${URL}/${resumeId}/career`)
+      .send({ test: "asdf" });
 
     expect(res.status).toBe(400);
   });
 
-  it("GET '/',If Created(필수항목), return 200", async () => {
-    const data = newResumeAllFactory({
-      helperVideo: null,
-      educations: null,
-      careers: null,
-      trainings: null,
-      certificates: null,
-      preference: null,
-      portfolio: null,
-      introductions: null,
-      awards: null,
-    });
-    const res = await request(await startApp())
-      .post(URL)
-      .send(data);
+  it("GET '/',If No resume, return 404", async () => {
+    const resumeId = 1;
 
-    expect(res.status).toBe(200);
+    const res = await request(await startApp())
+      .post(`${URL}/${resumeId}/career`)
+      .send(newCareerFactory());
+
+    expect(res.status).toBe(404);
   });
 
-  it("GET '/',If Created(전체항목), return 200", async () => {
+  it("GET '/',If Created, return 200", async () => {
+    const userId = 1;
+    const { resume } = await resumeService.createResume(
+      userId,
+      newResumeAllFactory()
+    );
     const res = await request(await startApp())
-      .post(URL)
-      .send(newResumeAllFactory());
+      .post(`${URL}/${resume.id}/career`)
+      .send(newCareerFactory());
 
     expect(res.status).toBe(200);
   });

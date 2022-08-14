@@ -196,6 +196,20 @@ export interface IUpdateResumeInfo {
 export interface IUpdateEducation {
   education: Partial<Omit<Educations, "id" | "resumeId">>;
 }
+
+export type ICreateEducation = Omit<Educations, "id" | "resumeId">;
+export type ICreateCareer = Omit<Careers, "id" | "resumeId">;
+export type ICreateActivity = Omit<Activities, "id" | "resumeId">;
+export type ICreateAward = Omit<Awards, "id" | "resumeId">;
+export type ICreateMyVideo = Omit<MyVideos, "id" | "resumeId">;
+export type ICreateHelperVideo = Omit<HelperVideos, "id" | "resumeId">;
+export type ICreatePreference = Omit<Preferences, "id" | "resumeId">;
+export type ICreatePreferenceJob = Omit<PreferenceJobs, "id" | "preferenceId">;
+export type ICreatePreferenceLocation = Omit<
+  PreferenceLocations,
+  "id" | "preferenceId"
+>;
+
 export interface IUpdateCareer {
   career: Partial<Omit<Careers, "id" | "resumeId">>;
 }
