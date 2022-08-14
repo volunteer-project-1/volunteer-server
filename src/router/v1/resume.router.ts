@@ -54,41 +54,49 @@ resumeRouter
 
 resumeRouter
   .route("/:id/education")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createEducation))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateEducation))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteEducation));
 
 resumeRouter
   .route("/:id/career")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createCareer))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateCareer))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteCareer));
 
 resumeRouter
   .route("/:id/activity")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createActivity))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateActivity))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteActivity));
 
 resumeRouter
   .route("/:id/award")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createAward))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateAward))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteAward));
 
 resumeRouter
   .route("/:id/my-video")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createMyVideo))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateMyVideo))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteMyVideo));
 
 resumeRouter
   .route("/:id/helper-video")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createHelperVideo))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updateHelperVideo))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deleteHelperVideo));
 
 resumeRouter
   .route("/:id/preference")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createPreference))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updatePreference))
   .delete(isUserAuthenticate, asyncHandler(resumeController.deletePreference));
 
 resumeRouter
   .route("/:id/preference-job")
+  .post(isUserAuthenticate, asyncHandler(resumeController.createPreferenceJob))
   .patch(isUserAuthenticate, asyncHandler(resumeController.updatePreferenceJob))
   .delete(
     isUserAuthenticate,
@@ -97,6 +105,10 @@ resumeRouter
 
 resumeRouter
   .route("/:id/preference-location")
+  .post(
+    isUserAuthenticate,
+    asyncHandler(resumeController.createPreferenceLocation)
+  )
   .patch(
     isUserAuthenticate,
     asyncHandler(resumeController.updatePreferenceLocation)

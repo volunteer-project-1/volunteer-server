@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
 import { Service } from "typedi";
+import { plainToInstance } from "class-transformer";
 import { ResumeService } from "../services";
 import { IResumeController } from "../types";
 import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
@@ -17,6 +18,15 @@ import {
   UpdatePreferenceDto,
   UpdatePreferenceJobDto,
   UpdatePreferenceLocationDto,
+  CreateEducationDto,
+  CreateCareerDto,
+  CreateActivityDto,
+  CreateAwardDto,
+  CreateMyVideoDto,
+  CreateHelperVideoDto,
+  CreatePreferenceDto,
+  CreatePreferenceJobDto,
+  CreatePreferenceLocationDto,
 } from "../dtos";
 
 type ReqParams = {
@@ -142,6 +152,23 @@ export class ResumeController implements IResumeController {
     return res.json({ education });
   };
 
+  createEducation = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateEducationDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateEducationDto, body));
+    // await validateDtos(new CreateEducationDto(body));
+
+    const education = await this.resumeService.createEducation(
+      Number(id),
+      body
+    );
+
+    return res.json({ education });
+  };
+
   updateCareer = async (
     { params: { id }, body }: Request<ReqParams, unknown, UpdateCareerDto>,
     res: Response
@@ -158,6 +185,22 @@ export class ResumeController implements IResumeController {
     return res.json({ career });
   };
 
+  createCareer = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateCareerDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateCareerDto, body));
+
+    const career = await this.resumeService.createCareer(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ career });
+  };
+
   updateActivity = async (
     { params: { id }, body }: Request<ReqParams, unknown, UpdateActivityDto>,
     res: Response
@@ -166,6 +209,22 @@ export class ResumeController implements IResumeController {
 
     await validateDtos(new UpdateActivityDto(body));
     const activity = await this.resumeService.updateActivity(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ activity });
+  };
+
+  createActivity = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateActivityDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateActivityDto, body));
+
+    const activity = await this.resumeService.createActivity(
       parseToNumberOrThrow(id),
       body
     );
@@ -189,6 +248,22 @@ export class ResumeController implements IResumeController {
     return res.json({ award });
   };
 
+  createAward = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateAwardDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateAwardDto, body));
+
+    const award = await this.resumeService.createAward(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ award });
+  };
+
   updateMyVideo = async (
     { params: { id }, body }: Request<ReqParams, unknown, UpdateMyVideoDto>,
     res: Response
@@ -198,6 +273,22 @@ export class ResumeController implements IResumeController {
     await validateDtos(new UpdateMyVideoDto(body));
 
     const myVideo = await this.resumeService.updateMyVideo(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ myVideo });
+  };
+
+  createMyVideo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateMyVideoDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateMyVideoDto, body));
+
+    const myVideo = await this.resumeService.createMyVideo(
       parseToNumberOrThrow(id),
       body
     );
@@ -221,6 +312,22 @@ export class ResumeController implements IResumeController {
     return res.json({ helperVideo });
   };
 
+  createHelperVideo = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreateHelperVideoDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreateHelperVideoDto, body));
+
+    const helperVideo = await this.resumeService.createHelperVideo(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ helperVideo });
+  };
+
   updatePreference = async (
     { params: { id }, body }: Request<ReqParams, unknown, UpdatePreferenceDto>,
     res: Response
@@ -230,6 +337,22 @@ export class ResumeController implements IResumeController {
     await validateDtos(new UpdatePreferenceDto(body));
 
     const preference = await this.resumeService.updatePreference(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ preference });
+  };
+
+  createPreference = async (
+    { params: { id }, body }: Request<ReqParams, unknown, CreatePreferenceDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreatePreferenceDto, body));
+
+    const preference = await this.resumeService.createPreference(
       parseToNumberOrThrow(id),
       body
     );
@@ -256,6 +379,25 @@ export class ResumeController implements IResumeController {
     return res.json({ preferenceJob });
   };
 
+  createPreferenceJob = async (
+    {
+      params: { id },
+      body,
+    }: Request<ReqParams, unknown, CreatePreferenceJobDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreatePreferenceJobDto, body));
+
+    const preferenceJob = await this.resumeService.createPreferenceJob(
+      parseToNumberOrThrow(id),
+      body
+    );
+
+    return res.json({ preferenceJob });
+  };
+
   updatePreferenceLocation = async (
     {
       params: { id },
@@ -269,6 +411,26 @@ export class ResumeController implements IResumeController {
 
     const preferenceLocation =
       await this.resumeService.updatePreferenceLocation(
+        parseToNumberOrThrow(id),
+        body
+      );
+
+    return res.json({ preferenceLocation });
+  };
+
+  createPreferenceLocation = async (
+    {
+      params: { id },
+      body,
+    }: Request<ReqParams, unknown, CreatePreferenceLocationDto>,
+    res: Response
+  ) => {
+    assertNonNullish(id);
+
+    await validateDtos(plainToInstance(CreatePreferenceLocationDto, body));
+
+    const preferenceLocation =
+      await this.resumeService.createPreferenceLocation(
         parseToNumberOrThrow(id),
         body
       );
