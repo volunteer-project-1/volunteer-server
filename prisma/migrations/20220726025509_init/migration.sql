@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `activities` (
+CREATE TABLE IF NOT EXISTS `activities` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `organization` VARCHAR(100) NULL,
     `description` VARCHAR(100) NULL,
@@ -10,7 +10,7 @@ CREATE TABLE `activities` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `awards` (
+CREATE TABLE IF NOT EXISTS `awards` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(20) NULL,
     `institute` VARCHAR(100) NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `awards` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `careers` (
+CREATE TABLE IF NOT EXISTS `careers` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `company` VARCHAR(100) NULL,
     `department` VARCHAR(100) NULL,
@@ -39,7 +39,7 @@ CREATE TABLE `careers` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `certificates` (
+CREATE TABLE IF NOT EXISTS `certificates` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(30) NULL,
     `institute` VARCHAR(100) NULL,
@@ -51,7 +51,7 @@ CREATE TABLE `certificates` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `company_histories` (
+CREATE TABLE IF NOT EXISTS `company_histories` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `content` VARCHAR(600) NOT NULL,
     `history_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -62,7 +62,7 @@ CREATE TABLE `company_histories` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `companys` (
+CREATE TABLE IF NOT EXISTS `companys` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(40) NOT NULL,
     `password` VARCHAR(1000) NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE `companys` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `educations` (
+CREATE TABLE IF NOT EXISTS `educations` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `type` VARCHAR(20) NULL,
     `school_name` VARCHAR(100) NULL,
@@ -103,7 +103,7 @@ CREATE TABLE `educations` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `helper_videos` (
+CREATE TABLE IF NOT EXISTS `helper_videos` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(255) NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE `helper_videos` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `introductions` (
+CREATE TABLE IF NOT EXISTS `introductions` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(30) NULL,
     `content` VARCHAR(800) NULL,
@@ -124,7 +124,7 @@ CREATE TABLE `introductions` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `jd_details` (
+CREATE TABLE IF NOT EXISTS `jd_details` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(100) NOT NULL,
     `num_recruitment` INTEGER UNSIGNED NOT NULL DEFAULT 0,
@@ -138,7 +138,7 @@ CREATE TABLE `jd_details` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `jd_steps` (
+CREATE TABLE IF NOT EXISTS `jd_steps` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `step` INTEGER UNSIGNED NOT NULL DEFAULT 1,
     `title` VARCHAR(100) NOT NULL,
@@ -149,7 +149,7 @@ CREATE TABLE `jd_steps` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `jd_welfares` (
+CREATE TABLE IF NOT EXISTS `jd_welfares` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(50) NOT NULL,
     `content` VARCHAR(150) NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE `jd_welfares` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `jd_work_conditions` (
+CREATE TABLE IF NOT EXISTS `jd_work_conditions` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `type` VARCHAR(500) NOT NULL,
     `time` VARCHAR(500) NOT NULL,
@@ -173,7 +173,7 @@ CREATE TABLE `jd_work_conditions` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `job_descriptions` (
+CREATE TABLE IF NOT EXISTS `job_descriptions` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `started_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `deadline_at` DATETIME(3) NOT NULL,
@@ -185,7 +185,7 @@ CREATE TABLE `job_descriptions` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `my_videos` (
+CREATE TABLE IF NOT EXISTS `my_videos` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(255) NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE `my_videos` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `portfolios` (
+CREATE TABLE IF NOT EXISTS `portfolios` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(255) NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
@@ -205,7 +205,7 @@ CREATE TABLE `portfolios` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `preference_jobs` (
+CREATE TABLE IF NOT EXISTS `preference_jobs` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NULL,
     `preference_id` INTEGER UNSIGNED NOT NULL,
@@ -215,7 +215,7 @@ CREATE TABLE `preference_jobs` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `preference_locations` (
+CREATE TABLE IF NOT EXISTS `preference_locations` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `sido` VARCHAR(20) NULL,
     `sigungu` VARCHAR(20) NULL,
@@ -226,7 +226,7 @@ CREATE TABLE `preference_locations` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `preferences` (
+CREATE TABLE IF NOT EXISTS `preferences` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `employ_type` VARCHAR(20) NULL,
     `salary` SMALLINT NULL DEFAULT 0,
@@ -237,7 +237,7 @@ CREATE TABLE `preferences` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `profiles` (
+CREATE TABLE IF NOT EXISTS `profiles` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(20) NULL,
     `address` VARCHAR(255) NULL,
@@ -250,7 +250,7 @@ CREATE TABLE `profiles` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `resume_applyings` (
+CREATE TABLE IF NOT EXISTS `resume_applyings` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER UNSIGNED NOT NULL,
     `resume_id` INTEGER UNSIGNED NOT NULL,
@@ -265,7 +265,7 @@ CREATE TABLE `resume_applyings` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `resume_infos` (
+CREATE TABLE IF NOT EXISTS `resume_infos` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(20) NULL,
     `birthday` TIMESTAMP(3) NOT NULL,
@@ -284,7 +284,7 @@ CREATE TABLE `resume_infos` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `resumes` (
+CREATE TABLE IF NOT EXISTS `resumes` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(100) NOT NULL,
     `content` VARCHAR(255) NULL,
@@ -299,7 +299,7 @@ CREATE TABLE `resumes` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `trainings` (
+CREATE TABLE IF NOT EXISTS `trainings` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(30) NULL,
     `institute` VARCHAR(100) NULL,
@@ -313,7 +313,7 @@ CREATE TABLE `trainings` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `user_metas` (
+CREATE TABLE IF NOT EXISTS `user_metas` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `is_verified` BOOLEAN NULL DEFAULT false,
     `type` VARCHAR(10) NULL DEFAULT 'seeker',
@@ -325,7 +325,7 @@ CREATE TABLE `user_metas` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(40) NOT NULL,
     `password` VARCHAR(1000) NULL,
