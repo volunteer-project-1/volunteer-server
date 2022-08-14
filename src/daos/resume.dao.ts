@@ -15,7 +15,16 @@ import {
 } from "@prisma/client";
 import { IResumeDAO, IUpdateResume } from "../types";
 import {
+  ActivityDto,
+  AwardDto,
+  CareerDto,
   CreateResumeDto,
+  EducationDto,
+  HelperVideoDto,
+  MyVideoDto,
+  PreferenceDto,
+  PreferenceJobDto,
+  PreferenceLocationDto,
   UpdateActivityDto,
   UpdateAwardDto,
   UpdateCareerDto,
@@ -269,11 +278,19 @@ export class ResumeDAO implements IResumeDAO {
     });
   }
 
+  async createEducation(resumeId: number, data: EducationDto) {
+    return await this.prisma.educations.create({ data: { resumeId, ...data } });
+  }
+
   async updateCareer(id: number, { career }: UpdateCareerDto) {
     return await this.prisma.careers.update({
       where: { id },
       data: { ...career },
     });
+  }
+
+  async createCareer(resumeId: number, data: CareerDto) {
+    return await this.prisma.careers.create({ data: { resumeId, ...data } });
   }
 
   async updateActivity(id: number, { activity }: UpdateActivityDto) {
@@ -283,11 +300,19 @@ export class ResumeDAO implements IResumeDAO {
     });
   }
 
+  async createActivity(resumeId: number, data: ActivityDto) {
+    return await this.prisma.activities.create({ data: { resumeId, ...data } });
+  }
+
   async updateAward(id: number, { award }: UpdateAwardDto) {
     return await this.prisma.awards.update({
       where: { id },
       data: { ...award },
     });
+  }
+
+  async createAward(resumeId: number, data: AwardDto) {
+    return await this.prisma.awards.create({ data: { resumeId, ...data } });
   }
 
   async updateMyVideo(id: number, { myVideo }: UpdateMyVideoDto) {
@@ -297,6 +322,10 @@ export class ResumeDAO implements IResumeDAO {
     });
   }
 
+  async createMyVideo(resumeId: number, data: MyVideoDto) {
+    return await this.prisma.myVideos.create({ data: { resumeId, ...data } });
+  }
+
   async updateHelperVideo(id: number, { helperVideo }: UpdateHelperVideoDto) {
     return await this.prisma.helperVideos.update({
       where: { id },
@@ -304,10 +333,38 @@ export class ResumeDAO implements IResumeDAO {
     });
   }
 
+  async createHelperVideo(resumeId: number, data: HelperVideoDto) {
+    return await this.prisma.helperVideos.create({
+      data: { resumeId, ...data },
+    });
+  }
+
   async updatePreference(id: number, { preference }: UpdatePreferenceDto) {
     return await this.prisma.preferences.update({
       where: { id },
       data: { ...preference },
+    });
+  }
+
+  async createPreference(
+    resumeId: number,
+    { preferenceJobs, preferenceLocations, ...rest }: PreferenceDto
+  ) {
+    return await this.prisma.preferences.create({
+      data: {
+        resumeId,
+        ...rest,
+        ...(preferenceJobs?.length && {
+          preferenceJob: { create: preferenceJobs },
+        }),
+        ...(preferenceLocations?.length && {
+          preferenceLocation: { create: preferenceLocations },
+        }),
+      },
+      include: {
+        preferenceJobs: true,
+        preferenceLocation: true,
+      },
     });
   }
 
@@ -321,6 +378,15 @@ export class ResumeDAO implements IResumeDAO {
     });
   }
 
+  async createPreferenceLocation(
+    preferenceId: number,
+    data: PreferenceLocationDto
+  ) {
+    return await this.prisma.preferenceLocations.create({
+      data: { preferenceId, ...data },
+    });
+  }
+
   async updatePreferenceJob(
     id: number,
     { preferenceJob }: UpdatePreferenceJobDto
@@ -328,6 +394,12 @@ export class ResumeDAO implements IResumeDAO {
     return await this.prisma.preferenceJobs.update({
       where: { id },
       data: { ...preferenceJob },
+    });
+  }
+
+  async createPreferenceJob(preferenceId: number, data: PreferenceJobDto) {
+    return await this.prisma.preferenceJobs.create({
+      data: { preferenceId, ...data },
     });
   }
 

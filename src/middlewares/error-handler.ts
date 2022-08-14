@@ -55,7 +55,7 @@ export function logDbErrorMiddleware(
       return;
     }
 
-    if (err.code === "P2025") {
+    if (err.code === "P2025" || err.code === "P2003") {
       res.status(HTTP_STATUS_CODE.NOT_FOUND);
     }
     res.json({ name: err.code, message: err.message });
