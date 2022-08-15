@@ -71,7 +71,7 @@ export class CompanyDAO implements IComapnyDAO {
       data: { ...data },
     });
   }
-  
+
   async test() {
     return true;
   }
