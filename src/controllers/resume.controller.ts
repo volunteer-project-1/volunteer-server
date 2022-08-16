@@ -42,7 +42,8 @@ export class ResumeController implements IResumeController {
 
   upload = async ({ file }: Request<unknown, unknown>, res: Response) => {
     assertNonNullish(file?.key);
-    const url = this.multerS3.getSignedUrl(file.key);
+    const url = file.location;
+    // const url = this.multerS3.getSignedUrl(file.key);
 
     return res.json({ file, url });
   };

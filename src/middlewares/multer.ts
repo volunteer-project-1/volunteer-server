@@ -50,7 +50,9 @@ const MULTER_OPTION: Options = {
     acl: "public-read",
     contentType: AUTO_CONTENT_TYPE,
     key: (req, file, cb) => {
-      cb(null, `${Date.now()}.${file.originalname.split(".").pop()}`);
+      const newFileName = `${Date.now()}.${file.originalname.split(".").pop()}`;
+      const fullPath = `videos/${newFileName}`;
+      cb(null, fullPath);
     },
   }),
   limits: { fileSize: MAX_SIZE },
