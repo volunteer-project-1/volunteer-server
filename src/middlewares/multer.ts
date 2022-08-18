@@ -2,6 +2,7 @@ import multer, { Options, FileFilterCallback } from "multer";
 import multerS3, { AUTO_CONTENT_TYPE } from "multer-s3";
 import path from "path";
 import Container from "typedi";
+import { NextFunction, Request, Response } from "express";
 import { BadReqError, MulterS3 } from "../lib";
 import { S3_BUCKET } from "../config";
 
@@ -43,24 +44,6 @@ const checkFileCheck = (
   }
 };
 
-// const MULTER_OPTION: Options = {
-//   storage: multerS3({
-//     s3,
-//     bucket: S3_BUCKET,
-//     acl: "public-read",
-//     contentType: AUTO_CONTENT_TYPE,
-//     key: (req, file, cb) => {
-//       const newFileName = `${Date.now()}.${file.originalname.split(".").pop()}`;
-//       const fullPath = `videos/${newFileName}`;
-//       cb(null, fullPath);
-//     },
-//   }),
-//   limits: { fileSize: MAX_SIZE },
-//   fileFilter: (req, file, cb) => {
-//     checkFileCheck(file, req.url.split("/")[1], cb);
-//   },
-// };
-
 const ROUTER_NAMES = ["video", "pdf", "avatar"] as const;
 type RouterName = typeof ROUTER_NAMES[number];
 
@@ -86,7 +69,30 @@ const MULTER_OPTION = (routerName: RouterName): Options => {
   };
 };
 
-export function upload(routerName: RouterName) {
-  return multer(MULTER_OPTION(routerName));
-}
-// export const upload = multer(MULTER_OPTION);
+const upload = (name: RouterName) => {
+  return multer(MULTER_OPTION(name));
+};
+
+export const uploadVideo = (
+  _req: Request,
+  _res: Response,
+  _next: NextFunction
+) => {
+  return upload("video").single("url");
+};
+
+export const uploadPdf = (
+  _req: Request,
+  _res: Response,
+  _next: NextFunction
+) => {
+  return upload("pdf").single("url");
+};
+
+export const uploadAvatar = (
+  _req: Request,
+  _res: Response,
+  _next: NextFunction
+) => {
+  return upload("avatar").single("url");
+};
