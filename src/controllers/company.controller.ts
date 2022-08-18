@@ -72,13 +72,13 @@ export class CompanyController implements ICompanyController {
       throw new BadReqError();
     }
 
-    const found = await this.companyService.findCompanyById(company.id);
+    // const found = await this.companyService.findCompanyById(company.id);
 
-    if (!found) {
-      throw new NotFoundError();
-    }
+    // if (!found) {
+    //   throw new NotFoundError();
+    // }
 
-    return res.json({ company: found });
+    return res.json({ company: updatedCompany });
   };
 
   findCompanyList = async (
