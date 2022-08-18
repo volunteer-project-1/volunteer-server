@@ -1,7 +1,8 @@
 import { Router } from "express";
 import Container from "typedi";
 import { ResumeController } from "../../controllers";
-import { isUserAuthenticate, upload } from "../../middlewares";
+import { upload } from "../../middlewares/multer";
+import { isUserAuthenticate } from "../../middlewares";
 import { asyncHandler } from "../../utils";
 
 const resumeRouter = Router();
@@ -12,7 +13,7 @@ resumeRouter
   .route("/video")
   .post(
     isUserAuthenticate,
-    upload.single("url"),
+    upload("video").single("url"),
     asyncHandler(resumeController.upload)
   );
 
@@ -20,7 +21,7 @@ resumeRouter
   .route("/pdf")
   .post(
     isUserAuthenticate,
-    upload.single("url"),
+    upload("pdf").single("url"),
     asyncHandler(resumeController.upload)
   );
 
@@ -28,7 +29,7 @@ resumeRouter
   .route("/avatar")
   .post(
     isUserAuthenticate,
-    upload.single("url"),
+    upload("avatar").single("url"),
     asyncHandler(resumeController.upload)
   );
 

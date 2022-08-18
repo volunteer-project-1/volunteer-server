@@ -43,22 +43,50 @@ const checkFileCheck = (
   }
 };
 
-const MULTER_OPTION: Options = {
-  storage: multerS3({
-    s3,
-    bucket: S3_BUCKET,
-    acl: "public-read",
-    contentType: AUTO_CONTENT_TYPE,
-    key: (req, file, cb) => {
-      const newFileName = `${Date.now()}.${file.originalname.split(".").pop()}`;
-      const fullPath = `videos/${newFileName}`;
-      cb(null, fullPath);
+// const MULTER_OPTION: Options = {
+//   storage: multerS3({
+//     s3,
+//     bucket: S3_BUCKET,
+//     acl: "public-read",
+//     contentType: AUTO_CONTENT_TYPE,
+//     key: (req, file, cb) => {
+//       const newFileName = `${Date.now()}.${file.originalname.split(".").pop()}`;
+//       const fullPath = `videos/${newFileName}`;
+//       cb(null, fullPath);
+//     },
+//   }),
+//   limits: { fileSize: MAX_SIZE },
+//   fileFilter: (req, file, cb) => {
+//     checkFileCheck(file, req.url.split("/")[1], cb);
+//   },
+// };
+
+const ROUTER_NAMES = ["video", "pdf", "avatar"] as const;
+type RouterName = typeof ROUTER_NAMES[number];
+
+const MULTER_OPTION = (routerName: RouterName): Options => {
+  return {
+    storage: multerS3({
+      s3,
+      bucket: S3_BUCKET,
+      acl: "public-read",
+      contentType: AUTO_CONTENT_TYPE,
+      key: (req, file, cb) => {
+        const newFileName = `${Date.now()}.${file.originalname
+          .split(".")
+          .pop()}`;
+        const fullPath = `${routerName}/${newFileName}`;
+        cb(null, fullPath);
+      },
+    }),
+    limits: { fileSize: MAX_SIZE },
+    fileFilter: (req, file, cb) => {
+      checkFileCheck(file, req.url.split("/")[1], cb);
     },
-  }),
-  limits: { fileSize: MAX_SIZE },
-  fileFilter: (req, file, cb) => {
-    checkFileCheck(file, req.url.split("/")[1], cb);
-  },
+  };
 };
 
-export const upload = multer(MULTER_OPTION);
+export function upload(routerName: RouterName) {
+  return multer(MULTER_OPTION(routerName));
+}
+// export const upload = multer(MULTER_OPTION);
