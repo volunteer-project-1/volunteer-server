@@ -48,8 +48,21 @@ export class CompanyController implements ICompanyController {
     return res.json({ company });
   };
 
-  findCompanyById = async ({ user: company }: Request, res: Response) => {
-    const result = await this.companyService.findCompanyById(company!.id);
+  findCompanyById = async (
+    { user: company, params: { id } }: Request,
+    res: Response
+  ) => {
+    if (!id) {
+      throw new BadReqError();
+    }
+    const companyId = id === "me" ? company!.id : +id;
+    parseToNumberOrThrow(companyId);
+
+    const result = await this.companyService.findCompanyById(companyId);
+
+    if (!result) {
+      throw new NotFoundError();
+    }
 
     return res.json({ company: result });
   };
