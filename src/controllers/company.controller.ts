@@ -48,6 +48,25 @@ export class CompanyController implements ICompanyController {
     return res.json({ company });
   };
 
+  findCompanyById = async (
+    { user: company, params: { id } }: Request,
+    res: Response
+  ) => {
+    if (!id) {
+      throw new BadReqError();
+    }
+    const companyId = id === "me" ? company!.id : +id;
+    parseToNumberOrThrow(companyId);
+
+    const result = await this.companyService.findCompanyById(companyId);
+
+    if (!result) {
+      throw new NotFoundError();
+    }
+
+    return res.json({ company: result });
+  };
+
   updateCompany = async (
     { body, user: company }: Request<unknown, unknown, UpdateCompanyDto>,
     res: Response
@@ -66,13 +85,13 @@ export class CompanyController implements ICompanyController {
       throw new BadReqError();
     }
 
-    const found = await this.companyService.findCompanyById(company.id);
+    // const found = await this.companyService.findCompanyById(company.id);
 
-    if (!found) {
-      throw new NotFoundError();
-    }
+    // if (!found) {
+    //   throw new NotFoundError();
+    // }
 
-    return res.json({ company: found });
+    return res.json({ company: updatedCompany });
   };
 
   findCompanyList = async (
