@@ -3,6 +3,17 @@ import { magenta } from "colors";
 import onFinished from "on-finished";
 import { logger } from "../utils";
 
+const CENSOR_WORD_LIST = ["password", "passwordConfirm"] as const;
+const lowerCaseCensorWordList = CENSOR_WORD_LIST.map((list) =>
+  list.toLowerCase()
+);
+
+function xorArrFromBrr(arr: string[], brr: string[]) {
+  return arr
+    .map((key) => key.toLowerCase())
+    .filter((key) => !brr.includes(key));
+}
+
 export const loggingReq = (
   { method, originalUrl, query, body, file, files }: Request,
   res: Response,
@@ -13,18 +24,11 @@ export const loggingReq = (
     logger.info(`Query Parameters : ${JSON.stringify(query)}`);
   }
   if (body) {
-    const filteredBody = { ...body };
-    Object.keys(body).forEach((k) => {
-      if (k.toLocaleLowerCase().indexOf("password") > -1) {
-        filteredBody.password = "FILTERED";
-      }
-
-      if (k.toLocaleLowerCase().indexOf("passwordconfirm") > -1) {
-        filteredBody.passwordConfirm = "FILTERED";
-      }
-    });
-
-    logger.info(`Parameters : ${JSON.stringify(filteredBody)}`);
+    logger.info(
+      `Parameters : ${JSON.stringify(
+        xorArrFromBrr(Object.keys({ ...body }), lowerCaseCensorWordList)
+      )}`
+    );
   }
   if (file || files) {
     logger.info(`File : ${JSON.stringify(file || files)}`);
