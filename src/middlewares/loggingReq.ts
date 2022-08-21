@@ -8,10 +8,31 @@ const lowerCaseCensorWordList = CENSOR_WORD_LIST.map((list) =>
   list.toLowerCase()
 );
 
-function xorArrFromBrr(arr: string[], brr: string[]) {
-  return arr
-    .map((key) => key.toLowerCase())
-    .filter((key) => !brr.includes(key));
+type BodyWithIndexSignature = Record<string, string | unknown>;
+
+function filteringNestedBody(
+  body: BodyWithIndexSignature,
+  censoredWords: string[]
+) {
+  const keys = Object.keys(body);
+  // const filter1 = keys.filter( v => lowerCaseCensorWordList.indexOf(v.toLocaleLowerCase()) > -1);
+
+  const keysOfObjectInBody = keys.filter((key) => body[key] instanceof Object);
+  if (keysOfObjectInBody.length > 0) {
+    for (const key of keysOfObjectInBody) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      filteringNestedBody(body[key] as BodyWithIndexSignature, censoredWords);
+    }
+  }
+
+  for (const word of censoredWords) {
+    const key = keys.find((v) => v.toLocaleLowerCase() === word);
+    if (key) {
+      // eslint-disable-next-line no-param-reassign
+      body[key] = "FILTERED";
+    }
+  }
+  return body;
 }
 
 export const loggingReq = (
@@ -26,7 +47,7 @@ export const loggingReq = (
   if (body) {
     logger.info(
       `Parameters : ${JSON.stringify(
-        xorArrFromBrr(Object.keys({ ...body }), lowerCaseCensorWordList)
+        filteringNestedBody({ ...body }, lowerCaseCensorWordList)
       )}`
     );
   }
