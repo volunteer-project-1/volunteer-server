@@ -73,7 +73,7 @@ $ npm run build
 $ nf -e .env run npm run dev // `foreman`이라는 환경변수 주입 라이브러리 사용, 전역에 설치해주세요
 ```
 
-## 도커
+## 도커 .
 
 로컬에 docker가 설치되어 있어야 합니다.
 
