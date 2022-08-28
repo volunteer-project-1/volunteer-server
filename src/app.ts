@@ -7,8 +7,14 @@ import session from "express-session";
 import cors from "cors";
 import helmet from "helmet";
 import colors from "colors";
+import rateLimit from "express-rate-limit";
 import routes from "./router";
-import { API_PREFIX, CORS_CONFIG, SESSION_OPTION } from "./config";
+import {
+  API_PREFIX,
+  CORS_CONFIG,
+  SESSION_OPTION,
+  RATE_LIMIT_OPTION,
+} from "./config";
 import {
   loggingReq,
   logExErrorMiddleware,
@@ -29,6 +35,7 @@ export async function startApp() {
   await redis.initialize(session);
   const RedisStore = redis.getRedisStore();
 
+  app.use(rateLimit(RATE_LIMIT_OPTION));
   app.use(setOffKeepAlive);
 
   app.use(helmet());
