@@ -49,20 +49,46 @@ afterAll(async () => {
 describe("findMyProfile test", () => {
   const URL = "/api/v1/user";
 
-  it("GET '/profile',If My profile founded, return 200", async () => {
-    const res = await request(await startApp()).get(`${URL}/profile`);
+  it("GET '/profile',If My profile founded, return 404", async () => {
+    const id = 2;
+    const res = await request(await startApp()).get(`${URL}/${id}/profile`);
 
     expect(res.status).toBe(404);
   });
 
   it("GET '/profile',If My profile founded, return 200", async () => {
+    const id = 1;
     const email = "ehgks0083@gmail.com";
 
     const userService = Container.get(UserService);
     await userService.createUserBySocial(email);
 
-    const res = await request(await startApp()).get(`${URL}/profile`);
+    const res = await request(await startApp()).get(`${URL}/${id}/profile`);
 
     expect(res.status).toBe(200);
+  });
+
+  it("GET '/profile',If My profile founded, return 200", async () => {
+    const id = "me";
+    const email = "ehgks0083@gmail.com";
+
+    const userService = Container.get(UserService);
+    await userService.createUserBySocial(email);
+
+    const res = await request(await startApp()).get(`${URL}/${id}/profile`);
+
+    expect(res.status).toBe(200);
+  });
+
+  it("GET '/profile',If My profile founded, return 400", async () => {
+    const id = "dde";
+    const email = "ehgks0083@gmail.com";
+
+    const userService = Container.get(UserService);
+    await userService.createUserBySocial(email);
+
+    const res = await request(await startApp()).get(`${URL}/${id}/profile`);
+
+    expect(res.status).toBe(400);
   });
 });

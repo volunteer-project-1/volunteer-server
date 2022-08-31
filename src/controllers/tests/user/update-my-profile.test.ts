@@ -50,19 +50,32 @@ describe("updateMyProfile test", () => {
   const URL = "/api/v1/user";
 
   it("PATCH '/profile', If no body, return 400", async () => {
+    const id = 1;
     const res = await request(await startApp())
-      .patch(`${URL}/profile`)
+      .patch(`${URL}/${id}/profile`)
       .send({});
 
     expect(res.status).toBe(400);
   });
 
   it("PATCH '/profile',If Not Found, return 404", async () => {
+    const id = 1;
+
     const res = await request(await startApp())
-      .patch(`${URL}/profile`)
+      .patch(`${URL}/${id}/profile`)
       .send({ name: "DoHan Kim" });
 
     expect(res.status).toBe(404);
+  });
+
+  it("PATCH '/profile',If Not My Id, return 400", async () => {
+    const id = 2;
+
+    const res = await request(await startApp())
+      .patch(`${URL}/${id}/profile`)
+      .send({ name: "DoHan Kim" });
+
+    expect(res.status).toBe(400);
   });
 
   it("PATCH '/profile',If Update Successful, return 200", async () => {
@@ -70,8 +83,24 @@ describe("updateMyProfile test", () => {
     const email = "ehgks0083@gmail.com";
     await userService.createUserBySocial(email);
 
+    const id = 1;
+
     const res = await request(await startApp())
-      .patch(`${URL}/profile`)
+      .patch(`${URL}/${id}/profile`)
+      .send({ name: "DoHan Kim" });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("PATCH '/profile',If Update Successful, return 200", async () => {
+    const userService = Container.get(UserService);
+    const email = "ehgks0083@gmail.com";
+    await userService.createUserBySocial(email);
+
+    const id = "me";
+
+    const res = await request(await startApp())
+      .patch(`${URL}/${id}/profile`)
       .send({ name: "DoHan Kim" });
 
     expect(res.status).toBe(200);

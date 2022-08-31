@@ -6,6 +6,7 @@ import { assertNonNullish, parseToNumberOrThrow, validateDtos } from "../utils";
 import { UserService } from "../services";
 import { UpdateProfileDto } from "../dtos/user/update-my-profile.dto";
 import { CreateUserByLocalDto } from "../dtos/user/create-user-by-local.dto";
+import { BadReqError } from "../lib";
 
 type ReqParams = { id?: string };
 @Service()
@@ -23,8 +24,10 @@ export class UserController implements IUserController {
     return res.json({ user, userMetas, profiles });
   };
 
-  findMyProfile = async ({ user }: Request, res: Response) => {
-    const profile = await this.userService.findMyProfile(user!.id);
+  findMyProfile = async ({ user, params: { id } }: Request, res: Response) => {
+    // parseToNumberOrThrow(id);
+    const userId = id === "me" ? user!.id : parseToNumberOrThrow(id);
+    const profile = await this.userService.findMyProfile(userId);
 
     assertNonNullish(profile);
 
@@ -32,11 +35,29 @@ export class UserController implements IUserController {
   };
 
   updateMyProfile = async (
-    { user, body }: Request<unknown, unknown, UpdateProfileDto>,
+    { user, body, params: { id } }: Request,
     res: Response
   ) => {
+    const userId =
+      id === "me"
+        ? user!.id
+        : parseToNumberOrThrow(id) === user!.id
+        ? user!.id
+        : parseToNumberOrThrow(NaN);
+
     await validateDtos(new UpdateProfileDto(body));
-    const profile = await this.userService.updateMyProfile(user!.id, body);
+    const profile = await this.userService.updateMyProfile(userId, body);
+
+    return res.json({ profile });
+  };
+
+  oldUpdateMyProfile = async ({ user, body }: Request, res: Response) => {
+    if (!user || !user.id) {
+      throw new BadReqError();
+    }
+
+    await validateDtos(new UpdateProfileDto(body));
+    const profile = await this.userService.updateMyProfile(user.id, body);
 
     return res.json({ profile });
   };
